@@ -28,7 +28,6 @@ export class CartResolver {
     @Args('bookId', { type: () => ID }) bookId: string,
     @Args('quantity', { type: () => Int, defaultValue: 1 }) quantity: number,
   ) {
-    console.log(cartId,userId,bookId,quantity);
     return await this.cartService.createCartItem(cartId, userId, bookId, quantity);
   }
 
