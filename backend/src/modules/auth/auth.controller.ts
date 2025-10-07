@@ -1,21 +1,20 @@
-import { Controller, Request, Post, UseGuards, Get, Body, UseInterceptors, UploadedFiles, ParseFilePipeBuilder, Put, Req, UnauthorizedException, Res, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Get, Body,Req, Res, BadRequestException } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from 'src/modules/auth/dto/create-auth.dto';
-import { LoginDto } from 'src/modules/auth/dto/login.dto';
+import { AdminLogin, LoginDto } from 'src/modules/auth/dto/login.dto';
 import { RefreshTokenGuard } from 'src/modules/auth/guards/refreshToken.guard';
-import { AuthGuard } from 'src/modules/auth/guards/auth.guard';
-import { ChangePasswordDto } from 'src/modules/auth/dto/change.passord.dto';
 import { GoogleGuard } from 'src/modules/auth/guards/google.guard';
-import { MailerService } from '@nestjs-modules/mailer/dist/mailer.service';
 import { Public } from 'src/decorator/custome';
 import { UserService } from 'src/modules/users/users.service';
-
-
+import { Roles } from 'src/decorator/role';
+import { ROLE } from 'src/enum/role';
+import { RoleGuard } from 'src/modules/auth/guards/role.guard';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService,private readonly userService: UserService) { }
+  constructor(private readonly authService: AuthService, private readonly userService: UserService) { }
 
 
   @Post('sign-up')
@@ -27,6 +26,11 @@ export class AuthController {
   @Post('login')
   async signIn(@Body() credentials: LoginDto, @Res({ passthrough: true }) res: Response) {
     return this.authService.login(credentials, res);
+  }
+  
+  @Post('admin-login')
+  async AdminLogin(@Body() credentials: AdminLogin) {
+    return await this.authService.AdminLogin(credentials);
   }
 
   @Post('logout')
@@ -41,26 +45,26 @@ export class AuthController {
   }
 
 
-@Post('changePassword')
-async changePassword(
-  @Body() body: { email: string; newpassword: string; confirmpassword: string },
-) {
-  const { email, newpassword, confirmpassword } = body;
+  @Post('changePassword')
+  async changePassword(
+    @Body() body: { email: string; newpassword: string; confirmpassword: string },
+  ) {
+    const { email, newpassword, confirmpassword } = body;
 
-  
-  if (newpassword !== confirmpassword) {
-    throw new BadRequestException('New password and confirm password do not match.');
+
+    if (newpassword !== confirmpassword) {
+      throw new BadRequestException('New password and confirm password do not match.');
+    }
+
+
+    let user = this.userService.checkEmailExist(email);
+
+    if (!user) {
+      throw new BadRequestException('User not authenticated.');
+    }
+
+    return await this.authService.resetPassword(email, newpassword);
   }
-
-
-  let user = this.userService.checkEmailExist(email);
-
-  if (!user) {
-    throw new BadRequestException('User not authenticated.');
-  }
-
-  return await this.authService.resetPassword(email, newpassword);
-}
   @UseGuards(GoogleGuard)
   @Get('google/login')
   async googleLogin() { }
@@ -71,14 +75,14 @@ async changePassword(
 
     const user = req.user;
 
-
     const accessToken = await this.authService.generateAccesstoken(user.id)
 
-
     const frontendCallbackUrl = "http://localhost:3000/api/auth/google/callback";
+
     if (!frontendCallbackUrl) {
       throw new Error('FRONTEND_GOOGLE_CALLBACK_URL is not defined in environment variables');
     }
+
     const redirectUrl = new URL(frontendCallbackUrl);
 
     redirectUrl.searchParams.set('accessToken', accessToken);

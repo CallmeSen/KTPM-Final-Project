@@ -14,12 +14,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
   constructor(
     @Inject(jwtConfig.KEY)
     private readonly refreshTokenCofig: ConfigType<typeof refreshjwtConfig>,
-    private readonly authService: AuthService, // nếu bạn cần validate user
+    private readonly authService: AuthService, 
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refresh'),
       secretOrKey: refreshTokenCofig.secret,
-      ignoreExpiration: false, // nếu bạn muốn kiểm tra thời gian hết hạn của token
+      ignoreExpiration: false, 
       passReqToCallback: true
     });
   }

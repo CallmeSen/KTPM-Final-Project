@@ -5,7 +5,5 @@ export class GoogleGuard extends AuthGuard('google') {
   constructor() {
     super();
   }
-
-
 }   
 
