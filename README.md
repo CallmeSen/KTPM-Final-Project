@@ -7,7 +7,7 @@ A simple library/bookstore full-stack project (Backend: NestJS, Frontend: Next.j
 Ứng dụng là một demo hệ thống quản lý sách và mua hàng: quản lý sách, giỏ hàng, nhận xét, thông báo, thanh toán, và chức năng admin. Mục tiêu repo là làm ví dụ triển khai NestJS + Next.js với các cơ chế thực tiễn: DTO validation, role-based access control, TypeORM entities, và template mail.
 
 ## Cấu trúc chính (tóm tắt)
-
+```
 KTPM-Final-Project/
 │   ├── LICENSE
 │   ├── README.md
@@ -47,7 +47,7 @@ KTPM-Final-Project/
 │   │       ├── lib/                    # api clients, auth helpers
 │   │       └── context/
 │   └── design/                        # mockup / images
-
+```
 ## Yêu cầu (Requirements)
 
 - Node.js (LTS, ví dụ >=16)
