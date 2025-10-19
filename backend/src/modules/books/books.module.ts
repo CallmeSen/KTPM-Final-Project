@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { Module } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { BooksResolver } from './books.resolver';
@@ -9,3 +10,16 @@ import { Book } from 'src/modules/books/entities/book.entity';
   providers: [BooksResolver, BooksService],
 })
 export class BooksModule {}
+=======
+import { Module } from '@nestjs/common';
+import { BooksService } from './books.service';
+import { BooksResolver } from './books.resolver';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Book } from 'src/modules/books/entities/book.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Book])],
+  providers: [BooksResolver, BooksService],
+})
+export class BooksModule {}
+>>>>>>> Stashed changes

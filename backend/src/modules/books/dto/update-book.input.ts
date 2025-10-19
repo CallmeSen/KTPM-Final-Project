@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { CreateBookInput } from './create-book.input';
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 
@@ -6,3 +7,13 @@ export class UpdateBookInput extends PartialType(CreateBookInput) {
   @Field(() => Int)
   isbn10: string;
 }
+=======
+import { CreateBookInput } from './create-book.input';
+import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
+
+@InputType()
+export class UpdateBookInput extends PartialType(CreateBookInput) {
+  @Field(() => Int)
+  isbn10: string;
+}
+>>>>>>> Stashed changes
