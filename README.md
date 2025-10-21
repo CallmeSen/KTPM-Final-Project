@@ -58,6 +58,146 @@ Dự án Quản Lý Thư Viện/Cửa Hàng Sách là một giải pháp phần 
 - Template email với Handlebars.
 - Tích hợp Nodemailer để gửi email.
 
+## Cấu Trúc Thư Mục 📁
+
+```
+KTPM-Final-Project/
+├── backend/                           # NestJS Backend
+│   ├── src/
+│   │   ├── main.ts                   # Entry point
+│   │   ├── app.module.ts             # Root module
+│   │   ├── schema.gql                # GraphQL schema
+│   │   ├── config/
+│   │   │   └── db.config.ts          # Database configuration
+│   │   ├── modules/
+│   │   │   ├── auth/                 # Authentication module
+│   │   │   │   ├── guards/           # JWT & Role guards
+│   │   │   │   ├── strategies/       # Passport strategies
+│   │   │   │   └── entities/         # RefreshToken, Blacklist
+│   │   │   ├── users/                # User management
+│   │   │   ├── books/                # Book management
+│   │   │   │   └── mockData/         # CSV import data
+│   │   │   ├── cart/                 # Shopping cart
+│   │   │   ├── Payment/              # Stripe integration
+│   │   │   ├── comment/              # Comments & reviews
+│   │   │   ├── notification/         # Notifications
+│   │   │   ├── inventory/            # Stock management
+│   │   │   └── Blacklist/            # Token blacklist
+│   │   ├── mails/                    # Email templates
+│   │   ├── decorator/                # Custom decorators
+│   │   ├── enum/                     # Enums (Roles, etc.)
+│   │   ├── entities/                 # Shared entities
+│   │   ├── helpers/                  # Utility functions
+│   │   ├── interceptors/             # Cache interceptor
+│   │   └── middleware/               # Logging middleware
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── dockerfile
+│
+├── Frontend/                          # Next.js Frontend
+│   ├── src/
+│   │   ├── app/                      # App router pages
+│   │   ├── components/               # React components
+│   │   ├── lib/                      # API clients, utilities
+│   │   ├── context/                  # React Context
+│   │   ├── hooks/                    # Custom hooks
+│   │   └── Shared/                   # Shared constants
+│   ├── public/                       # Static assets
+│   ├── package.json
+│   ├── next.config.ts
+│   ├── tailwind.config.ts
+│   └── dockerfile
+│
+├── Machine-Learning-Sentimental-Classfication/  # ML model
+│   └── analyze-sentimental-review.ipynb
+│
+├── docker-compose.yml                # Docker orchestration
+└── README.md
+```
+
+## API Endpoints Chính 🔌
+
+### REST API
+
+- **Authentication**
+  - `POST /auth/register` - Đăng ký tài khoản
+  - `POST /auth/login` - Đăng nhập
+  - `POST /auth/refresh` - Refresh token
+  - `POST /auth/logout` - Đăng xuất
+  - `GET /auth/google` - Google OAuth login
+
+- **Payment**
+  - `POST /payment/create-checkout-session` - Tạo phiên thanh toán
+  - `POST /payment/webhook` - Stripe webhook
+
+### GraphQL API
+
+Truy cập GraphQL Playground tại `http://localhost:3000/graphql`
+
+**Queries:**
+```graphql
+# Lấy danh sách sách
+query {
+  books {
+    id
+    title
+    author
+    price
+    stock
+  }
+}
+
+# Lấy giỏ hàng
+query {
+  cart {
+    id
+    totalPrice
+    items {
+      book {
+        title
+        price
+      }
+      quantity
+    }
+  }
+}
+
+# Lấy thông báo
+query {
+  notifications {
+    id
+    title
+    message
+    read
+    createdAt
+  }
+}
+```
+
+**Mutations:**
+```graphql
+# Thêm sách vào giỏ
+mutation {
+  addToCart(bookId: "uuid", quantity: 1) {
+    id
+    totalPrice
+  }
+}
+
+# Tạo bình luận
+mutation {
+  createComment(input: {
+    bookId: "uuid"
+    content: "Great book!"
+    rating: 5
+  }) {
+    id
+    content
+    createdAt
+  }
+}
+```
+
 ## Công Nghệ 🔧
 
 ### Backend
@@ -239,146 +379,6 @@ Trước khi bắt đầu, hãy đảm bảo rằng các yêu cầu sau đã đ�
    docker-compose down
    ```
 
-## Cấu Trúc Thư Mục 📁
-
-```
-KTPM-Final-Project/
-├── backend/                           # NestJS Backend
-│   ├── src/
-│   │   ├── main.ts                   # Entry point
-│   │   ├── app.module.ts             # Root module
-│   │   ├── schema.gql                # GraphQL schema
-│   │   ├── config/
-│   │   │   └── db.config.ts          # Database configuration
-│   │   ├── modules/
-│   │   │   ├── auth/                 # Authentication module
-│   │   │   │   ├── guards/           # JWT & Role guards
-│   │   │   │   ├── strategies/       # Passport strategies
-│   │   │   │   └── entities/         # RefreshToken, Blacklist
-│   │   │   ├── users/                # User management
-│   │   │   ├── books/                # Book management
-│   │   │   │   └── mockData/         # CSV import data
-│   │   │   ├── cart/                 # Shopping cart
-│   │   │   ├── Payment/              # Stripe integration
-│   │   │   ├── comment/              # Comments & reviews
-│   │   │   ├── notification/         # Notifications
-│   │   │   ├── inventory/            # Stock management
-│   │   │   └── Blacklist/            # Token blacklist
-│   │   ├── mails/                    # Email templates
-│   │   ├── decorator/                # Custom decorators
-│   │   ├── enum/                     # Enums (Roles, etc.)
-│   │   ├── entities/                 # Shared entities
-│   │   ├── helpers/                  # Utility functions
-│   │   ├── interceptors/             # Cache interceptor
-│   │   └── middleware/               # Logging middleware
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── dockerfile
-│
-├── Frontend/                          # Next.js Frontend
-│   ├── src/
-│   │   ├── app/                      # App router pages
-│   │   ├── components/               # React components
-│   │   ├── lib/                      # API clients, utilities
-│   │   ├── context/                  # React Context
-│   │   ├── hooks/                    # Custom hooks
-│   │   └── Shared/                   # Shared constants
-│   ├── public/                       # Static assets
-│   ├── package.json
-│   ├── next.config.ts
-│   ├── tailwind.config.ts
-│   └── dockerfile
-│
-├── Machine-Learning-Sentimental-Classfication/  # ML model
-│   └── analyze-sentimental-review.ipynb
-│
-├── docker-compose.yml                # Docker orchestration
-└── README.md
-```
-
-## API Endpoints Chính 🔌
-
-### REST API
-
-- **Authentication**
-  - `POST /auth/register` - Đăng ký tài khoản
-  - `POST /auth/login` - Đăng nhập
-  - `POST /auth/refresh` - Refresh token
-  - `POST /auth/logout` - Đăng xuất
-  - `GET /auth/google` - Google OAuth login
-
-- **Payment**
-  - `POST /payment/create-checkout-session` - Tạo phiên thanh toán
-  - `POST /payment/webhook` - Stripe webhook
-
-### GraphQL API
-
-Truy cập GraphQL Playground tại `http://localhost:3000/graphql`
-
-**Queries:**
-```graphql
-# Lấy danh sách sách
-query {
-  books {
-    id
-    title
-    author
-    price
-    stock
-  }
-}
-
-# Lấy giỏ hàng
-query {
-  cart {
-    id
-    totalPrice
-    items {
-      book {
-        title
-        price
-      }
-      quantity
-    }
-  }
-}
-
-# Lấy thông báo
-query {
-  notifications {
-    id
-    title
-    message
-    read
-    createdAt
-  }
-}
-```
-
-**Mutations:**
-```graphql
-# Thêm sách vào giỏ
-mutation {
-  addToCart(bookId: "uuid", quantity: 1) {
-    id
-    totalPrice
-  }
-}
-
-# Tạo bình luận
-mutation {
-  createComment(input: {
-    bookId: "uuid"
-    content: "Great book!"
-    rating: 5
-  }) {
-    id
-    content
-    createdAt
-  }
-}
-```
-
 ## Testing 🧪
 
 ### Backend Tests
@@ -484,10 +484,10 @@ This project is licensed under the MIT License.
 
 ## Về Nhóm Dự Án 🤝
 
-- **Members:** *[Huỳnh Thanh Tuấn](https://github.com/CallmeSen)*
-- **Members:** *[Lâm Quang Khôi](https://github.com/kohi-vip)*
-- **Members:** *[Nguyễn Trọng Nghĩa](https://github.com/nghia108)*
-- **Members:** *[Nguyen Huynh Phuong Loc](https://github.com/nguyenhuynhphuongloc)*
+- **Project Leader:** *[Lâm Quang Khôi](https://github.com/kohi-vip)*
+- **Team Member:** *[Huỳnh Thanh Tuấn](https://github.com/CallmeSen)*
+- **Team Member:** *[Nguyễn Trọng Nghĩa](https://github.com/nghia108)*
+- **Team Member:** *[Nguyễn Huỳnh Phương Lộc](https://github.com/nguyenhuynhphuongloc)*
 
 ---
 
