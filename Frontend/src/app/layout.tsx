@@ -1,6 +1,11 @@
+'use client';
+
 import localFont from "next/font/local";
 import "./globals.css";
-import { ApolloWrapper } from "./ApolloWrapper";
+import { ApolloProvider } from "@apollo/client/react";
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+
+
 
 export const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,6 +19,13 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+
+const client = new ApolloClient({
+  link: new HttpLink({ uri: "http://localhost:8000/graphql" }),
+  cache: new InMemoryCache(),
+});
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,9 +34,9 @@ export default function RootLayout({
   return (
     <html className="h-screen bg-white" lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ApolloWrapper>
-          {children}
-        </ApolloWrapper>
+        <ApolloProvider client={client}>
+            {children}
+        </ApolloProvider>
       </body>
     </html>
   );

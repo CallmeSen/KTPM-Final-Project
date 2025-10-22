@@ -13,12 +13,14 @@ import { MailService } from "src/mails/mail.service";
 import { CreateUserDto } from "src/modules/users/dto/create-user.input";
 import { UpdateUserDto } from "src/modules/users/dto/update-user.input";
 import { hashPassword } from "src/helpers/util";
+import { CartService } from "src/modules/cart/cart.service";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
     private mailService: MailService,
+    private readonly cartService: CartService,
   ) { }
 
   async checkEmailExist(email: string): Promise<boolean> {
@@ -119,9 +121,11 @@ export class UserService {
     const createdUser = await this.userRepo.save(user);
 
 
+    await this.cartService.createCart(createdUser.id)
+
     await this.mailService.sendUserConfirmation(createdUser);
 
-    return { message: "User registered successfully" };
+    return user
     
   }
 

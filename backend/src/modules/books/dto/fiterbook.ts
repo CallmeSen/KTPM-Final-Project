@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 // dto/filter-books.args.ts
 import { ArgsType, Field, Int } from '@nestjs/graphql';
 
@@ -13,19 +12,3 @@ export class FilterBooksArgs {
   @Field(() => Int, { defaultValue: 10 })
   take: number;
 }
-=======
-// dto/filter-books.args.ts
-import { ArgsType, Field, Int } from '@nestjs/graphql';
-
-@ArgsType()
-export class FilterBooksArgs {
-  @Field()
-  categoryName: string;
-
-  @Field(() => Int, { defaultValue: 0 })
-  skip: number;
-
-  @Field(() => Int, { defaultValue: 10 })
-  take: number;
-}
->>>>>>> Stashed changes

@@ -7,7 +7,6 @@ import jwtConfig from 'src/modules/auth/config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
 import refreshjwtConfig from 'src/modules/auth/config/refreshjwt.config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { MailService } from 'src/mails/mail.service';
 import { BlacklistService } from 'src/modules/Blacklist/blacklist.service';
 import { AuthGuard } from 'src/modules/auth/guards/auth.guard';
 import { GoogleStrategy } from 'src/modules/auth/stragegies/google.strategy';
@@ -22,7 +21,6 @@ import { CartItem } from 'src/modules/cart/entities/cart.items';
 import { CartService } from 'src/modules/cart/cart.service';
 import { CartModule } from 'src/modules/cart/cart.module';
 import { Book } from 'src/modules/books/entities/book.entity';
-import { UserService } from 'src/modules/users/users.service';
 import { MailModule } from 'src/mails/mail.module';
 
 

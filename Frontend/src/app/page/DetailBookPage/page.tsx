@@ -5,7 +5,7 @@ import Footer from "@/Shared/Footer/page";
 import { useMutation, useQuery } from "@apollo/client/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { fetchSessionClient } from "@/lib/session-client";
+import { getSession } from "@/lib/session";
 import { GetCartData } from "@/app/interfaces/cart.interface";
 import { Session } from "@/app/interfaces/session.interface";
 import Navbar from "@/app/page/HomePage/components/NavBar/page";
@@ -31,7 +31,7 @@ export default function BookDetailPage() {
 
     useEffect(() => {
         const loadSession = async () => {
-            const sess = await fetchSessionClient();
+            const sess = await getSession();
             setSession(sess);
         };
         loadSession();
@@ -96,6 +96,7 @@ export default function BookDetailPage() {
                                     });
 
                                     alert("Thêm vào giỏ hàng thành công");
+                                    router.push('/page/CartPage')
                                 } catch (err) {
                                     console.error(err);
                                     alert("Thêm vào giỏ hàng thất bại!");

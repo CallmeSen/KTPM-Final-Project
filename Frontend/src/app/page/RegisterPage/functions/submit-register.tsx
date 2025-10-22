@@ -1,20 +1,30 @@
+"use client";
+
 import axiosInstance from "@/app/utils/RefeshTokenHandler";
 import { RegisterSchema } from "@/lib/zod";
 import { z } from "zod";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
-export async function onSubmit(values: z.infer<typeof RegisterSchema>) {
-    try {
-        const response = await axiosInstance.post('http://localhost:8000/auth/sign-up', values);
+export function useRegisterHandler() {
+    
+    const router = useRouter();
 
-        if (response.status === 201 || response.status === 200) {
-            alert('Đăng ký thành công!');
-            window.location.href = '/auth/login';
-        }
-    } catch (error: any) {
-        if (error.response && error.response.data && error.response.data.message) {
-            const errorMessage = error.response.data.message;
+    const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
+        try {
+            const response = await axios.post('http://localhost:8000/auth/sign-up', values);
+
+            alert("đăng ký thành công")
+
+            router.push("/page/LoginPage");     
             
-            console.error("Lỗi đăng ký:", errorMessage);
+        } catch (error: any) {
+            if (error.response?.data?.message) {
+                toast.error(`Lỗi: ${error.response.data.message}`);
+            }
         }
-    }
+    };
+
+    return { onSubmit };
 }

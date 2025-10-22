@@ -18,7 +18,7 @@ import { useQuery } from "@apollo/client/react";
 import { BooksByCategoryData } from "@/app/interfaces/Props-ItemBooks.interface";
 import BookCard from "@/app/page/BookLibrary/components/BookCard";
 import { Session } from "@/app/interfaces/session.interface";
-import { fetchSessionClient } from "@/lib/session-client";
+import { getSession } from "@/lib/session";
 
 export default function Library() {
 
@@ -37,7 +37,7 @@ export default function Library() {
     const [totalPages, setTotalPages] = useState(1);
 
     const fetchSession = async () => {
-        const session = await fetchSessionClient();
+        const session = await getSession();
         setSession(session);
     };
 

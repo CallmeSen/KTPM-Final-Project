@@ -14,11 +14,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { RegisterSchema } from "@/lib/zod"
 import 'react-toastify/dist/ReactToastify.css';
-import { onSubmit } from "@/app/page/RegisterPage/functions/submit-register"
 import { FormTypeRegister } from "@/app/types/types"
-import Link from "next/link"
+import { useRegisterHandler } from "@/app/page/RegisterPage/functions/submit-register"
 
 export function RegisterForm() {
+
+    const { onSubmit } = useRegisterHandler();
 
     const form = useForm<FormTypeRegister>({
         resolver: zodResolver(RegisterSchema),
@@ -126,13 +127,6 @@ export function RegisterForm() {
                         className="bg-[#df4930] rounded-sm p-5 text-white hover:bg-[#df4930] hover:shadow-none w-[450px] cursor-pointer">
                         Sign in with Google
                     </Button>
-                </div>
-
-                <div className="flex justify-center">
-                    <span className="text-[#294563]">Already have an account? </span>
-                    <Link href="/page/LoginPage" className="ml-1">
-                        <span className="text-[#294563] font-serif">Sign in</span>
-                    </Link>
                 </div>
             </form>
         </Form>

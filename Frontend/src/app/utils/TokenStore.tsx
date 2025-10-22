@@ -1,23 +1,16 @@
 
+
 export const AccessStored = {
     
-  getAccessToken: () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('accessToken') || '';
-    }
-    return '';
-  },
+  getAccessToken: () => localStorage.getItem('accessToken') || '',
 
   setAccessToken: (token: string) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('accessToken', token);
-    }
+    localStorage.setItem('accessToken', token);
   },
 
   clear: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-    }
+    
+    localStorage.removeItem('accessToken');
   }
 
 };
@@ -27,23 +20,18 @@ export const AccessStored = {
 
 export const RefreshStored = {
 
-  getRefreshToken: () => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('refreshToken') || '';
-    }
-    return '';
-  },
+  getRefreshToken: () => localStorage.getItem('refreshToken') || '',
 
   setRefreshToken: (token: string) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('refreshToken', token);
-    }
+
+    localStorage.setItem('refreshToken', token);
+
   },
 
   clear: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('refreshToken');
-    }
+
+    localStorage.removeItem('refreshToken');
+
   }
 
 };

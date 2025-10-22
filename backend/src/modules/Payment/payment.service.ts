@@ -1,6 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as fs from 'fs';
-import * as csv from 'csv-parser';
 import Stripe from 'stripe';
 import { Repository } from 'typeorm';
 import { Payment } from 'src/modules/Payment/entity/payment.entity';
@@ -22,41 +21,6 @@ export class PaymentService {
     @InjectRepository(User) readonly UserRes: Repository<User>,
   ) { }
 
-  async importProductsFromFile(filePath: string) {
-    const results: any[] = [];
-
-    return new Promise((resolve, reject) => {
-
-      fs.createReadStream(filePath)
-        .pipe(csv({ mapHeaders: ({ header }) => header.toLowerCase().trim() }))
-        .on('data', (row) => results.push(row))
-        .on('end', async () => {
-          const createdProducts: Stripe.Response<Stripe.Product>[] = [];
-
-          for (const row of results) {
-            console.log("Row from CSV:", row);
-            const product = await this.stripe.products.create({
-              name: row.title,
-              active: true,
-              images: row.thumbnail ? [row.thumbnail] : [],
-              default_price_data: {
-                currency: 'usd',
-                unit_amount: Number(row.price) * 100,
-              },
-            });
-
-            createdProducts.push(product);
-          }
-
-          resolve({
-            message: 'Products imported successfully',
-            count: createdProducts.length,
-            products: createdProducts,
-          });
-        })
-        .on('error', (err) => reject(err));
-    });
-  }
 
   async getProductByTitle(title: string) {
     const cleanTitle = title.trim();
@@ -142,6 +106,40 @@ export class PaymentService {
       stripePaymentId,
     });
     return await this.paymentRes.save(payment);
+  }
+
+ 
+  async refundPayment(
+    paymentIntentId: string,
+    amount?: number,
+    reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer',
+  ) {
+    try {
+     
+
+      const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+
+      const chargeId = paymentIntent.latest_charge as string;
+
+     
+      const refund = await this.stripe.refunds.create({
+        charge: chargeId,
+        amount: amount ? amount * 100 : undefined, 
+        reason: reason,
+      });
+
+      return {
+        success: true,
+        message: 'Refund created successfully',
+        data: refund,
+      };
+    } catch (error) {
+      console.error('Refund error:', error);
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
   }
 
 }

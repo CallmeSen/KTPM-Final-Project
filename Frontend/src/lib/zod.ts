@@ -2,9 +2,6 @@ import { z } from "zod";
 
 export const signInSchema = z.object({
 
-    username: z.string().min(2, {
-        message: "Tên đăng nhập không đúng",
-    }),
     password: z.string().optional(),
 
     email: z.string().email({

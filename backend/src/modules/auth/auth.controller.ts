@@ -15,8 +15,8 @@ export class AuthController {
 
   @Post('sign-up')
   @Public()
-  Register(@Body() registerDto: CreateAuthDto) {
-    return this.authService.Register(registerDto)
+  async Register(@Body() registerDto: CreateAuthDto) {
+    return await this.authService.Register(registerDto)
   }
 
   @Post('Login')

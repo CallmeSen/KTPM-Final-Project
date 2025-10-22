@@ -18,14 +18,11 @@ export const SignupFormData = z.object({
 
 export const signInSchema = z.object({
 
-    username: z.string().min(2, {
-        message: "Tên đăng nhập không đúng",
-    }),
-    password: z.string().optional(),
-
-    email: z.string().email({
+  email: z.string().email({
         message: "Địa chỉ email không hợp lệ",
-    })
+  }),   
+  password: z.string().optional(),
+
 })
 
 

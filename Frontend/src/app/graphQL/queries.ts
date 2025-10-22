@@ -258,3 +258,19 @@ export const GET_ALL_USERS = gql`
   }
 `;
 
+
+
+export const CREATE_BOOK = gql`
+  mutation CreateBook($createBookInput: CreateBookInput!) {
+    createBook(createBookInput: $createBookInput) {
+      id
+      thumbnail
+      title
+      description
+      price
+      inventory
+      authors
+    }
+  }
+`;
+

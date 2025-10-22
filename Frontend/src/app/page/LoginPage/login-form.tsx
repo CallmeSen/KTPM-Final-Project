@@ -27,7 +27,6 @@ export function LoginForm() {
     const form = useForm<FormTypeLogin>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
-            username: "",
             password: "",
             email: "",
         },
@@ -52,19 +51,22 @@ export function LoginForm() {
                     <span className="text-[#294563] justify-center text-3xl font-sans">Login</span>
                 </div>
 
+
                 <FormField
                     control={form.control}
-                    name="username"
+                    name="email"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="font-bold text-[#294563] p-2">Username</FormLabel>
+                            <FormLabel className="font-bold text-[#294563] p-2">Email</FormLabel>
                             <FormControl>
-                                <Input className="text-black" placeholder="Enter your username" autoComplete="off" {...field} />
+                                <Input className="text-black" placeholder="Enter your email" autoComplete="off" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
+                
 
                 <FormField
                     control={form.control}
@@ -80,19 +82,6 @@ export function LoginForm() {
                     )}
                 />
 
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="font-bold text-[#294563] p-2">Email</FormLabel>
-                            <FormControl>
-                                <Input className="text-black" placeholder="Enter your email" autoComplete="off" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
 
                 <Button className="!mt-5 w-full bg-[#2F70AF] text-white hover:bg-customBlue hover:shadow-none cursor-pointer" type="submit">
                     Login

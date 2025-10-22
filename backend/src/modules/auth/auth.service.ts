@@ -76,8 +76,6 @@ export class AuthService {
 
   async login(@Body() credentials: LoginDto) {
 
-    console.log(1)
-
     const { email, password } = credentials;
 
     const user = await this.userRepo.findOne({ where: { email } });
@@ -96,7 +94,6 @@ export class AuthService {
 
     if (!passwordMatch) throw new Error("Mật khẩu sai");
 
-    console.log(2)
 
     return {
       user: {
@@ -186,7 +183,12 @@ export class AuthService {
 
 
   async Register(registerDto: CreateAuthDto) {
-    return this.userService.register(registerDto)
+
+    const user = await this.userService.register(registerDto)
+
+
+    return { message: "Register updated successfully" };
+
   }
 
 

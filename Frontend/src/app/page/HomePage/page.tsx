@@ -9,7 +9,7 @@ import { GET_TOP_RATED_BOOKS } from "@/app/graphQL/queries";
 import { useQuery } from "@apollo/client/react";
 import { PropsItemBooks } from "@/app/interfaces/Props-ItemBooks.interface";
 import { GetTopRatedBooksData } from "@/app/interfaces/Books.interface";
-import { fetchSessionClient } from "@/lib/session-client";
+import { getSession } from "@/lib/session";
 import { useEffect, useState } from "react";
 import { Session } from "@/app/interfaces/session.interface";
 import CenterLoading from "@/Shared/Loading/page";
@@ -22,15 +22,16 @@ export default function Homepage() {
 
     const [loading, setLoading] = useState(true);
 
-    const fetchSession = async () => {
-        const session = await fetchSessionClient();
-        setSession(session);
-        setLoading(false);
-    };
+   
 
     useEffect(() => {
-        fetchSession();
+        (async () => {
+            const session = await getSession();
+            setSession(session);
+            setLoading(false);
+        })();
     }, []);
+
 
 
     const { data, error } = useQuery<GetTopRatedBooksData>(GET_TOP_RATED_BOOKS, {

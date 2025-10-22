@@ -129,12 +129,6 @@ export class PaymentController {
     return await this.paymentService.getProductByTitle(body.title)
   }
 
-  @Get('products/import')
-  async importProducts() {
-    const filePath = "C:/Users/ASUS/Documents/GitHub/Bookstore/book-strore/src/modules/books/books-3.csv";
-    return await this.paymentService.importProductsFromFile(filePath);
-  }
-
   @Post('webhook')
   async handleWebhook(@Req() req: Request, @Res() res: Response) {
 
@@ -229,6 +223,15 @@ export class PaymentController {
 
     return res.json();
 
+  }
+
+  @Post('refund')
+  async refund(@Body() body: { paymentIntentId: string; amount?: number; reason?: string }) {
+    return await this.paymentService.refundPayment(
+      body.paymentIntentId,
+      body.amount,
+      body.reason as any,
+    );
   }
 
 

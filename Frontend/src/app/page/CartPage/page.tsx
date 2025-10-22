@@ -5,7 +5,7 @@ import {  GetCartData } from "@/app/interfaces/cart.interface"
 import CartNavbar from "@/app/page/CartPage/navbar-cartpage"
 import { useQuery } from "@apollo/client/react"
 import { useEffect, useState } from "react"
-import { fetchSessionClient } from "@/lib/session-client"
+import { getSession } from "@/lib/session"
 import Image from "next/image"
 import { Session } from "@/app/interfaces/session.interface"
 import { calculateTotal, createCheckoutPayload } from "@/app/page/CartPage/functions/functions-cartPage"
@@ -23,7 +23,7 @@ export default function CartPage() {
 
     useEffect(() => {
         const loadSession = async () => {
-            const sess = await fetchSessionClient()
+            const sess = await getSession()
             setSession(sess)
         }
         loadSession()

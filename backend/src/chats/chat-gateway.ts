@@ -27,7 +27,6 @@ onMessage(client: any, data: any) {
 
   this.server.emit('test', 'hello message');
 
-  return { event: 'message', data: 'got some data' };
 }
 
 }

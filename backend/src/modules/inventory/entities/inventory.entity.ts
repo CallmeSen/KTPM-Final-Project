@@ -9,9 +9,7 @@ export class Inventory {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Field(() => Book)
-  @ManyToOne(() => Book, (book) => book.inventories, { onDelete: 'CASCADE' })
-  book: Book;
+ 
 
   @Field(() => Int)
   @Column({ type: 'int', default: 0 })
