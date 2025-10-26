@@ -38,9 +38,7 @@ export function LoginForm() {
 
     const handleLogin = async (values: z.infer<typeof signInSchema>) => {
         console.log("🔹 Form submitted:", values);
-        await onSubmit(values, router);
-
-
+        return await onSubmit(values, router);
     };
 
 

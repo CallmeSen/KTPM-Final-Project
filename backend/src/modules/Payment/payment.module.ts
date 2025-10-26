@@ -13,13 +13,15 @@ import { CartItem } from 'src/modules/cart/entities/cart.items';
 import { NotificationService } from 'src/modules/notification/notification.service';
 import { NotificationModule } from 'src/modules/notification/notification.module';
 import { Notification } from 'src/modules/notification/entities/notification.entity';
+import { Order } from 'src/modules/orders/entities/order.entity';
+import { OrdersService } from 'src/modules/orders/orders.service';
 @Module({
   imports: [
     HttpModule, 
     StripeModule,
     NotificationModule,
-    TypeOrmModule.forFeature([Book,Payment,User,Cart,CartItem,Notification])],  
+    TypeOrmModule.forFeature([Book,Payment,User,Cart,CartItem,Notification,Order])],  
   controllers: [PaymentController],
-  providers: [PaymentService,CartService,NotificationService],
+  providers: [PaymentService,CartService,NotificationService,OrdersService],
 })
 export class PaymentModule {}

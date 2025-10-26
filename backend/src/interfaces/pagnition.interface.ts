@@ -1,5 +1,6 @@
 import { InputType, Field, Int, ObjectType } from '@nestjs/graphql';
 import { Book } from 'src/modules/books/entities/book.entity';
+import { Order } from 'src/modules/orders/entities/order.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
 @InputType()
@@ -47,6 +48,22 @@ export class GetPaginatedBooks {
 export class PaginatedUsers {
   @Field(() => [User])
   users: User[];
+
+  @Field(() => Int)
+  total: number;
+
+  @Field(() => Int)
+  page: number;
+
+  @Field(() => Int)
+  limit: number;
+}
+
+
+@ObjectType()
+export class PaginatedOrders {
+  @Field(() => [Order])
+  orders: Order[];
 
   @Field(() => Int)
   total: number;

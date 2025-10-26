@@ -26,7 +26,9 @@ type UsersResponse = {
 };
 
 export default function UsersPage() {
+
     const [page, setPage] = useState(1);
+
     const limit = 5;
 
     const { data, loading, error } = useQuery<UsersResponse>(GET_ALL_USERS, {
@@ -34,9 +36,11 @@ export default function UsersPage() {
     });
 
     if (loading) return <p className="p-6">Loading...</p>;
+
     if (error) return <p className="p-6 text-red-600">Error: {error.message}</p>;
 
     const { users = [], total } = data?.getAllUsers ?? { users: [], total: 0 };
+
     const totalPages = Math.ceil(total / limit);
 
     return (
@@ -55,17 +59,29 @@ export default function UsersPage() {
                 <h1 className="text-2xl font-bold mb-4">Customers</h1>
 
                 <div className="overflow-x-auto rounded-xl shadow bg-white">
+
                     <table className="w-full border-collapse">
+                        
                         <thead>
+                            
                             <tr className="bg-gray-100 text-left text-sm font-semibold text-gray-700">
+
                                 <th className="p-3">Avatar</th>
+
                                 <th className="p-3">UserId</th>
+
                                 <th className="p-3">Email</th>
+
                                 <th className="p-3">Role</th>
+
                                 <th className="p-3">Status</th>
+
                             </tr>
+
                         </thead>
+
                         <tbody>
+
                             {users.map((user :any) => (
                                 <tr
                                     key={user.id}
@@ -95,8 +111,11 @@ export default function UsersPage() {
                                     </td>
                                 </tr>
                             ))}
+
                         </tbody>
+
                     </table>
+
                 </div>
 
                 {/* Pagination */}
@@ -112,12 +131,16 @@ export default function UsersPage() {
                         onClick={() => setPage((prev) => prev + 1)}
                         className="px-4 py-2 text-gray-200 rounded border-gray-400 border-1 cursor-pointer"
                     >
+
                         <span className="text-black"> 
                             next
                         </span>
+
                     </button>
                 </div>
+
             </div>
+
         </div>
     );
 }

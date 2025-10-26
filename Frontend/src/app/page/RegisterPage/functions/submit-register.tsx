@@ -13,7 +13,7 @@ export function useRegisterHandler() {
 
     const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
         try {
-            const response = await axios.post('http://localhost:8000/auth/sign-up', values);
+            const response = await axios.post('http://localhost:8000/auth/SignUp', values);
 
             alert("đăng ký thành công")
 

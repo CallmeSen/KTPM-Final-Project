@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CartService } from 'src/modules/cart/cart.service';
 import { User } from 'src/modules/users/entities/user.entity';
 import { NotificationService } from 'src/modules/notification/notification.service';
+import { OrdersService } from 'src/modules/orders/orders.service';
 @Controller('payment')
 export class PaymentController {
 
@@ -18,6 +19,7 @@ export class PaymentController {
     private readonly cartService: CartService,
     @InjectRepository(User) readonly UserRes: Repository<User>,
     private readonly notificationService: NotificationService,
+    private readonly ordersService: OrdersService,
   ) { }
 
   @Post('products')
@@ -96,7 +98,7 @@ export class PaymentController {
       items: { id_stripe: string; quantity: number }[];
     }
   ) {
-    return await this.paymentService.createPaymentLink(body.date ,body.cartId, body.items);
+    return await this.paymentService.createPaymentLink(body.date, body.cartId, body.items);
   }
 
 
@@ -138,7 +140,7 @@ export class PaymentController {
 
     let event: Stripe.Event;
 
-    
+
 
     try {
       event = this.stripe.webhooks.constructEvent(
@@ -151,9 +153,10 @@ export class PaymentController {
       throw new BadRequestException(err.message);
     }
 
-   
+
 
     switch (event.type) {
+
       case 'checkout.session.completed': {
 
         const session = event.data.object as Stripe.Checkout.Session;
@@ -206,8 +209,13 @@ export class PaymentController {
             title: `Mã đơn hàng ${session.metadata.date}) đã thanh toán thành công.Đơn hàng sẽ được giao đến bạn trong thời gian sớm nhất`,
             message: `Bạn đã thanh toán ${(amount / 100).toFixed(2)} ${currency.toUpperCase()} thành công, đơn hàng sẽ được giao đến bạn trong thời gian sớm nhất`,
           });
-        }
 
+          await this.ordersService.createOrder(
+            user.email,
+            amount / 100,
+            stripePaymentId,
+          );
+        }
         break;
       }
 
@@ -226,14 +234,11 @@ export class PaymentController {
   }
 
   @Post('refund')
-  async refund(@Body() body: { paymentIntentId: string; amount?: number; reason?: string }) {
+  async refund(@Body() body: { paymentIntentId: string,reason?: string }) {
     return await this.paymentService.refundPayment(
       body.paymentIntentId,
-      body.amount,
       body.reason as any,
     );
   }
-
-
 
 }

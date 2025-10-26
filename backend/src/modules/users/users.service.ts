@@ -123,8 +123,6 @@ export class UserService {
 
     await this.cartService.createCart(createdUser.id)
 
-    await this.mailService.sendUserConfirmation(createdUser);
-
     return user
     
   }

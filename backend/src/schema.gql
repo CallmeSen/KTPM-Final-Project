@@ -71,6 +71,19 @@ type Book {
   comments: [Comment!]
 }
 
+type Order {
+  id: ID!
+  user_email: String!
+  totalAmount: Float!
+  stripePaymentId: String!
+  status: String!
+  orderStatus: String!
+  paymentIntentId: String
+  refundReason: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type PaginatedBooks {
   data: [Book!]!
   total: Int!
@@ -87,6 +100,13 @@ type GetPaginatedBooks {
 
 type PaginatedUsers {
   users: [User!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+}
+
+type PaginatedOrders {
+  orders: [Order!]!
   total: Int!
   page: Int!
   limit: Int!
@@ -116,6 +136,9 @@ type Query {
   countNotifications(userId: String!): Int!
   getCommentsByBook(bookId: String!, skip: Int! = 0, take: Int! = 4): [Comment!]!
   replies(commentId: String!): [Comment!]!
+  orders: [Order!]!
+  getAllOrders(page: Int! = 1, limit: Int! = 10): PaginatedOrders!
+  order(id: Int!): Order!
 }
 
 input PaginationInput {
@@ -136,6 +159,9 @@ type Mutation {
   updateComment(updateCommentInput: UpdateCommentInput!): Boolean!
   removeComment(id: String!): Comment!
   likeComment(commentId: String!, userId: String!): Comment!
+  createOrder(createOrderInput: CreateOrderInput!): Order!
+  updateOrder(updateOrderInput: UpdateOrderInput!): Order!
+  removeOrder(id: Int!): Order!
 }
 
 input CreateUserDto {
@@ -196,4 +222,20 @@ input UpdateCommentInput {
   parentId: String
   id: String!
   likes: Int!
+}
+
+input CreateOrderInput {
+  user_email: String!
+  totalAmount: Float!
+  stripePaymentId: String!
+}
+
+input UpdateOrderInput {
+  user_email: String
+  totalAmount: Float
+  stripePaymentId: String
+  id: String!
+
+  """Trạng thái của đơn hàng"""
+  status: String
 }

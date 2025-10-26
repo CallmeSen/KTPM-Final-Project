@@ -26,9 +26,11 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-
   @Column()
   password: string;
+
+  @Column({ default: 'Unknown' })
+  address: string;
 
   @Field()
   @Column({ unique: true })
@@ -46,11 +48,11 @@ export class User {
   @Column({ default: 'user' })
   role: string;
 
-  @Field({ nullable: true })  
+  @Field({ nullable: true })
   @Column({ nullable: true })
   avatarUrl?: string;
 
-  @Field({ nullable: true })  
+  @Field({ nullable: true })
   @Column({ nullable: true })
   refreshTokens: string;
 

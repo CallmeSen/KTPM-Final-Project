@@ -274,3 +274,24 @@ export const CREATE_BOOK = gql`
   }
 `;
 
+
+
+export const GET_ALL_ORDERS = gql`
+  query GetAllOrders($page: Int!, $limit: Int!) {
+    getAllOrders(page: $page, limit: $limit) {
+      orders {
+        id
+        user_email
+        totalAmount
+        status
+        createdAt
+        stripePaymentId
+      }
+      total
+      page
+      limit
+    }
+  }
+`;
+
+

@@ -358,15 +358,13 @@ export class AuthService {
     return { message: 'Postcode verified successfully' };
   }
 
-  async AdminLogin(credentials){
-    
+  async AdminLogin(credentials) {
+
     const { email, password } = credentials;
 
     const user = await this.userRepo.findOne({ where: { email } });
 
     if (!user) throw new UnauthorizedException("User not found");
-
-    if(user.role!="ADMIN") throw new UnauthorizedException("not admin");
 
     const { accessToken, refreshToken } = await this.generateToken(user.id);
 
@@ -380,10 +378,16 @@ export class AuthService {
 
     if (!passwordMatch) throw new Error("Mật khẩu sai");
 
+
     return {
-      accessToken,
-      refreshToken
-    }
+      user: {
+        id: user.id,
+        name: user.username || null,
+        role: user.role
+      },
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
   }
 
 }

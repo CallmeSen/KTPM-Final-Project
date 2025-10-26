@@ -17,6 +17,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { CommentModule } from 'src/modules/comment/comment.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ChatModule } from 'src/chats/chat.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { ChatModule } from 'src/chats/chat.module';
     PaymentModule,
     NotificationModule,
     CommentModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
