@@ -101,6 +101,12 @@ export class PaymentController {
     return await this.paymentService.createPaymentLink(body.date, body.cartId, body.items);
   }
 
+  @Get('products/import')
+  async importProducts() {
+    const filePath = "D:/Bookstore/backend/src/modules/books/mockData/books-3.csv";
+    return await this.paymentService.importProductsFromFile(filePath);
+  }
+
 
   @Post('update')
   async updateStripeIdsForAllBooks() {
@@ -131,6 +137,8 @@ export class PaymentController {
     return await this.paymentService.getProductByTitle(body.title)
   }
 
+
+
   @Post('webhook')
   async handleWebhook(@Req() req: Request, @Res() res: Response) {
 
@@ -142,11 +150,18 @@ export class PaymentController {
 
 
 
+
+
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      throw new Error('Missing STRIPE_WEBHOOK_SECRET in environment variables');
+    }
+
     try {
       event = this.stripe.webhooks.constructEvent(
         req.body as unknown as Buffer,
         sig,
-        "whsec_fd39cb93841c463629d1e6565fc9f0d2ab1e5005f86fbc01c4cbeb5d8bd94110"
+        webhookSecret
       );
     } catch (err: any) {
       console.error('Webhook signature verification failed:', err.message);
@@ -204,6 +219,7 @@ export class PaymentController {
         }
 
         if (user) {
+
           await this.notificationService.sendNotification({
             userId: user.id,
             title: `Mã đơn hàng ${session.metadata.date}) đã thanh toán thành công.Đơn hàng sẽ được giao đến bạn trong thời gian sớm nhất`,
@@ -215,6 +231,7 @@ export class PaymentController {
             amount / 100,
             stripePaymentId,
           );
+
         }
         break;
       }
@@ -234,10 +251,11 @@ export class PaymentController {
   }
 
   @Post('refund')
-  async refund(@Body() body: { paymentIntentId: string,reason?: string }) {
+  async refund(@Body() body: { paymentIntentId: string, reason?: string, email: string }) {
     return await this.paymentService.refundPayment(
       body.paymentIntentId,
       body.reason as any,
+      body.email
     );
   }
 

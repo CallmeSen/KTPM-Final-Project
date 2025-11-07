@@ -38,7 +38,7 @@ export interface CommentType {
 export interface PropsComentItem {
     comment: CommentType;
     bookId: string;
-    currentUserId: string;
+    currentUserId?: string;
 }
 
 export interface AddCommentResponse {
@@ -56,7 +56,7 @@ export interface AddCommentResponse {
 
 export interface PropsCommentForm {
     bookId: string;
-    userId: string;
+    userId?: string;
     parentId?: string;
     take: number;
     onSuccess?: () => void;

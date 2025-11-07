@@ -119,5 +119,8 @@ export class BooksService {
   randomPrice(min = 10, max = 500) {
     return parseFloat((Math.random() * (max - min) + min).toFixed(2));
   }
+
+  
+
 }
 

@@ -8,6 +8,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+
 import {
     GET_BOOKS_BY_CATEGORY,
     SEARCH_BOOKS_BY_TITLE,
@@ -139,7 +140,7 @@ export default function Library() {
                                 onClick={(e) => {
                                     e.preventDefault();
                                     if (page > 1) setPage((prev) => prev - 1);
-                                }} size={300} />
+                                }} />
                         </PaginationItem>
 
                         {Array.from({ length: 4 })

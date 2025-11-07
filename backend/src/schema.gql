@@ -24,11 +24,16 @@ scalar DateTime
 type User {
   id: ID!
   username: String!
+  address: String
   email: String!
   status: UserStatus!
   role: String!
   avatarUrl: String
   refreshTokens: String
+  firstName: String
+  lastName: String
+  dateOfBirth: String
+  gender: String
 }
 
 """The status of a user"""
@@ -123,6 +128,7 @@ type Notification {
 }
 
 type Query {
+  getUserById(id: ID!): User
   getAllUsers(page: Int! = 1, limit: Int! = 10): PaginatedUsers!
   getCartByUser(userId: String!): Cart!
   countCartItems(userId: String!): Int!
@@ -148,6 +154,7 @@ input PaginationInput {
 
 type Mutation {
   createUser(input: CreateUserDto!): User!
+  updateUser(input: UpdateUserDto!): User!
   createCart(createCartInput: String!): Cart!
   addCartItem(cartId: ID, userId: ID!, bookId: ID!, quantity: Int! = 1): CartItem!
   clearCart(userId: ID!): Boolean!
@@ -168,6 +175,16 @@ input CreateUserDto {
   username: String!
   password: String!
   email: String!
+}
+
+input UpdateUserDto {
+  id: ID!
+  firstName: String
+  lastName: String
+  address: String
+  dateOfBirth: String
+  gender: String
+  email: String
 }
 
 input CreateBookInput {

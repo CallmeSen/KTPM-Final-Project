@@ -18,6 +18,7 @@ registerEnumType(UserStatus, {
 @ObjectType()
 @Entity()
 export class User {
+
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -29,8 +30,10 @@ export class User {
   @Column()
   password: string;
 
+  @Field({ nullable: true })
   @Column({ default: 'Unknown' })
   address: string;
+
 
   @Field()
   @Column({ unique: true })
@@ -64,4 +67,21 @@ export class User {
 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments?: Comment[];
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  firstName?: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  lastName?: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  dateOfBirth?: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  gender?: string;
+
 }

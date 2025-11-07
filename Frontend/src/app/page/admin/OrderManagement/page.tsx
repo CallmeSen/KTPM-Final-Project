@@ -29,7 +29,7 @@ export default function OrdersPage() {
     const [page, setPage] = useState(1);
     const [ordersData, setOrdersData] = useState<Order[]>([]);
     const [isRefundModalOpen, setRefundModalOpen] = useState(false);
-    const [selectedPaymentIntentId, setSelectedPaymentIntentId] = useState<string>("");
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
     const limit = 5;
 
@@ -49,22 +49,21 @@ export default function OrdersPage() {
     const total = data?.getAllOrders.total ?? 0;
     const totalPages = Math.ceil(total / limit);
 
-
-    const handleRefundSubmit = async (data: { paymentIntentId: string; reason?: string }) => {
+ 
+    const handleRefundSubmit = async (formData: { paymentIntentId: string; reason?: string; email: string }) => {
         try {
-            const res = await axios.post("http://localhost:8000/payment/refund", data);
+            const res = await axios.post("http://localhost:8000/payment/refund", formData);
 
             if (res.data.success) {
-            
                 setOrdersData((prev) =>
                     prev.map((order) =>
-                        order.stripePaymentId === data.paymentIntentId
+                        order.stripePaymentId === formData.paymentIntentId
                             ? { ...order, status: "REFUNDED" }
                             : order
                     )
                 );
 
-                alert("Refund successful!");
+                alert("✅ Refund successful!");
             } else {
                 alert(`Refund failed: ${res.data.message}`);
             }
@@ -76,14 +75,13 @@ export default function OrdersPage() {
 
     return (
         <div className="p-6 flex w-full">
-            
+            {/* Sidebar */}
             <div className="w-64">
                 <AppSidebar />
             </div>
 
-            
+            {/* Content */}
             <div className="flex-1 w-full">
-
                 <div className="h-14 border-b">
                     <AdminNavbar />
                 </div>
@@ -124,16 +122,16 @@ export default function OrdersPage() {
                                     <td className="p-3 text-center">
                                         <button
                                             onClick={() => {
-                                                setSelectedPaymentIntentId(order.stripePaymentId);
+                                                setSelectedOrder(order);
                                                 setRefundModalOpen(true);
                                             }}
-                                            disabled={order.status === "refunded"}
+                                            disabled={order.status === "REFUNDED"}
                                             className={`px-3 py-1 text-sm rounded font-medium transition ${order.status === "REFUNDED"
-                                                    ? "bg-blue-600 text-gray-500 cursor-not-allowed"
-                                                    : "bg-gray-300 text-white cursor-pointer"
+                                                    ? "bg-gray-300 text-white cursor-not-allowed"
+                                                    : "bg-blue-600 text-white hover:bg-blue-700"
                                                 }`}
                                         >
-                                            {order.status === "REFUNDED" ? "Refunded" : "Refund"}
+                                            Refund
                                         </button>
                                     </td>
                                 </tr>
@@ -158,7 +156,7 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Refund Modal */}
-                {isRefundModalOpen && (
+                {isRefundModalOpen && selectedOrder && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
                         <div className="bg-white rounded-lg p-6 w-[420px] shadow-lg relative h-[420px]">
                             <h2 className="text-xl font-bold mb-4 text-center">Refund Payment</h2>
@@ -169,12 +167,18 @@ export default function OrdersPage() {
                                     const form = e.target as HTMLFormElement;
                                     const paymentIntentId = form.paymentIntentId.value.trim();
                                     const reason = form.reason.value;
+
                                     if (!paymentIntentId) {
                                         alert("Payment Intent ID is required");
                                         return;
                                     }
 
-                                    await handleRefundSubmit({ paymentIntentId, reason });
+                                    await handleRefundSubmit({
+                                        paymentIntentId,
+                                        reason,
+                                        email: selectedOrder.user_email,
+                                    });
+
                                     setRefundModalOpen(false);
                                 }}
                                 className="space-y-4"
@@ -186,7 +190,7 @@ export default function OrdersPage() {
                                     <input
                                         type="text"
                                         name="paymentIntentId"
-                                        defaultValue={selectedPaymentIntentId}
+                                        defaultValue={selectedOrder.stripePaymentId}
                                         readOnly
                                         className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-700 focus:outline-none cursor-not-allowed"
                                     />

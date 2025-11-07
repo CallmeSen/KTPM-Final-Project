@@ -15,7 +15,7 @@ export const useAddComment = () => {
         take = 4,
     }: {
         bookId: string;
-        userId: string;
+        userId?: string;
         content: string;
         parentId?: string | null;
         take?: number;

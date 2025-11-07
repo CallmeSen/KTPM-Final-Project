@@ -75,8 +75,6 @@ export default function CartPage() {
         try {
 
             const payload = createCheckoutPayload(date,cartiD, cartItems);
-            
-            console.log(payload)
 
             const res = await fetch("http://localhost:8000/payment/create-payment-link", {
                 method: "POST",
@@ -93,11 +91,17 @@ export default function CartPage() {
             const payment_data = await res.json()
 
             if (payment_data) {
-                window.location.href = payment_data.url
+                window.open(payment_data.url, "_blank", "noopener,noreferrer");
             }
-        } catch (err) {
+
+        } 
+
+        catch (err) {
+
             console.error(err)
+
             alert("Có lỗi khi thanh toán")
+
         }
     }
 

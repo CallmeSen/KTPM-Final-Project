@@ -1,9 +1,8 @@
 'use client'
 import BookSellBanner from "@/app/page/HomePage/components/BookSellBanner/page";
 import { CarouselDApiDemo } from "@/app/page/HomePage/components/Carousel/carousel"
-import { GetFreeBooks } from "@/app/page/HomePage/components/GetFreeBook/page";
 import Navbar from "@/app/page/HomePage/components/NavBar/page"
-import { NewReleaseBooks } from "@/app/page/HomePage/components/ReleasedBook/page";
+import { NewReleaseBooks } from "@/app/page/HomePage/components/ReleasedBook/releasedBook";
 import Footer from "@/Shared/Footer/page";
 import { GET_TOP_RATED_BOOKS } from "@/app/graphQL/queries";
 import { useQuery } from "@apollo/client/react";
@@ -14,6 +13,8 @@ import { useEffect, useState } from "react";
 import { Session } from "@/app/interfaces/session.interface";
 import CenterLoading from "@/Shared/Loading/page";
 import ErrorWidget from "@/Shared/Error/page";
+import GetFreeBooks from "@/app/page/HomePage/components/GetFreeBook/page";
+
 
 
 export default function Homepage() {
@@ -22,7 +23,7 @@ export default function Homepage() {
 
     const [loading, setLoading] = useState(true);
 
-   
+
 
     useEffect(() => {
         (async () => {

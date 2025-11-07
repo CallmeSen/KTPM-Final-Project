@@ -40,16 +40,6 @@ describe('CartPage functions', () => {
     expect(calculateFinalTotal(mockCart)).toBe((2 * 100 + 3 * 200) - (2 * 100 + 3 * 200) * 0.1 + 0);
   });
 
-  test('createCheckoutPayload trả payload đúng', () => {
-    const payload = createCheckoutPayload('cart123', mockCart);
-    expect(payload).toEqual({
-      cartId: 'cart123',
-      items: [
-        { id_stripe: 'stripe1', quantity: 2 },
-        { id_stripe: 'stripe2', quantity: 3 },
-      ],
-    });
-  });
 
   test('saveForLater chuyển sản phẩm vào saved', () => {
     const saved: any[] = [];

@@ -112,8 +112,8 @@ export function CarouselDApiDemo() {
                 </CarouselItem>
             </CarouselContent>
 
-            <CarouselPrevious className="absolute left-[1rem] top-1/2 transform -translate-y-1/2 z-40 duration-1000 border border-[#ED553B] bg-white" />
-            <CarouselNext className="absolute right-[1rem] top-1/2 transform -translate-y-1/2 z-40 duration-1000 border border-[#ED553B] bg-white" />
+            <CarouselPrevious className="absolute left-[1rem] top-1/2 transform -translate-y-1/2 z-40 duration-1000 border border-[#ED553B] bg-white cursor-pointer" />
+            <CarouselNext className="absolute right-[1rem] top-1/2 transform -translate-y-1/2 z-40 duration-1000 border border-[#ED553B] bg-white cursor-pointer" />
         </Carousel>
     )
 }

@@ -165,7 +165,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                       
                       <ul className="space-y-2 ">
                         <li>
-                          <Link href="/pages/profile" passHref className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded">
+                          <Link href="/page/ProfilePage" passHref className="block w-full text-left px-4 py-2 hover:bg-gray-100 rounded">
                             <p className="hover:text-[#FB635D] cursor-pointer">Profile</p>
                           </Link>
                         </li>

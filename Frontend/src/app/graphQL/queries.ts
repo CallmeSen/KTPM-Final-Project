@@ -295,3 +295,37 @@ export const GET_ALL_ORDERS = gql`
 `;
 
 
+export const UPDATE_USER = gql`
+  mutation UpdateUser($input: UpdateUserDto!) {
+    updateUser(input: $input) {
+      id
+      username
+      firstName
+      lastName
+      email
+      gender
+      dateOfBirth
+      address
+      status
+      role
+      avatarUrl
+    }
+  }
+`;
+
+export const GET_USER_BY_ID = gql`
+  query GetUserById($id: ID!) {
+    getUserById(id: $id) {
+      id
+      username
+      firstName
+      lastName
+      email
+      gender
+      dateOfBirth
+      address
+      status
+      role
+    }
+  }
+`;

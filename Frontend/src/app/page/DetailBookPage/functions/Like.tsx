@@ -3,6 +3,7 @@ import { LikeCommentResponse } from "@/app/interfaces/interfaces";
 import { useMutation } from "@apollo/client/react";
 
 export const useLikeComment = () => {
+
     const [likeCommentMutation, { loading, error }] =
         useMutation<LikeCommentResponse>(LIKE_COMMENT);
 
@@ -14,7 +15,7 @@ export const useLikeComment = () => {
     }: {
         bookId: string;
         commentId: string;
-        userId: string;
+        userId?: string;
         take?: number;
     }) => {
         try {

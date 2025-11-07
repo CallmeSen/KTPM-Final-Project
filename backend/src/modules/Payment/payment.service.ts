@@ -1,14 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import * as fs from 'fs';
 import Stripe from 'stripe';
 import { Repository } from 'typeorm';
 import { Payment } from 'src/modules/Payment/entity/payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserStatus } from 'src/modules/users/entities/user.entity';
-import { Cart } from 'src/modules/cart/entities/cart.entity';
-import { Order } from 'src/modules/orders/entities/order.entity';
 import { OrdersService } from 'src/modules/orders/orders.service';
-
+import { NotificationService } from 'src/modules/notification/notification.service';
+import * as fs from 'fs';
+import * as csv from 'csv-parser';
 @Injectable()
 export class PaymentService {
   constructor(
@@ -17,16 +16,20 @@ export class PaymentService {
     @InjectRepository(Payment)
 
     private readonly paymentRes: Repository<Payment>,
-    @InjectRepository(User)
 
+    @InjectRepository(User)
     private readonly userRes: Repository<Payment>,
-    @InjectRepository(Cart)
+
 
     @InjectRepository(User) readonly UserRes: Repository<User>,
 
+
     private readonly ordersService: OrdersService,
 
+    private readonly notificationService: NotificationService,
+
   ) { }
+
 
   async getProductByTitle(title: string) {
     const cleanTitle = title.trim();
@@ -116,18 +119,21 @@ export class PaymentService {
 
  
  async refundPayment(
-
   paymentIntentId: string,
-
   reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer',
-
-) {
-
+  email?: string
+)
+{
   try {
+    // Tìm user theo email
+    const user = await this.UserRes.findOne({ where: { email } });
 
-    //  Lấy thông tin PaymentIntent từ Stripe
+    if (!user) {
+      throw new Error(`Không tìm thấy người dùng với email: ${email}`);
+    }
+
+    // Lấy thông tin PaymentIntent từ Stripe
     const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
-
     if (!paymentIntent || !paymentIntent.latest_charge) {
       throw new Error('Payment Intent không hợp lệ hoặc chưa có charge');
     }
@@ -139,25 +145,72 @@ export class PaymentService {
       charge: chargeId,
       reason,
     });
-  
-    await this.ordersService.updateStatusByPaymentIntent(paymentIntentId,"refunded")
+
+    // Cập nhật trạng thái đơn hàng
+    await this.ordersService.updateStatusByPaymentIntent(paymentIntentId, "refunded");
+
+    await this.notificationService.sendNotification({
+            userId: user.id,
+            title: `Đơn hàng của bạn đã được hoàn tiền thành công`,
+            message: `Đơn hàng của bạn là đã được hoàn tiền`,
+    });
+
+    //  Ghi log hoặc gửi mail cho user
+    console.log(`Refund thành công cho user ${user.email}, order ${paymentIntentId}`);
 
     // Trả kết quả
     return {
       success: true,
       message: 'Refund created and order status updated successfully',
       data: refund,
+      user,
     };
+
   } catch (error: any) {
     console.error('Refund error:', error);
     return {
       success: false,
       message: error.message || 'Refund failed',
     };
-
   }
-  
 }
+
+async importProductsFromFile(filePath: string) {
+    const results: any[] = [];
+
+    return new Promise((resolve, reject) => {
+
+      fs.createReadStream(filePath)
+        .pipe(csv({ mapHeaders: ({ header }) => header.toLowerCase().trim() }))
+        .on('data', (row) => results.push(row))
+        .on('end', async () => {
+          const createdProducts: Stripe.Response<Stripe.Product>[] = [];
+
+          for (const row of results) {
+            console.log("Row from CSV:", row);
+            const product = await this.stripe.products.create({
+              name: row.title,
+              active: true,
+              images: row.thumbnail ? [row.thumbnail] : [],
+              default_price_data: {
+                currency: 'usd',
+                unit_amount: Number(row.price) * 100,
+              },
+            });
+
+            createdProducts.push(product);
+          }
+
+          resolve({
+            message: 'Products imported successfully',
+            count: createdProducts.length,
+            products: createdProducts,
+          });
+        })
+        .on('error', (err) => reject(err));
+    });
+  }
+
 
 }
 
