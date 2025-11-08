@@ -103,7 +103,7 @@ export class PaymentController {
 
   @Get('products/import')
   async importProducts() {
-    const filePath = "D:/Bookstore/backend/src/modules/books/mockData/books-3.csv";
+    const filePath = "D:/Bookstore/backend/src/modules/books/mockData/books.csv";
     return await this.paymentService.importProductsFromFile(filePath);
   }
 
