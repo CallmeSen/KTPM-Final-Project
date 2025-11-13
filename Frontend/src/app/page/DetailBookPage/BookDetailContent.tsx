@@ -71,6 +71,11 @@ export default function BookDetailContent() {
                         <button
                             className="bg-[#DB4444] text-white font-bold py-2 px-6 rounded-md mt-4 w-fit cursor-pointer"
                             onClick={async () => {
+                                if (!session?.user?.id) {
+                                    alert("Bạn phải đăng nhập để thêm vào giỏ hàng");
+                                    router.push("/page/LoginPage");
+                                    return;
+                                }
                                 try {
                                     await addCartItem({
                                         variables: {
@@ -95,6 +100,11 @@ export default function BookDetailContent() {
                         <button
                             className="bg-black text-white font-bold py-2 px-6 rounded-md mt-4 w-fit cursor-pointer"
                             onClick={async () => {
+                                if (!session?.user?.id) {
+                                    alert("Bạn phải đăng nhập để thêm vào giỏ hàng");
+                                    router.push("/page/LoginPage");
+                                    return;
+                                }
                                 try {
                                     await addCartItem({
                                         variables: {

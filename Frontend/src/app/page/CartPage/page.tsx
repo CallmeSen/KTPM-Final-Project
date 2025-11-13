@@ -1,9 +1,9 @@
 'use client'
 
-import { GET_CART_BY_USER } from "@/app/graphQL/queries"
+import { GET_CART_BY_USER } from "@/app/graphQL/queries"  // Xóa REMOVE_CART_ITEM vì không tồn tại
 import {  GetCartData } from "@/app/interfaces/cart.interface"
 import CartNavbar from "@/app/page/CartPage/navbar-cartpage"
-import { useQuery } from "@apollo/client/react"
+import { useQuery } from "@apollo/client/react"  // Xóa useMutation vì không dùng
 import { useEffect, useState } from "react"
 import { getSession } from "@/lib/session"
 import Image from "next/image"
@@ -34,6 +34,7 @@ export default function CartPage() {
         skip: !session?.user.id,
     })
 
+    // Xóa useMutation vì REMOVE_CART_ITEM không tồn tại
 
     useEffect(() => {
         if (data?.getCartByUser) {
@@ -54,6 +55,13 @@ export default function CartPage() {
         )
     }
 
+    const handleRemoveItem = (itemId: number) => {
+        // Xóa khỏi state local
+        setCartItems(prev => prev.filter(item => item.id !== itemId));
+        // Lưu ý: Bạn cần thêm mutation GraphQL hoặc API call để xóa từ server, ví dụ: REMOVE_CART_ITEM
+        // Hiện tại chỉ xóa local, refetch sẽ không cập nhật nếu không có thay đổi server
+    }
+
     const checkout = async () => {
 
         if (isCartEmpty) {
@@ -68,8 +76,7 @@ export default function CartPage() {
             (now.getMonth() + 1).toString().padStart(2, "0") + "/" +
             now.getFullYear() + "(" +
             now.getHours().toString().padStart(2, "0") + ":" +
-            now.getMinutes().toString().padStart(2, "0") + ":" +
-            now.getSeconds().toString().padStart(2, "0"); + ")"
+            now.getMinutes().toString().padStart(2, "0") + ")"  // Sửa lỗi syntax: xóa ; trước )
 
 
         try {
@@ -147,7 +154,7 @@ export default function CartPage() {
                                 <th className="p-3 font-semibold text-gray-700">Price</th>
                                 <th className="p-3 font-semibold text-gray-700">Quantity</th>
                                 <th className="p-3 font-semibold text-gray-700">Subtotal</th>
-                                <th className="p-3 font-semibold text-gray-700"></th>
+                                <th className="p-3 font-semibold text-gray-700">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -209,6 +216,15 @@ export default function CartPage() {
                                         <td className="p-3 font-semibold text-gray-800">
                                             ${subtotal.toLocaleString()}
                                         </td>
+
+                                        <td className="p-3">
+                                            <button
+                                                onClick={() => handleRemoveItem(item.id)}
+                                                className="px-3 py-1 bg-red-500 text-white rounded cursor-pointer hover:bg-red-600"
+                                            >
+                                                X
+                                            </button>
+                                        </td>
                                     </tr>
                                 );
                             })}
@@ -250,4 +266,3 @@ export default function CartPage() {
         </div>
     )
 }
-
