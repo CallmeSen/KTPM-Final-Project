@@ -31,6 +31,18 @@ export class CartResolver {
     return await this.cartService.createCartItem(cartId, userId, bookId, quantity);
   }
 
+  // ...existing code...
+
+@Mutation(() => Boolean, { name: 'removeCartItem' })
+async removeCartItem(
+  @Args('cartItemId', { type: () => ID }) cartItemId: number,
+  @Args('userId', { type: () => ID }) userId: string,
+): Promise<boolean> {
+  return await this.cartService.removeCartItem(cartItemId, userId);
+}
+
+// ...existing code... (không thay đổi gì khác)
+
   @Query(() => Int)
   async countCartItems(
     @Args('userId') userId: string,
@@ -38,14 +50,13 @@ export class CartResolver {
     return await this.cartService.countCartItems(userId);
   }
 
-@Mutation(() => Boolean, { name: 'clearCart' })
-async clearCart(
-  @Args('userId', { type: () => ID }) userId: string,
-): Promise<boolean> {
-  await this.cartService.clearCart(userId);
-  return true;
-}
+  @Mutation(() => Boolean, { name: 'clearCart' })
+  async clearCart(
+    @Args('userId', { type: () => ID }) userId: string,
+  ): Promise<boolean> {
+    await this.cartService.clearCart(userId);
+    return true;
+  }
 
-
-
+  
 }

@@ -19,7 +19,7 @@ export class InventoryResolver {
   }
 
   @Query(() => Inventory, { name: 'inventory' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  findOne(@Args('id') id: string) {
     return this.inventoryService.findOne(id);
   }
 
@@ -29,7 +29,7 @@ export class InventoryResolver {
   }
 
   @Mutation(() => Inventory)
-  removeInventory(@Args('id', { type: () => Int }) id: number) {
+  removeInventory(@Args('id') id: string) {
     return this.inventoryService.remove(id);
   }
 }

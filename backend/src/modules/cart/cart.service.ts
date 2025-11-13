@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cart } from './entities/cart.entity';
@@ -187,5 +187,29 @@ export class CartService {
     await this.cartItemRepo.remove(cart.items);
   }
  }
+
+ // ...existing code...
+
+async removeCartItem(cartItemId: number, userId: string): Promise<boolean> {
+  // Tìm cart item và kiểm tra quyền sở hữu
+  const cartItem = await this.cartItemRepo.findOne({
+    where: { id: cartItemId },
+    relations: ['cart', 'cart.user'],
+  });
+
+  if (!cartItem) {
+    throw new NotFoundException('Cart item not found');
+  }
+
+  if (cartItem.cart.user.id !== userId) {
+    throw new ForbiddenException('You do not own this cart item');
+  }
+
+  // Xóa item
+  await this.cartItemRepo.remove(cartItem);
+  return true;
+}
+
+// ...existing code... (không thay đổi gì khác)
 
 }

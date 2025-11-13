@@ -37,7 +37,4 @@ export class CreateBookInput {
   @Field(() => Float, { nullable: true })
   price?: number;
 
-  @Field(() => Int, { nullable: true })
-  @Column({ type: 'int', nullable: true })
-  inventory?: number;
 }

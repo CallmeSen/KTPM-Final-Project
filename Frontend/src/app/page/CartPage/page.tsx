@@ -1,9 +1,9 @@
 'use client'
 
-import { GET_CART_BY_USER } from "@/app/graphQL/queries"  // Xóa REMOVE_CART_ITEM vì không tồn tại
+import { GET_CART_BY_USER, REMOVE_CART_ITEM } from "@/app/graphQL/queries"  // Xóa REMOVE_CART_ITEM vì không tồn tại
 import {  GetCartData } from "@/app/interfaces/cart.interface"
 import CartNavbar from "@/app/page/CartPage/navbar-cartpage"
-import { useQuery } from "@apollo/client/react"  // Xóa useMutation vì không dùng
+import { useMutation, useQuery } from "@apollo/client/react"  // Xóa useMutation vì không dùng
 import { useEffect, useState } from "react"
 import { getSession } from "@/lib/session"
 import Image from "next/image"
@@ -55,12 +55,35 @@ export default function CartPage() {
         )
     }
 
-    const handleRemoveItem = (itemId: number) => {
-        // Xóa khỏi state local
-        setCartItems(prev => prev.filter(item => item.id !== itemId));
-        // Lưu ý: Bạn cần thêm mutation GraphQL hoặc API call để xóa từ server, ví dụ: REMOVE_CART_ITEM
-        // Hiện tại chỉ xóa local, refetch sẽ không cập nhật nếu không có thay đổi server
+     const [removeCartItemMutation] = useMutation(REMOVE_CART_ITEM, {
+        onCompleted: () => {
+            // Refetch cart sau khi xóa thành công để cập nhật UI
+            refetch();
+        },
+        onError: (err) => {
+            console.error('Error removing item:', err);
+            alert('Không thể xóa sản phẩm. Vui lòng thử lại.');
+        },
+    });
+
+    const handleRemoveItem = async (itemId: number) => {
+        if (!session?.user.id) {
+            alert('Bạn cần đăng nhập để xóa sản phẩm.');
+            return;
+        }
+        try {
+            // Gọi mutation để xóa trên server
+            await removeCartItemMutation({
+                variables: { cartItemId: itemId, userId: session.user.id },
+            });
+            // UI sẽ được cập nhật qua refetch trong onCompleted
+        } catch (err) {
+            console.error('Failed to remove item:', err);
+        }
     }
+
+    
+    
 
     const checkout = async () => {
 

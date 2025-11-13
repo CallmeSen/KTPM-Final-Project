@@ -230,6 +230,7 @@ export const GET_ALL_BOOKS = gql`
         average_rating
         published_year
         price
+        quantity
       }
       total
       page,
@@ -327,5 +328,11 @@ export const GET_USER_BY_ID = gql`
       status
       role
     }
+  }
+`;
+
+export const REMOVE_CART_ITEM = gql`
+  mutation RemoveCartItem($cartItemId: ID!, $userId: ID!) {
+    removeCartItem(cartItemId: $cartItemId, userId: $userId)
   }
 `;

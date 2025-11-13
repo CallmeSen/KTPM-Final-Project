@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Book } from './entities/book.entity';
 import { CreateBookInput } from './dto/create-book.input';
 import { UpdateBookInput } from './dto/update-book.input';
-import * as fs from 'fs';
+
 @Injectable()
 export class BooksService {
   constructor(
@@ -92,9 +92,6 @@ export class BooksService {
     };
   }
 
-
-
-
   async searchByTitle({ searchTerm }: { searchTerm: string }): Promise<Book[]> {
 
     const query = this.bookRepository.createQueryBuilder('book');
@@ -114,6 +111,7 @@ export class BooksService {
       .take(limit);
 
     return query.getMany();
+
   }
 
   randomPrice(min = 10, max = 500) {

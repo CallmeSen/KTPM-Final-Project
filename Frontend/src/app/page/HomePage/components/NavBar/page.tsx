@@ -139,11 +139,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                 onClick={() => router.push("/page/CartPage")}
               >
                 <FaShoppingCart size={22} className="cursor-pointer"/>
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-yellow-400 text-xs rounded-full px-1 cursor-pointer">
-                    {cartCount}
-                  </span>
-                )}
+                
               </button>
 
               <NavigationMenu>

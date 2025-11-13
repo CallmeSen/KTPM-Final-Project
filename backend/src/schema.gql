@@ -72,8 +72,8 @@ type Book {
   ratings_count: Int
   price: Float!
   id_stripe: String
-  inventory: Int
   comments: [Comment!]
+  quantity: Int!
 }
 
 type Order {
@@ -157,6 +157,7 @@ type Mutation {
   updateUser(input: UpdateUserDto!): User!
   createCart(createCartInput: String!): Cart!
   addCartItem(cartId: ID, userId: ID!, bookId: ID!, quantity: Int! = 1): CartItem!
+  removeCartItem(cartItemId: ID!, userId: ID!): Boolean!
   clearCart(userId: ID!): Boolean!
   createBook(createBookInput: CreateBookInput!): Book!
   updateBook(updateBookInput: UpdateBookInput!): Book!
@@ -199,7 +200,6 @@ input CreateBookInput {
   num_pages: Int
   ratings_count: Int
   price: Float
-  inventory: Int
 }
 
 input UpdateBookInput {
@@ -214,7 +214,6 @@ input UpdateBookInput {
   num_pages: Int
   ratings_count: Int
   price: Float
-  inventory: Int
   isbn10: Int!
 }
 
