@@ -18,6 +18,8 @@ import { CommentModule } from 'src/modules/comment/comment.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ChatModule } from 'src/chats/chat.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { AuthorsModule } from './authors/authors.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 
 @Module({
   imports: [
@@ -53,6 +55,8 @@ import { OrdersModule } from './modules/orders/orders.module';
     NotificationModule,
     CommentModule,
     OrdersModule,
+    AuthorsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
