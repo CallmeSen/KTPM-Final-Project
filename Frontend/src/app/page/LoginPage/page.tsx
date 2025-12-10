@@ -7,7 +7,6 @@ export default function LoginPage() {
             <div className="flex justify-center h-4/6 mt-10">
                 <LoginForm />
             </div>
-            
         </div>
     )
 }
