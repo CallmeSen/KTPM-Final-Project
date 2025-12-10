@@ -23,6 +23,10 @@ export type NotificationVars = {
   userId: string;
 };
 
+export type Notificatio2132 = {
+  userId: string;
+};
+
 
 export  type FormTypeLogin = z.infer<typeof signInSchema>
 

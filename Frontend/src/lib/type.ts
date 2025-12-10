@@ -35,3 +35,13 @@ export type Session = {
   accessToken: string;
   refreshToken: string;
 };
+
+export type Session2 = {
+  user: {
+    id: string;
+    name: string | null;
+    role : string;
+  };
+  accessToken: string;
+  refreshToken: string;
+};
