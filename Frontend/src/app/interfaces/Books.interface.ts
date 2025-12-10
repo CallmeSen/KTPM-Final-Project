@@ -10,7 +10,7 @@ export interface Book {
   ratings_count: number;
   price: number;
   id_stripe: string;
-  inventories?: any[]; 
+  quantity: number;
 }
 
 
