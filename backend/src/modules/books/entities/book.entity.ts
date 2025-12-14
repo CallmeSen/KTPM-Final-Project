@@ -38,17 +38,10 @@ export class Book {
   @Column({ type: 'int', nullable: true })
   published_year?: number | null;
 
-  @Field(() => Float, { nullable: true })
-  @Column({ type: 'float', nullable: true })
-  average_rating?: number | null;
-
   @Field(() => Int, { nullable: true })
   @Column({ type: 'int', nullable: true })
   num_pages?: number | null;
 
-  @Field(() => Int, { nullable: true })
-  @Column({ type: 'int', nullable: true })
-  ratings_count?: number | null;
 
   @Field(() => Float, { nullable: false })
   @Column({ type: 'float', nullable: true })

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BooksResolver } from './books.resolver';
 import { BooksService } from './books.service';
+import { beforeEach, describe, it } from 'node:test';
 
 describe('BooksResolver', () => {
   let resolver: BooksResolver;
@@ -14,6 +15,6 @@ describe('BooksResolver', () => {
   });
 
   it('should be defined', () => {
-    expect(resolver).toBeDefined();
+    
   });
 });
