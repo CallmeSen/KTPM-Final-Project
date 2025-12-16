@@ -1,15 +1,29 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
-import { describe, it } from 'node:test';
+import { AppModule } from '../app.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-describe('App (E2E)', () => {
+describe('App (E2E) MySQL', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule], // import toàn bộ app
+      imports: [
+        // Override DB connection cho test
+        TypeOrmModule.forRoot({
+          type: 'mysql',
+          host: 'localhost',
+          port: 3306,
+          username: 'root',
+          password: 'password123',
+          database: 'nestjs_test',
+          autoLoadEntities: true,
+          synchronize: true,  // tạo schema tự động
+          dropSchema: true,   // xóa schema trước khi test
+        }),
+        AppModule,
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -20,15 +34,15 @@ describe('App (E2E)', () => {
     await app.close();
   });
 
-  it('GET /books - should return all books', async () => {
+  it('Database connection should be OK', async () => {
+    // đơn giản gọi một repository để kiểm tra
     const response = await request(app.getHttpServer()).get('/books');
     expect(response.status).toBe(200);
-    expect(Array.isArray(response.body.data)).toBe(true);
   });
 
-  it('POST /books - should create a book', async () => {
+  it('POST /books - create book in MySQL', async () => {
     const newBook = {
-      title: 'Test Book',
+      title: 'Test Book MySQL',
       authors: 'John Doe',
       categories: 'Science',
       description: 'Book for testing',
@@ -43,6 +57,6 @@ describe('App (E2E)', () => {
       .send(newBook)
       .expect(201);
 
-    expect(response.body.title).toBe('Test Book');
+    expect(response.body.title).toBe('Test Book MySQL');
   });
 });

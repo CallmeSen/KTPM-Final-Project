@@ -1,13 +1,13 @@
-import { CreateOrderInput } from './create-order.input';
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateOrderInput extends PartialType(CreateOrderInput) {
-
-  @Field(() => String)
-  id: string;
-
-  @Field(() => String, { nullable: true, description: 'Trạng thái của đơn hàng' })
+export class UpdateOrderInput {
+  @Field(() => String, { nullable: true })
   status?: string;
-  
+
+  @Field(() => String, { nullable: true })
+  orderStatus?: string;
+
+  @Field(() => String, { nullable: true })
+  refundReason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
 }

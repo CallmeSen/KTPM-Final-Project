@@ -18,8 +18,8 @@ import { CommentModule } from 'src/modules/comment/comment.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ChatModule } from 'src/chats/chat.module';
 import { OrdersModule } from './modules/orders/orders.module';
-import { AuthorsModule } from './authors/authors.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { AuthorsModule } from 'src/modules/authors/authors.module';
 
 @Module({
   imports: [
