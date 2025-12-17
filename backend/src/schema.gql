@@ -1,0 +1,257 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Comment {
+  id: ID!
+  content: String!
+  createdAt: DateTime!
+  likes: Int!
+  parent: Comment
+  replies: [Comment!]
+  book: Book!
+  user: User!
+
+  """Sentiment of comment: positive or negative"""
+  sentiment: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type User {
+  id: ID!
+  username: String!
+  address: String
+  email: String!
+  status: UserStatus!
+  role: String!
+  avatarUrl: String
+  refreshTokens: String
+  firstName: String
+  lastName: String
+  dateOfBirth: String
+  gender: String
+}
+
+"""The status of a user"""
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+type Cart {
+  id: Int!
+  totalPrice: Float!
+  user: User!
+  items: [CartItem]!
+}
+
+type CartItem {
+  id: Int!
+  cart: Cart!
+  book: Book!
+  quantity: Int!
+  cartId: Int!
+  bookId: Int!
+}
+
+type Book {
+  id: ID!
+  title: String!
+  subtitle: String
+  authors: String
+  categories: String
+  thumbnail: String
+  description: String
+  published_year: Int
+  average_rating: Float
+  num_pages: Int
+  ratings_count: Int
+  price: Float!
+  id_stripe: String
+  comments: [Comment!]
+  quantity: Int!
+}
+
+type Order {
+  id: ID!
+  user_email: String!
+  totalAmount: Float!
+  stripePaymentId: String!
+  status: String!
+  orderStatus: String!
+  paymentIntentId: String
+  refundReason: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PaginatedBooks {
+  data: [Book!]!
+  total: Int!
+  totalPages: Int!
+  currentPage: Int!
+}
+
+type GetPaginatedBooks {
+  data: [Book!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+}
+
+type PaginatedUsers {
+  users: [User!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+}
+
+type PaginatedOrders {
+  orders: [Order!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+}
+
+type Notification {
+  id: ID!
+  userId: String
+  title: String!
+  image: String
+  message: String!
+  isRead: Boolean!
+  createdAt: DateTime!
+}
+
+type Query {
+  getUserById(id: ID!): User
+  getAllUsers(page: Int! = 1, limit: Int! = 10): PaginatedUsers!
+  getCartByUser(userId: String!): Cart!
+  countCartItems(userId: String!): Int!
+  book(id: ID!): Book
+  books(pagination: PaginationInput): GetPaginatedBooks!
+  searchBooksByTitle(searchTerm: String!): [Book!]!
+  booksByCategoryName(categoryName: String!, limit: Int): [Book!]!
+  getTopRatedBooks(limit: Int! = 15): [Book!]!
+  booksByCategory(categoryName: String!, page: Int, limit: Int): PaginatedBooks!
+  getNotifications(userId: String!): [Notification!]!
+  countNotifications(userId: String!): Int!
+  getCommentsByBook(bookId: String!, skip: Int! = 0, take: Int! = 4): [Comment!]!
+  replies(commentId: String!): [Comment!]!
+  orders: [Order!]!
+  getAllOrders(page: Int! = 1, limit: Int! = 10): PaginatedOrders!
+  order(id: Int!): Order!
+}
+
+input PaginationInput {
+  page: Int! = 1
+  limit: Int! = 10
+}
+
+type Mutation {
+  createUser(input: CreateUserDto!): User!
+  updateUser(input: UpdateUserDto!): User!
+  createCart(createCartInput: String!): Cart!
+  addCartItem(cartId: ID, userId: ID!, bookId: ID!, quantity: Int! = 1): CartItem!
+  removeCartItem(cartItemId: ID!, userId: ID!): Boolean!
+  clearCart(userId: ID!): Boolean!
+  createBook(createBookInput: CreateBookInput!): Book!
+  updateBook(updateBookInput: UpdateBookInput!): Book!
+  removeBook(isbn10: String!): Book!
+  sendNotification(createNotificationInput: CreateNotificationInput!): Notification!
+  AddComment(createCommentInput: CreateCommentInput!): Comment!
+  updateComment(updateCommentInput: UpdateCommentInput!): Boolean!
+  removeComment(id: String!): Comment!
+  likeComment(commentId: String!, userId: String!): Comment!
+  createOrder(createOrderInput: CreateOrderInput!): Order!
+  updateOrder(updateOrderInput: UpdateOrderInput!): Order!
+  removeOrder(id: Int!): Order!
+}
+
+input CreateUserDto {
+  username: String!
+  password: String!
+  email: String!
+}
+
+input UpdateUserDto {
+  id: ID!
+  firstName: String
+  lastName: String
+  address: String
+  dateOfBirth: String
+  gender: String
+  email: String
+}
+
+input CreateBookInput {
+  title: String
+  subtitle: String
+  authors: String
+  categories: String
+  thumbnail: String
+  description: String
+  published_year: Int
+  average_rating: Float
+  num_pages: Int
+  ratings_count: Int
+  price: Float
+}
+
+input UpdateBookInput {
+  title: String
+  subtitle: String
+  authors: String
+  categories: String
+  thumbnail: String
+  description: String
+  published_year: Int
+  average_rating: Float
+  num_pages: Int
+  ratings_count: Int
+  price: Float
+  isbn10: Int!
+}
+
+input CreateNotificationInput {
+  userId: String
+  title: String!
+  message: String!
+  image: String
+}
+
+input CreateCommentInput {
+  userId: String!
+  bookId: String!
+  content: String!
+  parentId: String
+}
+
+input UpdateCommentInput {
+  userId: String
+  bookId: String
+  content: String
+  parentId: String
+  id: String!
+  likes: Int!
+}
+
+input CreateOrderInput {
+  user_email: String!
+  totalAmount: Float!
+  stripePaymentId: String!
+}
+
+input UpdateOrderInput {
+  user_email: String
+  totalAmount: Float
+  stripePaymentId: String
+  id: String!
+
+  """Trạng thái của đơn hàng"""
+  status: String
+}
