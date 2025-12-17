@@ -8,7 +8,7 @@ import { calculateDiscount, calculateShipping, calculateTotal, createCheckoutPay
 jest.mock('@/lib/session');
 jest.mock('axios');
 
-describe('🧪 SYSTEM TEST - Login → Cart → Logout', () => {
+describe(' SYSTEM TEST - Login → Cart → Logout', () => {
   const router = {
     push: jest.fn(),
   } as any;
