@@ -1,6 +1,6 @@
 import { Body, forwardRef, Inject, Injectable, InternalServerErrorException, Logger, Res, UnauthorizedException } from '@nestjs/common';
-import { Response } from 'express';
-import { CreateAuthDto } from './dto/create-auth.dto';
+
+
 import { JwtService } from '@nestjs/jwt';
 import { comparePassword, hashPassword } from 'src/helpers/util';
 import { error } from 'console';
@@ -17,6 +17,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CartService } from 'src/modules/cart/cart.service';
 import { MailService } from 'src/mails/mail.service';
 import { Blacklist } from 'src/modules/Blacklist/entities/blacklist.entity';
+import type { CreateAuthDto } from 'src/modules/auth/dto/create-auth.dto';
 
 
 

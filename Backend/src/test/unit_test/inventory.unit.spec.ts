@@ -1,21 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { InventoryService } from './inventory.service';
-import { Inventory } from './entities/inventory.entity';
+import { InventoryService } from '../../modules/inventory/inventory.service';
+import { Inventory } from '../../modules/inventory/entities/inventory.entity';
 import { NotFoundException } from '@nestjs/common';
 
+// Mock repository
 const mockInventoryRepo = () => ({
   create: jest.fn(),
   save: jest.fn(),
   find: jest.fn(),
   findOne: jest.fn(),
+  findOneBy: jest.fn(), 
   remove: jest.fn(),
 });
 
 describe('InventoryService (Unit Test)', () => {
   let service: InventoryService;
-  let repo: jest.Mocked<Repository<Inventory>>;
+  let repo: ReturnType<typeof mockInventoryRepo>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -58,7 +59,7 @@ describe('InventoryService (Unit Test)', () => {
       const result = await service.findAll();
 
       expect(repo.find).toHaveBeenCalled();
-      expect(result.length).toBe(2);
+      expect(result).toEqual(inventories);
     });
   });
 
@@ -85,9 +86,18 @@ describe('InventoryService (Unit Test)', () => {
       repo.findOne.mockResolvedValue(inventory);
       repo.save.mockResolvedValue({ ...inventory, quantity: 20 });
 
-      const result = await service.update('1', { quantity: 20 });
+      const result = await service.update('1', 20);
 
+      expect(repo.save).toHaveBeenCalledWith(
+        expect.objectContaining({ id: '1', quantity: 20 }),
+      );
       expect(result.quantity).toBe(20);
+    });
+
+    it('should throw NotFoundException if inventory not found', async () => {
+      repo.findOne.mockResolvedValue(null);
+
+      await expect(service.update('999', 20)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -101,6 +111,12 @@ describe('InventoryService (Unit Test)', () => {
 
       expect(repo.remove).toHaveBeenCalledWith(inventory);
       expect(result).toEqual(inventory);
+    });
+
+    it('should throw NotFoundException if inventory not found', async () => {
+      repo.findOne.mockResolvedValue(null);
+
+      await expect(service.remove('999')).rejects.toThrow(NotFoundException);
     });
   });
 });

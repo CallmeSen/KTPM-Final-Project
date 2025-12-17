@@ -1,10 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PaymentService } from './payment.service';
+
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Payment } from './entity/payment.entity';
-import { User } from '../users/entities/user.entity';
-import { OrdersService } from '../orders/orders.service';
-import { NotificationService } from '../notification/notification.service';
+
+import { NotificationService } from 'src/modules/notification/notification.service';
+import { Payment } from 'src/modules/Payment/entity/payment.entity';
+import { OrdersService } from 'src/modules/orders/orders.service';
+import { User } from 'src/modules/users/entities/user.entity';
+import { PaymentService } from 'src/modules/Payment/payment.service';
+
 
 describe('PaymentService Integration Flows', () => {
   let service: PaymentService;

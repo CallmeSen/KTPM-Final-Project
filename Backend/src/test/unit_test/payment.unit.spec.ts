@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PaymentService } from './payment.service';
-import Stripe from 'stripe';
+
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Payment } from './entity/payment.entity';
-import { User, UserStatus } from '../users/entities/user.entity';
-import { OrdersService } from '../orders/orders.service';
-import { NotificationService } from '../notification/notification.service';
+
 import { NotFoundException } from '@nestjs/common';
+import { OrdersService } from 'src/modules/orders/orders.service';
+import { Payment } from 'src/modules/Payment/entity/payment.entity';
+import { PaymentService } from 'src/modules/Payment/payment.service';
+import { NotificationService } from 'src/modules/notification/notification.service';
+import { User } from 'src/modules/users/entities/user.entity';
 
 describe('PaymentService - Unit Test', () => {
   let service: PaymentService;

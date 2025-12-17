@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrdersService } from './orders.service';
+
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Order } from './entities/order.entity';
+
 import { Repository } from 'typeorm';
+import { Order } from 'src/modules/orders/entities/order.entity';
+import { OrdersService } from 'src/modules/orders/orders.service';
 
 describe('OrdersService Unit Tests', () => {
   let service: OrdersService;
@@ -117,8 +119,9 @@ describe('OrdersService Unit Tests', () => {
       });
 
       const result = await service.update('order-123', {
-        status: 'PAID',
-      });
+  id: 'order-123',  // ✅ bắt buộc
+  status: 'PAID',
+});
 
       expect(orderRepo.save).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'PAID' }),
@@ -130,7 +133,7 @@ describe('OrdersService Unit Tests', () => {
       mockOrderRepo.findOne.mockResolvedValue(null);
 
       await expect(
-        service.update('invalid-id', { status: 'PAID' }),
+        service.update('order-123', { id: 'order-123', status: 'PAID' }),
       ).rejects.toThrow('Order with ID invalid-id not found');
     });
   });

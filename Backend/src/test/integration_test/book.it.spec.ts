@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BooksService } from './books.service';
+
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Book } from './entities/book.entity';
+import { BooksService } from 'src/modules/books/books.service';
+import { Book } from 'src/modules/books/entities/book.entity';
+
 
 describe('BooksService Integration Flows', () => {
   let service: BooksService;

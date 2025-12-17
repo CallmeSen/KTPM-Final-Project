@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
+import { AuthService } from 'src/modules/auth/auth.service';
+import { User } from 'src/modules/users/entities/user.entity';
+
 import { Repository } from 'typeorm';
-import { UnauthorizedException } from '@nestjs/common';
+
 
 describe('AuthService Integration Tests', () => {
     let service: AuthService;

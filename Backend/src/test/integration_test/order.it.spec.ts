@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrdersService } from './orders.service';
+
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Order } from './entities/order.entity';
+import { Order } from 'src/modules/orders/entities/order.entity';
+import { OrdersService } from 'src/modules/orders/orders.service';
+
 import { Repository } from 'typeorm';
 
 describe('OrdersService Integration Flows', () => {
@@ -115,16 +117,20 @@ describe('OrdersService Integration Flows', () => {
   // Flow 4: Update Order
   // ==========================================
   it('Flow 4: Should update order successfully', async () => {
-    const existingOrder = { id: 'order-1', status: 'PENDING' } as Order;
-    orderRepo.findOne.mockResolvedValue(existingOrder);
-    orderRepo.save.mockResolvedValue({ ...existingOrder, status: 'PAID' });
+  const existingOrder = { id: 'order-1', status: 'PENDING' } as Order;
 
-    const result = await service.update('order-1', { status: 'PAID' });
+  // Mock repository
+  orderRepo.findOne.mockResolvedValue(existingOrder);
+  orderRepo.save.mockResolvedValue({ ...existingOrder, status: 'PAID' });
 
-    expect(orderRepo.findOne).toHaveBeenCalledWith({ where: { id: 'order-1' } });
-    expect(orderRepo.save).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'PAID' }),
-    );
-    expect(result.status).toBe('PAID');
-  });
+  // Call service method để lấy kết quả
+  const result = await service.update('order-1', { id: 'order-1', status: 'PAID' });
+
+  // Assertions
+  expect(orderRepo.findOne).toHaveBeenCalledWith({ where: { id: 'order-1' } });
+  expect(orderRepo.save).toHaveBeenCalledWith(
+    expect.objectContaining({ status: 'PAID' }),
+  );
+  expect(result.status).toBe('PAID');
+});
 });

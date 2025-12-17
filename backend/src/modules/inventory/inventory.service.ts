@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inventory } from './entities/inventory.entity';
 import { CreateInventoryInput } from './dto/create-inventory.input';
-import { UpdateInventoryInput } from './dto/update-inventory.input';
+import type { UpdateInventoryInput } from 'src/modules/inventory/dto/update-inventory.input';
+
 
 @Injectable()
 export class InventoryService {
@@ -29,9 +30,9 @@ export class InventoryService {
     return inventory;
   }
 
-  async update(id: string, updateInventoryInput: UpdateInventoryInput) {
+  async update(id: string, invetory:number) {
     const inventory = await this.findOne(id);
-    Object.assign(inventory, updateInventoryInput);
+    Object.assign(inventory, invetory);
     return this.inventoryRepository.save(inventory);
   }
 

@@ -25,7 +25,7 @@ export class InventoryResolver {
 
   @Mutation(() => Inventory)
   updateInventory(@Args('updateInventoryInput') updateInventoryInput: UpdateInventoryInput) {
-    return this.inventoryService.update(updateInventoryInput.id, updateInventoryInput);
+    return this.inventoryService.update("211", updateInventoryInput.quantity);
   }
 
   @Mutation(() => Inventory)
