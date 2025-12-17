@@ -13,6 +13,7 @@ on:
       - '.github/workflows/backend-ci.yml'
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -26,11 +27,16 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: 'Backend/package-lock.json'
     - name: Install dependencies
+      working-directory: ./Backend
       run: npm ci
     - name: Code Quality - Lint # kiểm tra chất lượng mã nguồn
+      working-directory: ./Backend
       run: npm run lint
     - name: Build
+      working-directory: ./Backend
       run: npm run build --if-present
     - name: Run tests
+      working-directory: ./Backend
       run: npm test
