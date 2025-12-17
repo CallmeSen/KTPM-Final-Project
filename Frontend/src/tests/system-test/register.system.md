@@ -1,573 +1,207 @@
 # Register Module - System Test Documentation
 
 ## Overview
-This document contains End-to-End (E2E) test scenarios for the Register Module, specifically focusing on **Google OAuth Registration Flow**. These tests cover browser interactions, popup handling, network scenarios, and security validation.
+This document contains End-to-End (E2E) test scenarios for the Register Module in standardized table format.
+
+**Module:** Register (Registration with Google OAuth)  
+**Test Type:** System Test / E2E  
+**Framework:** Cypress 13.x / Playwright 1.40.x  
+**Last Updated:** December 18, 2025
 
 ---
 
 ## Test Environment Setup
 
-### OAuth Configuration
+### Configuration
 ```javascript
-// Cypress configuration
-module.exports = {
-  e2e: {
-    baseUrl: 'http://localhost:3000',
-    viewportWidth: 1920,
-    viewportHeight: 1080,
-    chromeWebSecurity: false, // Required for OAuth popup testing
-    video: true,
-    screenshotOnRunFailure: true,
-    env: {
-      googleClientId: 'YOUR_GOOGLE_CLIENT_ID',
-      googleRedirectUri: 'http://localhost:3000/auth/google/callback'
-    }
-  }
-}
+// OAuth Configuration
+GOOGLE_CLIENT_ID: 'test_client_id'
+GOOGLE_REDIRECT_URI: 'http://localhost:3000/auth/google/callback'
+SESSION_SECRET: 'test_secret'
 ```
 
 ### Test Accounts
-```javascript
-const testAccounts = {
-  newGoogleUser: {
-    email: 'newuser.test@gmail.com',
-    password: 'TestPassword123',
-    status: 'Not in DB'
-  },
-  existingUser: {
-    email: 'existing@gmail.com',
-    password: 'ExistingPass123',
-    status: 'Already registered manually'
-  }
-}
-```
+- **New Google User**: newuser.test@gmail.com (not in DB)
+- **Existing User**: existing@gmail.com (already registered manually)
+- OAuth state tokens expire after 30 minutes
 
 ---
 
-## TEST CASE 1: Google OAuth - New User Registration
+## System Test Cases
 
-### Test ID: `ST_FE_REG_OAuth_01`
-**Chức năng**: [FE_RegisterPage-7] ST_FE_REG_OAuth_Success_New  
-**Mô tả**: Đăng ký mới bằng Google thành công
-
-### Test Steps
-
-#### Step 1: Initiate Google Sign-Up
-```javascript
-describe('Google OAuth Registration Flow', () => {
-  it('should register new user via Google OAuth successfully', () => {
-    // Arrange: Visit register page
-    cy.visit('/register');
-
-    // Assert: Google sign-up button visible
-    cy.get('[data-testid="google-signup-btn"]')
-      .should('be.visible')
-      .should('contain', 'Sign up with Google');
-
-    // Act: Click Google sign-up button
-    cy.get('[data-testid="google-signup-btn"]').click();
-
-    // Assert: Google OAuth popup opens
-    cy.window().then((win) => {
-      cy.stub(win, 'open').callsFake((url) => {
-        expect(url).to.include('accounts.google.com');
-        expect(url).to.include('oauth2/auth');
-        return win; // Return window object
-      });
-    });
-  });
-});
-```
-
-#### Step 2: Google Login Flow (Simulated)
-```javascript
-it('should handle Google OAuth callback with new user', () => {
-  // Note: In real E2E, this requires Google OAuth test credentials
-  // For automation, we simulate the callback
-
-  // Arrange: Mock OAuth callback with new user data
-  const oauthCallback = {
-    state: 'valid_state_token',
-    code: 'google_auth_code_12345',
-    scope: 'email profile'
-  };
-
-  // Act: Visit callback URL (simulating Google redirect)
-  cy.visit(`/auth/google/callback?code=${oauthCallback.code}&state=${oauthCallback.state}`);
-
-  // Wait for backend processing
-  cy.wait(2000);
-
-  // Assert: User created in database
-  cy.request('GET', '/api/users/me').then((response) => {
-    expect(response.status).to.eq(200);
-    expect(response.body.email).to.include('@gmail.com');
-    expect(response.body.oauth_provider).to.eq('google');
-  });
-
-  // Assert: Auto-login successful
-  cy.window().then((win) => {
-    const token = win.localStorage.getItem('auth_token');
-    expect(token).to.exist;
-  });
-
-  // Assert: Redirected to home page
-  cy.url().should('eq', `${Cypress.config().baseUrl}/`);
-  cy.get('[data-testid="user-menu"]').should('be.visible');
-
-  // Screenshot for verification
-  cy.screenshot('oauth-new-user-success');
-});
-```
+| Test ID | Test Case Name | Test Case Description | Test Case Procedure | Expected Output | Inter-test case Dependence | Test Data | Result | Test Date | Note |
+|---------|---------------|----------------------|---------------------|-----------------|---------------------------|-----------|--------|-----------|------|
+| SYSTEM_REG_OAUTH_01 | Google OAuth New User Success | Đăng ký mới bằng Google OAuth thành công | 1. Visit `/register`<br>2. Click "Sign up with Google" button<br>3. Popup window opens (Google login page)<br>4. Enter Google credentials in popup<br>5. Authorize app permissions<br>6. Popup closes, redirect to callback<br>7. Check final URL and user state | 1. User account created in database<br>2. Auto-login sau khi đăng ký<br>3. Redirect to homepage `/`<br>4. User info hiển thị ở header<br>5. Token stored in localStorage<br>6. Email from Google saved correctly | None | Email: newuser.test@gmail.com<br>Google ID: 1234567890<br>Status: New user | | | Related: [FE_RegisterPage-7]<br>Requires Google OAuth test credentials |
+| SYSTEM_REG_OAUTH_02 | User Cancels OAuth Flow | User hủy thao tác giữa chừng | 1. Visit `/register`<br>2. Click "Sign up with Google"<br>3. Popup opens<br>4. **User closes popup** (click X or Cancel button in Google login)<br>5. Check app state | 1. Stay on register page `/register`<br>2. No user created<br>3. No crash or error<br>4. Form functional, có thể thử lại<br>5. Message (optional): "Đăng ký đã bị hủy" | None | Action: User closes popup<br>Result: Cancelled | | | Related: [FE_RegisterPage-8]<br>Test user cancellation |
+| SYSTEM_REG_OAUTH_03 | OAuth Existing Email Merge | Đăng ký trùng Email (Account Linking) | 1. **Setup**: Tạo user manual với email `existing@gmail.com`<br>2. Visit `/register`<br>3. Click "Sign up with Google"<br>4. Login Google với `existing@gmail.com`<br>5. Authorize app | 1. No error "Email already exists"<br>2. Accounts được link (merge)<br>3. User có thể login bằng cả password và Google<br>4. Success message: "Tài khoản đã được liên kết"<br>5. No duplicate user record | None | Email: existing@gmail.com<br>Existing: Manual account<br>OAuth: Link Google account | | | Related: [FE_RegisterPage-9]<br>Business logic: Safe merge |
+| SYSTEM_REG_OAUTH_04 | Popup Blocked by Browser | Trình duyệt chặn Popup | 1. **Setup**: Enable popup blocker in browser settings<br>2. Visit `/register`<br>3. Click "Sign up with Google"<br>4. Browser blocks popup (null window returned) | 1. Detect popup blocked (window.open returns null)<br>2. Display error message: "Popup bị chặn. Vui lòng cho phép popup"<br>3. Instructions: "Settings → Allow popup for this site"<br>4. App không crash<br>5. Có thể retry sau khi enable popup | None | Browser: Popup blocker ON<br>window.open(): Returns null | | | Related: [FE_RegisterPage-10]<br>Graceful error handling |
+| SYSTEM_REG_OAUTH_05 | Network Failure During Redirect | Mất mạng khi đang Redirect | 1. Click "Sign up with Google"<br>2. Complete Google login in popup<br>3. **During redirect**: Ngắt mạng (DevTools Offline mode)<br>4. Callback URL fails to load<br>5. Reconnect network<br>6. Press F5 to refresh | 1. Display error page: "Kết nối bị gián đoạn"<br>2. After refresh: Safe fallback to `/auth/login`<br>3. No corrupt session data<br>4. No half-created user account<br>5. User có thể retry registration | None | Network: Offline during callback<br>Action: F5 after reconnect | | | Related: [FE_RegisterPage-11]<br>Test network interruption |
+| SYSTEM_REG_OAUTH_06 | OAuth State Mismatch (CSRF) | Lỗi xác thực State Token | 1. Intercept OAuth callback request<br>2. Modify `state` parameter to invalid value (e.g., "hacker_state")<br>3. Send modified request to callback URL<br>4. Backend validates state token | 1. Backend rejects request (state mismatch)<br>2. Error: "Xác thực thất bại. Vui lòng thử lại"<br>3. No user created<br>4. Redirect to `/register`<br>5. Security log recorded | None | State: Invalid token<br>Expected: Valid token<br>Security: CSRF protection | | | Related: [FE_RegisterPage-12]<br>Security test: State validation |
+| SYSTEM_REG_OAUTH_07 | OAuth State Token Expiry | State token hết hạn (30 phút) | 1. Click "Sign up with Google"<br>2. Popup opens, nhưng **không login ngay**<br>3. Đợi > 30 phút (hoặc modify token timestamp)<br>4. Complete Google login after 30 min<br>5. Callback with expired state token | 1. Backend detects expired state (timestamp > 30 min)<br>2. Error: "Phiên đăng ký đã hết hạn"<br>3. No user created<br>4. Redirect to `/register` để thử lại<br>5. User must restart OAuth flow | None | State token: Created at T<br>Callback at: T + 31 min<br>Expiry: 30 min | | | Related: [FE_RegisterPage-12]<br>Security: Token expiry |
 
 ---
 
-## TEST CASE 2: User Cancels OAuth Flow
+## Automation Script Examples
 
-### Test ID: `ST_FE_REG_OAuth_02`
-**Chức năng**: [FE_RegisterPage-8] ST_FE_REG_OAuth_User_Cancel  
-**Mô tả**: User hủy thao tác giữa chừng
-
-### Test Steps
-
-#### Automation Example (Playwright)
+### Cypress Example
 ```javascript
-import { test, expect } from '@playwright/test';
-
-test('should handle user cancellation of Google OAuth', async ({ page, context }) => {
-  // Arrange: Visit register page
-  await page.goto('/register');
-
-  // Act: Click Google sign-up button
-  const [popup] = await Promise.all([
-    context.waitForEvent('page'), // Wait for popup
-    page.click('[data-testid="google-signup-btn"]')
-  ]);
-
-  // Assert: Popup opened
-  expect(popup.url()).toContain('accounts.google.com');
-
-  // Act: User closes popup (cancel action)
-  await popup.close();
-  await page.waitForTimeout(1000);
-
-  // Assert: Main page still on register page
-  expect(page.url()).toContain('/register');
-
-  // Assert: Application did not crash
-  const errorMessage = await page.locator('[data-testid="error-banner"]').count();
-  expect(errorMessage).toBe(0); // No error displayed
-
-  // Assert: Register form still functional
-  const googleButton = await page.locator('[data-testid="google-signup-btn"]');
-  await expect(googleButton).toBeVisible();
-  await expect(googleButton).toBeEnabled();
-});
-```
-
-#### Cypress Alternative
-```javascript
-it('should stay on register page when OAuth is cancelled', () => {
-  // Arrange
-  cy.visit('/register');
-
-  // Act: Click Google button (popup will be blocked in headless mode)
-  cy.window().then((win) => {
-    // Stub window.open to simulate popup closure
-    cy.stub(win, 'open').returns({
-      closed: true, // Immediately closed
-      close: () => {}
-    });
-  });
-
-  cy.get('[data-testid="google-signup-btn"]').click();
-  cy.wait(1000);
-
-  // Assert: Still on register page
-  cy.url().should('include', '/register');
-
-  // Assert: No crash, form still visible
-  cy.get('[data-testid="register-form"]').should('be.visible');
-  cy.get('[data-testid="google-signup-btn"]').should('be.visible');
-});
-```
-
----
-
-## TEST CASE 3: OAuth with Existing Email (Account Merge)
-
-### Test ID: `ST_FE_REG_OAuth_03`
-**Chức năng**: [FE_RegisterPage-9] ST_FE_REG_OAuth_Existing_Email  
-**Mô tả**: Đăng ký trùng Email (Merge Account)
-
-### Test Steps
-
-#### Step 1: Setup Existing User
-```javascript
-describe('Google OAuth - Existing Email Scenario', () => {
-  before(() => {
-    // Arrange: Create user manually in database
-    cy.task('db:seed', {
-      table: 'users',
-      data: {
-        email: 'existing@gmail.com',
-        username: 'existinguser',
-        password_hash: '$2b$10$hashed_password',
-        oauth_provider: null, // Manual registration
-        created_at: new Date().toISOString()
-      }
-    });
-  });
-
-  it('should link Google account to existing email', () => {
-    // Arrange: Visit register page
-    cy.visit('/register');
-
-    // Act: Sign up with Google using existing email
-    cy.get('[data-testid="google-signup-btn"]').click();
-
-    // Simulate OAuth callback with existing email
-    const oauthData = {
-      email: 'existing@gmail.com',
-      google_id: 'google_user_12345',
-      name: 'Existing User',
-      picture: 'https://example.com/photo.jpg'
-    };
-
-    cy.intercept('POST', '/api/auth/google/callback', (req) => {
-      req.reply({
-        statusCode: 200,
-        body: {
-          success: true,
-          message: 'Account linked successfully',
-          user: {
-            id: 1,
-            email: 'existing@gmail.com',
-            oauth_provider: 'google',
-            google_id: 'google_user_12345'
-          },
-          token: 'merged_auth_token_12345'
-        }
-      });
-    }).as('googleCallback');
-
-    cy.visit('/auth/google/callback?code=test_code&state=valid_state');
-    cy.wait('@googleCallback');
-
-    // Assert: Login successful (no duplicate error)
-    cy.url().should('eq', `${Cypress.config().baseUrl}/`);
-
-    // Assert: User logged in
-    cy.get('[data-testid="user-menu"]').should('be.visible');
-
-    // Assert: Database updated
-    cy.task('db:query', {
-      sql: 'SELECT * FROM users WHERE email = ?',
-      params: ['existing@gmail.com']
-    }).then((result) => {
-      expect(result.oauth_provider).to.eq('google');
-      expect(result.google_id).to.eq('google_user_12345');
-    });
-
-    // Screenshot
-    cy.screenshot('oauth-account-merge-success');
-  });
-});
-```
-
----
-
-## TEST CASE 4: Popup Blocked by Browser
-
-### Test ID: `ST_FE_REG_OAuth_04`
-**Chức năng**: [FE_RegisterPage-10] ST_FE_REG_OAuth_Popup_Blocked  
-**Mô tả**: Trình duyệt chặn Popup
-
-### Test Steps
-
-#### Automation Example
-```javascript
-describe('OAuth Popup Blocker Handling', () => {
-  it('should display instructions when popup is blocked', () => {
-    // Arrange: Visit register page
-    cy.visit('/register');
-
-    // Act: Simulate popup blocker
-    cy.window().then((win) => {
-      // Stub window.open to return null (blocked popup)
-      cy.stub(win, 'open').returns(null);
-    });
-
-    // Act: Click Google button
-    cy.get('[data-testid="google-signup-btn"]').click();
-    cy.wait(500);
-
-    // Assert: Error message displayed
-    cy.get('[data-testid="popup-blocked-message"]')
-      .should('be.visible')
-      .should('contain', 'Vui lòng cho phép mở popup');
-
-    // Assert: Instructions visible
-    cy.get('[data-testid="popup-instructions"]')
-      .should('be.visible')
-      .should('contain', 'Cài đặt trình duyệt');
-
-    // Assert: Application did not freeze
-    cy.get('[data-testid="register-form"]').should('be.visible');
-    cy.get('[data-testid="username-input"]').should('be.enabled');
-
-    // Screenshot
-    cy.screenshot('popup-blocked-warning');
-  });
-
-  it('should allow retry after enabling popup', () => {
-    // Arrange: Visit page
-    cy.visit('/register');
-
-    // First attempt: Blocked
-    cy.window().then((win) => {
-      cy.stub(win, 'open').returns(null);
-    });
-    cy.get('[data-testid="google-signup-btn"]').click();
-    cy.wait(500);
-
-    // Assert: Error shown
-    cy.get('[data-testid="popup-blocked-message"]').should('be.visible');
-
-    // Act: Click retry button
-    cy.get('[data-testid="retry-oauth-btn"]').click();
-
-    // Assert: Second attempt should work (in real scenario)
-    // In test, we just verify button is clickable
-    cy.get('[data-testid="google-signup-btn"]').should('be.visible');
-  });
-});
-```
-
----
-
-## TEST CASE 5: Network Failure During OAuth Redirect
-
-### Test ID: `ST_FE_REG_OAuth_05`
-**Chức năng**: [FE_RegisterPage-11] ST_FE_REG_OAuth_Network_Fail  
-**Mô tả**: Mất mạng khi đang Redirect
-
-### Test Steps
-
-#### Playwright Network Interception
-```javascript
-import { test, expect } from '@playwright/test';
-
-test('should handle network failure during OAuth redirect', async ({ page, context }) => {
-  // Arrange: Visit register page
-  await page.goto('/register');
-
-  // Act: Click Google sign-up
-  const [popup] = await Promise.all([
-    context.waitForEvent('page'),
-    page.click('[data-testid="google-signup-btn"]')
-  ]);
-
-  // Simulate successful Google login (popup closes)
-  await popup.close();
-
-  // Act: Simulate network disconnection during redirect
-  await context.setOffline(true);
-  await page.waitForTimeout(2000);
-
-  // Assert: Error page displayed
-  const errorText = await page.locator('body').textContent();
-  expect(errorText).toContain('kết nối');
-
-  // Act: Reconnect network
-  await context.setOffline(false);
-  await page.reload();
-
-  // Assert: Redirect to login page (safe fallback)
-  await page.waitForTimeout(1000);
-  expect(page.url()).toContain('/login');
-
-  // Assert: No data corruption
-  const errorMessage = await page.locator('[data-testid="auth-error"]').count();
-  expect(errorMessage).toBe(0);
-});
-```
-
-#### Cypress Network Simulation
-```javascript
-it('should recover from network failure gracefully', () => {
-  // Arrange
-  cy.visit('/register');
-
-  // Act: Simulate network error during OAuth callback
-  cy.intercept('POST', '/api/auth/google/callback', {
-    forceNetworkError: true
-  }).as('networkError');
-
-  // Simulate callback attempt
-  cy.visit('/auth/google/callback?code=test&state=valid', {
-    failOnStatusCode: false
-  });
-
-  // Assert: Error page or connection error
-  cy.contains('kết nối', { matchCase: false }).should('be.visible');
-
-  // Act: Restore network and refresh
-  cy.intercept('POST', '/api/auth/google/callback').as('restored');
-  cy.reload();
-
-  // Assert: Redirect to safe page (login)
-  cy.url().should('include', '/login');
-  
-  // Assert: Application functional
-  cy.get('[data-testid="login-form"]').should('be.visible');
-});
-```
-
----
-
-## TEST CASE 6: OAuth State Mismatch (Security)
-
-### Test ID: `ST_FE_REG_OAuth_06`
-**Chức năng**: [FE_RegisterPage-12] ST_FE_REG_OAuth_Invalid_State  
-**Mô tả**: Lỗi xác thực (State Mismatch)
-
-### Test Steps
-
-#### Security Test - CSRF Protection
-```javascript
-describe('OAuth Security - State Validation', () => {
-  it('should reject OAuth callback with invalid state token', () => {
-    // Arrange: Visit register page and get valid state
+describe('Register OAuth System Tests', () => {
+  it('[SYSTEM_REG_OAUTH_01] Google OAuth new user success', () => {
     cy.visit('/register');
     
-    let validState;
+    // Stub OAuth flow (Cypress can't handle real popups easily)
     cy.window().then((win) => {
-      // Capture state token generated during OAuth initiation
       cy.stub(win, 'open').callsFake((url) => {
-        const urlObj = new URL(url);
-        validState = urlObj.searchParams.get('state');
-        return win;
+        // Simulate successful OAuth callback
+        cy.visit('/auth/google/callback?code=mock_code&state=valid_state');
       });
     });
-
+    
     cy.get('[data-testid="google-signup-btn"]').click();
+    
+    // Assert redirected to home
+    cy.url().should('eq', Cypress.config().baseUrl + '/');
+    cy.get('[data-testid="user-menu"]').should('contain', 'newuser.test@gmail.com');
+  });
 
-    // Act: Simulate callback with WRONG state token
-    const invalidState = 'tampered_state_token';
-    cy.visit(`/auth/google/callback?code=valid_code&state=${invalidState}`, {
-      failOnStatusCode: false
-    });
-
-    // Assert: Error message displayed
-    cy.get('[data-testid="auth-error"]')
-      .should('be.visible')
-      .should('contain', 'Phiên hết hạn');
-
-    // Assert: User NOT logged in
+  it('[SYSTEM_REG_OAUTH_02] User cancels OAuth', () => {
+    cy.visit('/register');
+    
     cy.window().then((win) => {
-      const token = win.localStorage.getItem('auth_token');
-      expect(token).to.not.exist;
+      cy.stub(win, 'open').returns(null); // Simulate cancelled popup
     });
-
-    // Assert: Redirected to error page or login
-    cy.url().should('match', /\/(login|error)/);
-  });
-
-  it('should reject expired state token (30 minutes)', () => {
-    // Arrange: Generate state token
-    cy.visit('/register');
-
-    // Mock time advance (30 minutes)
-    cy.clock();
-    cy.tick(30 * 60 * 1000); // 30 minutes
-
-    // Act: Try to use old state token
-    cy.visit('/auth/google/callback?code=code&state=old_state', {
-      failOnStatusCode: false
-    });
-
-    // Assert: Session expired error
-    cy.contains('Phiên hết hạn', { matchCase: false }).should('be.visible');
-
-    // Assert: Instruction to reload
-    cy.contains('tải lại trang', { matchCase: false }).should('be.visible');
-  });
-
-  it('should require page reload after state expiry', () => {
-    // Arrange: Expired session
-    cy.visit('/register');
-    cy.clock();
-    cy.tick(31 * 60 * 1000); // 31 minutes (expired)
-
-    // Act: Click Google button
+    
     cy.get('[data-testid="google-signup-btn"]').click();
-
-    // Assert: Warning to reload
-    cy.get('[data-testid="session-warning"]')
-      .should('be.visible')
-      .should('contain', 'tải lại');
-
-    // Act: Reload page
-    cy.reload();
-
-    // Assert: New state token generated
-    cy.get('[data-testid="google-signup-btn"]').should('be.visible');
+    
+    // Should stay on register page
+    cy.url().should('include', '/register');
+    cy.contains('Đăng ký đã bị hủy').should('be.visible');
   });
+});
+```
+
+### Playwright Example
+```javascript
+import { test, expect } from '@playwright/test';
+
+test('[SYSTEM_REG_OAUTH_04] Popup blocked by browser', async ({ page, context }) => {
+  await page.goto('/register');
+  
+  // Block popups by not granting permission
+  await context.grantPermissions([]);
+  
+  // Click Google signup button
+  const [popup] = await Promise.all([
+    context.waitForEvent('page', { timeout: 1000 }).catch(() => null),
+    page.click('[data-testid="google-signup-btn"]')
+  ]);
+  
+  // Assert popup was blocked (null)
+  expect(popup).toBeNull();
+  
+  // Assert error message shown
+  await expect(page.locator('.error-message')).toContainText('Popup bị chặn');
+  await expect(page.locator('.instructions')).toContainText('Vui lòng cho phép popup');
+});
+
+test('[SYSTEM_REG_OAUTH_05] Network failure during redirect', async ({ page, context }) => {
+  await page.goto('/register');
+  
+  // Click Google signup
+  await page.click('[data-testid="google-signup-btn"]');
+  
+  // Simulate network failure during callback
+  await context.setOffline(true);
+  
+  // Try to navigate to callback (should fail)
+  await page.goto('/auth/google/callback?code=test&state=valid').catch(() => {});
+  
+  // Assert error page
+  await expect(page.locator('h1')).toContainText('Kết nối bị gián đoạn');
+  
+  // Reconnect
+  await context.setOffline(false);
+  await page.reload();
+  
+  // Should fallback to login
+  await expect(page).toHaveURL(/.*\/auth\/login/);
+});
+
+test('[SYSTEM_REG_OAUTH_06] OAuth state mismatch (CSRF)', async ({ page, request }) => {
+  // Directly call callback with invalid state
+  const response = await request.get('/auth/google/callback', {
+    params: {
+      code: 'valid_code',
+      state: 'hacker_state_invalid'
+    }
+  });
+  
+  // Backend should reject
+  expect(response.status()).toBe(403); // Forbidden
+  
+  // Visit the URL
+  await page.goto('/auth/google/callback?code=valid_code&state=hacker_state_invalid');
+  
+  // Assert error message
+  await expect(page.locator('.error-message')).toContainText('Xác thực thất bại');
+  
+  // Redirected back to register
+  await expect(page).toHaveURL(/.*\/register/);
 });
 ```
 
 ---
 
-## Cross-Browser Testing
+## Test Execution Commands
 
-### Test Matrix
+```bash
+# Run all register OAuth tests
+npx cypress run --spec "cypress/e2e/register.system.cy.js"
+
+# Run specific test
+npx playwright test --grep "SYSTEM_REG_OAUTH"
+
+# Security tests only
+npx playwright test --grep "SYSTEM_REG_OAUTH_06|SYSTEM_REG_OAUTH_07"
+
+# Cross-browser testing
+npx playwright test register.system.spec.ts --project=chromium --project=firefox --project=webkit
+```
+
+---
+
+## Cross-Browser Testing Matrix
 
 | Feature | Chrome | Firefox | Safari | Edge |
 |---------|--------|---------|--------|------|
 | Google OAuth Popup | ✅ | ✅ | ⚠️ Popup blocker | ✅ |
 | Account Merge | ✅ | ✅ | ✅ | ✅ |
 | Network Failure Handling | ✅ | ✅ | ✅ | ✅ |
-| State Validation | ✅ | ✅ | ✅ | ✅ |
+| State Validation (CSRF) | ✅ | ✅ | ✅ | ✅ |
 | Popup Cancel | ✅ | ✅ | ⚠️ Behavior differs | ✅ |
 
-### Browser-Specific Notes
-
-**Safari**:
+**Safari Notes:**
 - More aggressive popup blocker - users must manually allow
 - OAuth redirect timing may differ
-- localStorage behavior slightly different
-
-**Firefox**:
-- Enhanced Tracking Protection may block Google OAuth
-- Test with `privacy.trackingprotection.enabled=false`
+- localStorage behavior slightly different in private mode
 
 ---
 
 ## Performance Requirements
 
-### OAuth Flow Timing
-- Popup open: < 500ms
-- Google authentication: < 5 seconds (user interaction)
-- Callback processing: < 2 seconds
-- Auto-login redirect: < 1 second
-
-### Lighthouse Metrics
-```javascript
-test('OAuth flow should maintain good performance', async ({ page }) => {
-  const { lhr } = await lighthouse(page.url());
-  
-  expect(lhr.audits['interactive'].numericValue).toBeLessThan(3000);
-  expect(lhr.categories.performance.score).toBeGreaterThan(0.8);
-});
-```
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Popup open | < 500ms | User perception |
+| Google authentication | < 5s | User interaction time |
+| Callback processing | < 2s | Backend + DB insert |
+| Auto-login redirect | < 1s | Page navigation |
+| Total OAuth flow | < 10s | End-to-end |
 
 ---
 
 ## Security Checklist
 
 ### OAuth Implementation Requirements
-
 - ✅ **State Token Validation**: CSRF protection via state parameter
 - ✅ **HTTPS Only**: OAuth redirect URIs must use HTTPS (except localhost)
 - ✅ **Token Expiry**: State tokens expire after 30 minutes
@@ -575,127 +209,46 @@ test('OAuth flow should maintain good performance', async ({ page }) => {
 - ✅ **Account Linking**: Safely merge OAuth with existing manual accounts
 - ✅ **Error Handling**: No sensitive data in error messages
 
-### Test Validation
-```javascript
-describe('OAuth Security Validation', () => {
-  it('should use HTTPS for redirect URI in production', () => {
-    cy.visit('/register');
-    cy.window().then((win) => {
-      cy.stub(win, 'open').callsFake((url) => {
-        const urlObj = new URL(url);
-        const redirectUri = urlObj.searchParams.get('redirect_uri');
-        
-        if (Cypress.env('NODE_ENV') === 'production') {
-          expect(redirectUri).to.match(/^https:\/\//);
-        }
-        
-        return win;
-      });
-    });
-    cy.get('[data-testid="google-signup-btn"]').click();
-  });
+---
 
-  it('should not expose sensitive data in error messages', () => {
-    cy.visit('/auth/google/callback?error=access_denied', {
-      failOnStatusCode: false
-    });
+## Test Prioritization
 
-    cy.get('body').then(($body) => {
-      const text = $body.text().toLowerCase();
-      
-      // Should NOT contain sensitive info
-      expect(text).to.not.include('client_secret');
-      expect(text).to.not.include('api_key');
-      expect(text).to.not.include('token');
-    });
-  });
-});
-```
+### P0 (Critical) - Security & Core Flow
+- SYSTEM_REG_OAUTH_01 (core registration flow)
+- SYSTEM_REG_OAUTH_06 (CSRF protection)
+
+### P1 (High) - UX & Error Handling
+- SYSTEM_REG_OAUTH_02 (user cancellation)
+- SYSTEM_REG_OAUTH_04 (popup blocked)
+- SYSTEM_REG_OAUTH_05 (network failure)
+
+### P2 (Medium) - Advanced Features
+- SYSTEM_REG_OAUTH_03 (account merge)
+- SYSTEM_REG_OAUTH_07 (token expiry)
 
 ---
 
-## Execution Commands
+## Notes
 
-### Run All System Tests
-```bash
-# Cypress
-npm run cypress:open
-
-# Playwright
-npx playwright test register.system.spec.ts
-
-# Specific test
-npx playwright test --grep "OAuth"
-```
-
-### Generate Reports
-```bash
-# HTML report
-npx playwright show-report
-
-# Video recording
-npm run cypress:run --record
-```
+- **SYSTEM_REG_OAUTH_01**: Requires real Google OAuth test credentials (or mocking)
+- **SYSTEM_REG_OAUTH_03**: Test account linking carefully to avoid duplicate users
+- **SYSTEM_REG_OAUTH_06**: Critical security test - must reject invalid state tokens
+- For CI/CD environments, use OAuth stubbing/mocking to avoid real Google API calls
+- Popup automation: Headless browsers may block popups differently
+- Use Playwright's context.waitForEvent('page') to handle popup windows
+- Document popup blocker behavior for each browser
 
 ---
 
-## Test Data Requirements
+## Related Documents
 
-### Database Seed
-```sql
--- Existing user for merge test
-INSERT INTO users (email, username, password_hash, oauth_provider)
-VALUES ('existing@gmail.com', 'existinguser', '$2b$10$hash', NULL);
-
--- OAuth state tokens table
-CREATE TABLE oauth_states (
-  state_token VARCHAR(255) PRIMARY KEY,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  expires_at TIMESTAMP,
-  used BOOLEAN DEFAULT FALSE
-);
-```
-
-### Environment Variables
-```bash
-GOOGLE_CLIENT_ID=your_client_id
-GOOGLE_CLIENT_SECRET=your_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback
-SESSION_SECRET=your_session_secret
-```
+- [Unit Test Spec](../unit-test/register.unit.spec.ts)
+- [Google OAuth Documentation](https://developers.google.com/identity/protocols/oauth2)
+- [Backend OAuth Implementation](../../../Backend/src/modules/auth/strategies/google.strategy.ts)
 
 ---
 
-## Expected Results Summary
-
-| Test Case | Expected Outcome |
-|-----------|------------------|
-| **New User OAuth** | User created, auto-login, redirect to home |
-| **User Cancel** | Stay on register page, no crash, form functional |
-| **Existing Email** | Account linked, no duplicate error, successful login |
-| **Popup Blocked** | Error message, instructions, app functional |
-| **Network Failure** | Error page, safe redirect after F5, no corruption |
-| **Invalid State** | Reject callback, session expired message, no login |
-
----
-
-## Known Issues & Limitations
-
-### OAuth Testing Challenges
-1. **Google Test Accounts**: Requires real Google OAuth test credentials
-2. **Popup Automation**: Headless browsers may block popups differently
-3. **Network Simulation**: Not all E2E tools simulate network failures perfectly
-4. **Timing Issues**: OAuth redirects have variable timing
-
-### Workarounds
-- Use OAuth stubbing for CI/CD environments
-- Mock OAuth endpoints for predictable testing
-- Use Playwright's network interception for offline testing
-- Implement retry logic for flaky OAuth tests
-
----
-
-**Document Version**: 1.0  
-**Last Updated**: December 2025  
+**Document Version**: 2.0 (Table Format)  
+**Last Updated**: December 18, 2025  
 **Test Framework**: Cypress 13.x / Playwright 1.40.x  
-**Recommended Execution**: Pre-release regression + Manual exploratory testing for OAuth
+**Maintained By**: QA Automation Team

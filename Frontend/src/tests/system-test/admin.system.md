@@ -1,890 +1,162 @@
 # Admin Module - System Test Documentation
 
 ## Overview
-This document contains End-to-End (E2E) test scenarios for the Admin Module, covering authentication flows, user management, product/order management, dashboard analytics, and audit logging.
+This document contains End-to-End (E2E) test scenarios for the Admin Module in standardized table format.
+
+**Module:** Admin  
+**Test Type:** System Test / E2E  
+**Framework:** Cypress 13.x / Playwright 1.40.x  
+**Last Updated:** December 18, 2025
 
 ---
 
 ## Test Environment Setup
 
-### Admin Panel Configuration
+### Configuration
 ```javascript
-// Cypress configuration
-module.exports = {
-  e2e: {
-    baseUrl: 'http://localhost:3000',
-    viewportWidth: 1920,
-    viewportHeight: 1080,
-    defaultCommandTimeout: 10000,
-    video: true,
-    screenshotOnRunFailure: true
-  }
-}
+// Cypress/Playwright config
+baseUrl: 'http://localhost:3000'
+viewport: 1920x1080
+timeout: 10000ms
 ```
 
 ### Test Users
-```javascript
-const testUsers = {
-  admin: {
-    email: 'admin@example.com',
-    password: 'admin123',
-    role: 'admin'
-  },
-  regularUser: {
-    email: 'user@example.com',
-    password: 'user123',
-    role: 'user'
-  },
-  lockedAdmin: {
-    email: 'locked@example.com',
-    password: 'admin123',
-    role: 'admin',
-    is_active: false
-  }
-}
-```
+- **Admin**: admin@example.com / admin123 (role: admin)
+- **Regular User**: user@example.com / user123 (role: user)
+- **Locked Admin**: locked@example.com / admin123 (is_active: false)
 
 ---
 
-## TEST CASE 1: Admin Login Flow with Role-Based Access
+## System Test Cases
 
-### Test ID: `SYSTEM_ADMIN_AUTH_01`
-**Chức năng**: Complete authentication flow with role verification  
-**Related Test Cases**: [FE_ADMIN-1], [FE_ADMIN-2], [FE_ADMIN-5]
-
-### Test Steps
-
-#### Step 1: Admin Login Success
-```javascript
-describe('Admin Authentication Flow', () => {
-  it('should allow admin to login and access dashboard', () => {
-    // Arrange: Visit admin login page
-    cy.visit('/admin/login');
-
-    // Act: Enter admin credentials
-    cy.get('[data-testid="email-input"]').type('admin@example.com');
-    cy.get('[data-testid="password-input"]').type('admin123');
-    cy.get('[data-testid="login-button"]').click();
-
-    // Assert: Redirect to dashboard
-    cy.url().should('include', '/admin/dashboard');
-    
-    // Assert: Admin menu is visible
-    cy.get('[data-testid="admin-menu"]').should('be.visible');
-    cy.get('[data-testid="admin-menu"]').should('contain', 'Quản lý User');
-    cy.get('[data-testid="admin-menu"]').should('contain', 'Quản lý Sản phẩm');
-    
-    // Assert: Token stored in localStorage
-    cy.window().then((win) => {
-      const token = win.localStorage.getItem('admin_token');
-      expect(token).to.exist;
-    });
-
-    // Screenshot for verification
-    cy.screenshot('admin-dashboard-success');
-  });
-});
-```
-
-#### Step 2: Regular User Denied Access
-```javascript
-it('should deny regular user access to admin panel', () => {
-  // Arrange
-  cy.visit('/admin/login');
-
-  // Act: Try to login with regular user credentials
-  cy.get('[data-testid="email-input"]').type('user@example.com');
-  cy.get('[data-testid="password-input"]').type('user123');
-  cy.get('[data-testid="login-button"]').click();
-
-  // Assert: Error message displayed
-  cy.get('[data-testid="error-message"]')
-    .should('be.visible')
-    .should('contain', 'Bạn không có quyền truy cập');
-
-  // Assert: Still on login page (not redirected)
-  cy.url().should('include', '/admin/login');
-
-  // Assert: No token stored
-  cy.window().then((win) => {
-    const token = win.localStorage.getItem('admin_token');
-    expect(token).to.not.exist;
-  });
-});
-```
-
-#### Step 3: Locked Account Denied
-```javascript
-it('should deny access for locked admin account', () => {
-  // Arrange
-  cy.visit('/admin/login');
-
-  // Act: Try to login with locked account
-  cy.get('[data-testid="email-input"]').type('locked@example.com');
-  cy.get('[data-testid="password-input"]').type('admin123');
-  cy.get('[data-testid="login-button"]').click();
-
-  // Assert: Error message
-  cy.get('[data-testid="error-message"]')
-    .should('contain', 'Tài khoản bị khóa');
-
-  // Assert: Contact support link displayed
-  cy.get('[data-testid="support-link"]').should('be.visible');
-});
-```
+| Test ID | Test Case Name | Test Case Description | Test Case Procedure | Expected Output | Inter-test case Dependence | Test Data | Result | Test Date | Note |
+|---------|---------------|----------------------|---------------------|-----------------|---------------------------|-----------|--------|-----------|------|
+| SYSTEM_ADMIN_AUTH_01 | Admin Login Success | Kiểm tra đăng nhập thành công với quyền Admin | 1. Visit `/admin/login`<br>2. Enter email: `admin@example.com`<br>3. Enter password: `admin123`<br>4. Click "Login" button<br>5. Wait for redirect | 1. Redirect to `/admin/dashboard`<br>2. Admin menu visible with "Quản lý User", "Quản lý Sản phẩm"<br>3. Token stored in localStorage<br>4. User info displayed in header | None | Email: admin@example.com<br>Password: admin123<br>Role: admin | | | Related: [FE_ADMIN-1] |
+| SYSTEM_ADMIN_AUTH_02 | Regular User Denied Access | User thường không được truy cập Admin panel | 1. Visit `/admin/login`<br>2. Enter email: `user@example.com`<br>3. Enter password: `user123`<br>4. Click "Login" button | 1. Error message: "Bạn không có quyền truy cập"<br>2. Stay on `/admin/login` page<br>3. No token stored in localStorage<br>4. No redirect to dashboard | None | Email: user@example.com<br>Password: user123<br>Role: user | | | Related: [FE_ADMIN-2] |
+| SYSTEM_ADMIN_AUTH_03 | Locked Account Denied | Tài khoản Admin bị khóa không thể đăng nhập | 1. Visit `/admin/login`<br>2. Enter email: `locked@example.com`<br>3. Enter password: `admin123`<br>4. Click "Login" button | 1. Error message: "Tài khoản bị khóa"<br>2. Support link visible<br>3. No access granted<br>4. Stay on login page | None | Email: locked@example.com<br>is_active: false | | | Related: [FE_ADMIN-4] |
+| SYSTEM_ADMIN_AUTH_04 | Deep Link Redirect | Redirect về intended URL sau khi login | 1. Try to access `/admin/products` (not logged in)<br>2. Should redirect to `/admin/login`<br>3. Login with admin credentials<br>4. Check final URL | 1. After login, redirect to `/admin/products` (NOT dashboard)<br>2. Products table visible<br>3. Intended URL preserved | SYSTEM_ADMIN_AUTH_01 | Email: admin@example.com<br>Intended URL: /admin/products | | | Related: [FE_ADMIN-5] |
+| SYSTEM_ADMIN_USERS_01 | View Paginated User List | Xem danh sách user với phân trang | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Check table displays 10 users<br>4. Click "Next" button<br>5. Verify page 2 loads | 1. Users table visible with 10 rows<br>2. Pagination info: "Trang 1 / Tổng: 50"<br>3. Page 2 shows different 10 users<br>4. No duplicate users between pages | SYSTEM_ADMIN_AUTH_01 | Total users: 50<br>Per page: 10 | | | Related: [FE_ADMIN-6], [FE_ADMIN-7] |
+| SYSTEM_ADMIN_USERS_02 | Search User by Name | Tìm kiếm user theo tên | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Enter "Nguyen Van A" in search box<br>4. Click "Search" button | 1. Results contain only users with "Nguyen Van A" in name<br>2. Other users filtered out<br>3. Search results accurate | SYSTEM_ADMIN_AUTH_01 | Keyword: "Nguyen Van A" | | | Related: [FE_ADMIN-8] |
+| SYSTEM_ADMIN_USERS_03 | Search User by Email | Tìm kiếm user theo email | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Enter "test@example.com" in search box<br>4. Click "Search" | 1. Exactly 1 user returned<br>2. Email matches search term<br>3. Unique result | SYSTEM_ADMIN_AUTH_01 | Email: test@example.com | | | Related: [FE_ADMIN-9] |
+| SYSTEM_ADMIN_USERS_04 | Filter Active Users | Lọc user đang hoạt động | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Select "Active" from status filter<br>4. Verify results | 1. All users have status badge "Active"<br>2. is_active = true for all<br>3. No banned users shown | SYSTEM_ADMIN_AUTH_01 | Status: Active | | | Related: [FE_ADMIN-10] |
+| SYSTEM_ADMIN_USERS_05 | Filter Banned Users | Lọc user bị khóa | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Select "Banned" from status filter<br>4. Check all results | 1. All users have status badge "Banned"<br>2. is_active = false for all<br>3. No active users shown | SYSTEM_ADMIN_AUTH_01 | Status: Banned | | | Related: [FE_ADMIN-11] |
+| SYSTEM_ADMIN_USERS_06 | Ban User Account | Khóa tài khoản user | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Find user "user1@example.com"<br>4. Click "Ban" button<br>5. Confirm modal<br>6. Wait for update | 1. Status changes to "Banned"<br>2. Button changes to "Unban"<br>3. User cannot login anymore<br>4. Success toast message | SYSTEM_ADMIN_AUTH_01 | User: user1@example.com<br>Action: Ban | | | Related: [FE_ADMIN-13] |
+| SYSTEM_ADMIN_USERS_07 | Unban User Account | Mở khóa tài khoản user | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Find banned user<br>4. Click "Unban" button<br>5. Confirm action | 1. Status changes to "Active"<br>2. Button changes to "Ban"<br>3. User can login again<br>4. Success message displayed | SYSTEM_ADMIN_USERS_06 | User: user1@example.com<br>Action: Unban | | | Related: [FE_ADMIN-14] |
+| SYSTEM_ADMIN_USERS_08 | Upgrade User Role | Nâng quyền user lên admin | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Click "Edit" on user1<br>4. Change role to "Admin"<br>5. Save changes | 1. Role badge shows "Admin"<br>2. Success message displayed<br>3. User has admin privileges<br>4. Database updated | SYSTEM_ADMIN_AUTH_01 | User: user1@example.com<br>Old role: user<br>New role: admin | | | Related: [FE_ADMIN-12] |
+| SYSTEM_ADMIN_PRODUCTS_01 | Create Product Valid | Tạo sản phẩm mới thành công | 1. Login as admin<br>2. Visit `/admin/products`<br>3. Click "Add Product"<br>4. Fill form: name, price, description, image, category<br>5. Click "Save" | 1. Product appears in list<br>2. Status 201 Created<br>3. Success toast message<br>4. Product at top of list | SYSTEM_ADMIN_AUTH_01 | Name: New Product<br>Price: 300000<br>Category: 1 | | | Related: [FE_ADMIN-15] |
+| SYSTEM_ADMIN_PRODUCTS_02 | Validation Empty Name | Bỏ trống tên sản phẩm | 1. Login as admin<br>2. Click "Add Product"<br>3. Leave name field empty<br>4. Fill other fields<br>5. Click "Save" | 1. Error message: "Tên sản phẩm là bắt buộc"<br>2. No API call<br>3. Stay on form<br>4. Form not submitted | SYSTEM_ADMIN_AUTH_01 | Name: (empty) | | | Related: [FE_ADMIN-16] |
+| SYSTEM_ADMIN_PRODUCTS_03 | Validation Negative Price | Giá sản phẩm âm | 1. Login as admin<br>2. Click "Add Product"<br>3. Enter price: -1000<br>4. Fill other fields<br>5. Click "Save" | 1. Error: "Giá phải lớn hơn 0"<br>2. No API call<br>3. Form validation blocks submission | SYSTEM_ADMIN_AUTH_01 | Price: -1000 | | | Related: [FE_ADMIN-17] |
+| SYSTEM_ADMIN_PRODUCTS_04 | Invalid Image Format | Upload file không phải ảnh | 1. Login as admin<br>2. Click "Add Product"<br>3. Upload virus.exe file<br>4. Attempt to save | 1. Error: "Chỉ chấp nhận file ảnh (jpg, png)"<br>2. File rejected<br>3. No upload occurs | SYSTEM_ADMIN_AUTH_01 | File: virus.exe<br>Type: executable | | | Related: [FE_ADMIN-18] |
+| SYSTEM_ADMIN_PRODUCTS_05 | Large Image File | Ảnh quá dung lượng | 1. Login as admin<br>2. Click "Add Product"<br>3. Upload 6MB image (limit: 2MB)<br>4. Try to save | 1. Error: "Dung lượng ảnh quá lớn"<br>2. File not uploaded<br>3. Validation blocks action | SYSTEM_ADMIN_AUTH_01 | File size: 6MB<br>Limit: 2MB | | | Related: [FE_ADMIN-19] |
+| SYSTEM_ADMIN_PRODUCTS_06 | Update Product | Cập nhật thông tin sản phẩm | 1. Login as admin<br>2. Visit `/admin/products`<br>3. Click "Edit" on Product A<br>4. Change price: 100k → 200k<br>5. Click "Update" | 1. Price updated to 200k<br>2. API PUT success<br>3. List refreshes<br>4. New price displayed | SYSTEM_ADMIN_AUTH_01 | Product: Product A<br>Old price: 100000<br>New price: 200000 | | | Related: [FE_ADMIN-20] |
+| SYSTEM_ADMIN_PRODUCTS_07 | Delete Product Soft | Xóa sản phẩm (Soft Delete) | 1. Login as admin<br>2. Find Product B (not in orders)<br>3. Click "Delete"<br>4. Confirm modal | 1. Product disappears from list<br>2. DB: is_deleted = true<br>3. Success message<br>4. Not hard deleted | SYSTEM_ADMIN_AUTH_01 | Product: Product B<br>In orders: No | | | Related: [FE_ADMIN-22] |
+| SYSTEM_ADMIN_PRODUCTS_08 | Delete Product in Orders | Không thể xóa sản phẩm đang trong đơn hàng | 1. Login as admin<br>2. Find Product C (in pending order)<br>3. Click "Delete"<br>4. Confirm | 1. Error: "Không thể xóa sản phẩm đang được xử lý"<br>2. Action blocked<br>3. Product still in list | SYSTEM_ADMIN_AUTH_01 | Product: Product C<br>In orders: Yes (pending) | | | Related: [FE_ADMIN-23] |
+| SYSTEM_ADMIN_ORDERS_01 | View All Orders | Xem danh sách đơn hàng | 1. Login as admin<br>2. Visit `/admin/orders`<br>3. Check table displays orders | 1. Orders table visible<br>2. Columns: Order ID, Customer, Total, Status<br>3. All orders listed | SYSTEM_ADMIN_AUTH_01 | Orders: Multiple | | | Related: [FE_ADMIN-24] |
+| SYSTEM_ADMIN_ORDERS_02 | Update Order Status | Cập nhật trạng thái đơn hàng | 1. Login as admin<br>2. Find order with status "Pending"<br>3. Change to "Shipping"<br>4. Confirm | 1. Status updated to "Shipping"<br>2. Success message<br>3. Email sent to customer (optional) | SYSTEM_ADMIN_AUTH_01 | Order: #1<br>Old: Pending<br>New: Shipping | | | Related: [FE_ADMIN-25] |
+| SYSTEM_ADMIN_ORDERS_03 | Invalid Status Reversal | Không thể chuyển ngược trạng thái | 1. Login as admin<br>2. Find order status "Delivered"<br>3. Try to change to "Pending"<br>4. Submit | 1. Error: "Không thể chuyển ngược trạng thái"<br>2. Action blocked<br>3. Status unchanged | SYSTEM_ADMIN_AUTH_01 | Order: #2<br>Current: Delivered<br>Attempt: Pending | | | Related: [FE_ADMIN-26] |
+| SYSTEM_ADMIN_ORDERS_04 | View Order Details | Xem chi tiết đơn hàng | 1. Login as admin<br>2. Click on order ID<br>3. Check detail page | 1. Order items list visible<br>2. Shipping address shown<br>3. Payment history displayed<br>4. All info complete | SYSTEM_ADMIN_AUTH_01 | Order: #1 | | | Related: [FE_ADMIN-27] |
+| SYSTEM_ADMIN_STATS_01 | View Revenue Stats | Thống kê doanh thu | 1. Login as admin<br>2. Visit `/admin/dashboard`<br>3. Check revenue widget | 1. Revenue number displayed<br>2. Chart/graph visible<br>3. Matches completed orders total<br>4. Period shown (e.g., "Tháng này") | SYSTEM_ADMIN_AUTH_01 | Period: Current month<br>Completed orders: 2 | | | Related: [FE_ADMIN-28] |
+| SYSTEM_ADMIN_STATS_02 | View User Count Stats | Thống kê số lượng user | 1. Login as admin<br>2. Check dashboard<br>3. Find user count widget | 1. Total users: 50<br>2. Growth indicator shown<br>3. Accurate count | SYSTEM_ADMIN_AUTH_01 | Total users: 50 | | | Related: [FE_ADMIN-29] |
+| SYSTEM_ADMIN_STATS_03 | Filter Stats by Date Range | Lọc thống kê theo ngày | 1. Login as admin<br>2. Select start date: 2023-12-01<br>3. Select end date: 2023-12-15<br>4. Click "Apply" | 1. Chart updates to show only selected range<br>2. Date range label displayed<br>3. Accurate data for period | SYSTEM_ADMIN_AUTH_01 | Start: 2023-12-01<br>End: 2023-12-15 | | | Related: [FE_ADMIN-30] |
+| SYSTEM_ADMIN_EXPORT_01 | Export Users CSV | Xuất báo cáo user ra CSV | 1. Login as admin<br>2. Visit `/admin/users`<br>3. Click "Export" button<br>4. Wait for download | 1. CSV file downloads<br>2. File contains user data<br>3. Headers: id, username, email<br>4. Data matches web display | SYSTEM_ADMIN_AUTH_01 | Format: CSV<br>Data: All users | | | Related: [FE_ADMIN-31] |
+| SYSTEM_ADMIN_IMPORT_01 | Import Products Valid | Nhập dữ liệu từ Excel | 1. Login as admin<br>2. Visit `/admin/products`<br>3. Click "Import"<br>4. Upload valid products.csv<br>5. Click "Upload" | 1. Success: "Import thành công 2 sản phẩm"<br>2. New products in list<br>3. Database updated | SYSTEM_ADMIN_AUTH_01 | File: products.csv<br>Rows: 2<br>Format: Valid | | | Related: [FE_ADMIN-32] |
+| SYSTEM_ADMIN_IMPORT_02 | Import Invalid Format | Import file sai định dạng | 1. Login as admin<br>2. Click "Import"<br>3. Upload invalid.csv (missing columns)<br>4. Attempt upload | 1. Error: "Lỗi định dạng tại dòng 1: Thiếu cột price"<br>2. No data imported<br>3. Error details shown | SYSTEM_ADMIN_AUTH_01 | File: invalid.csv<br>Error: Missing column | | | Related: [FE_ADMIN-33] |
+| SYSTEM_ADMIN_AUDIT_01 | Audit Log Login | Ghi log đăng nhập Admin | 1. Admin A logs in<br>2. Visit `/admin/audit-logs`<br>3. Check logs | 1. Log entry: "Admin A logged in at [Time]"<br>2. Timestamp recorded<br>3. Action tracked | None | Admin: admin<br>Action: Login | | | Related: [FE_ADMIN-34] |
+| SYSTEM_ADMIN_AUDIT_02 | Audit Log Delete Action | Ghi log hành động xóa | 1. Login as admin<br>2. Delete user #5<br>3. Check audit logs | 1. Log: "Admin [Name] deleted User [ID]"<br>2. Target ID recorded<br>3. Timestamp present<br>4. Sensitive action tracked | SYSTEM_ADMIN_AUTH_01 | Admin: admin<br>Action: Delete User<br>Target: User #5 | | | Related: [FE_ADMIN-35] |
 
 ---
 
-## TEST CASE 2: Deep Link Redirect After Login
+## Automation Script Examples
 
-### Test ID: `SYSTEM_ADMIN_AUTH_02`
-**Chức năng**: Redirect to intended URL after authentication  
-**Related Test Cases**: [FE_ADMIN-5]
-
-### Test Steps
-
-#### Automation Example
+### Cypress Example
 ```javascript
-describe('Deep Link Redirect', () => {
-  it('should redirect to intended page after login', () => {
-    // Arrange: Try to access /admin/products without being logged in
-    cy.visit('/admin/products');
-
-    // Assert: Redirected to login page
-    cy.url().should('include', '/admin/login');
-
-    // Act: Login
-    cy.get('[data-testid="email-input"]').type('admin@example.com');
-    cy.get('[data-testid="password-input"]').type('admin123');
-    cy.get('[data-testid="login-button"]').click();
-
-    // Assert: Redirected back to /admin/products (NOT dashboard)
-    cy.url().should('include', '/admin/products');
-    cy.url().should('not.include', '/admin/dashboard');
-
-    // Assert: Products page loaded
-    cy.get('[data-testid="products-table"]').should('be.visible');
-  });
-
-  it('should redirect to dashboard if no intended URL', () => {
-    // Arrange: Directly access login page
+describe('Admin System Tests', () => {
+  it('[SYSTEM_ADMIN_AUTH_01] Admin login success', () => {
     cy.visit('/admin/login');
-
-    // Act: Login
     cy.get('[data-testid="email-input"]').type('admin@example.com');
     cy.get('[data-testid="password-input"]').type('admin123');
     cy.get('[data-testid="login-button"]').click();
-
-    // Assert: Default to dashboard
     cy.url().should('include', '/admin/dashboard');
   });
-});
-```
 
----
-
-## TEST CASE 3: User Management Complete Flow
-
-### Test ID: `SYSTEM_ADMIN_USERS_01`
-**Chức năng**: Full user management workflow  
-**Related Test Cases**: [FE_ADMIN-6] to [FE_ADMIN-14]
-
-### Test Steps
-
-#### Step 1: View and Paginate Users
-```javascript
-describe('User Management Flow', () => {
-  beforeEach(() => {
-    // Login as admin
+  it('[SYSTEM_ADMIN_USERS_01] View paginated users', () => {
     cy.login('admin@example.com', 'admin123');
     cy.visit('/admin/users');
-  });
-
-  it('should display paginated user list', () => {
-    // Assert: Table visible
-    cy.get('[data-testid="users-table"]').should('be.visible');
-    
-    // Assert: Default 10 users per page
     cy.get('[data-testid="user-row"]').should('have.length', 10);
-
-    // Assert: Pagination info
-    cy.get('[data-testid="pagination-info"]')
-      .should('contain', 'Trang 1')
-      .should('contain', 'Tổng: 50');
-
-    // Act: Go to next page
     cy.get('[data-testid="next-page-btn"]').click();
-    cy.wait(500);
-
-    // Assert: Page 2 loaded
     cy.url().should('include', 'page=2');
-    cy.get('[data-testid="user-row"]').should('have.length', 10);
-
-    // Assert: Different users (no duplicates)
-    cy.get('[data-testid="user-row"]').first()
-      .invoke('attr', 'data-user-id')
-      .then((page2FirstId) => {
-        cy.get('[data-testid="prev-page-btn"]').click();
-        cy.wait(500);
-        
-        cy.get('[data-testid="user-row"]').first()
-          .invoke('attr', 'data-user-id')
-          .should('not.equal', page2FirstId);
-      });
   });
 });
 ```
 
-#### Step 2: Search and Filter Users
+### Playwright Example
 ```javascript
-it('should search users by name and email', () => {
-  // Act: Search by name
-  cy.get('[data-testid="search-input"]').type('Nguyen Van A');
-  cy.get('[data-testid="search-button"]').click();
-  cy.wait(500);
+import { test, expect } from '@playwright/test';
 
-  // Assert: Results contain search term
-  cy.get('[data-testid="user-row"]').each(($row) => {
-    cy.wrap($row).should('contain', 'Nguyen Van A');
-  });
-
-  // Act: Clear and search by email
-  cy.get('[data-testid="search-input"]').clear().type('test@example.com');
-  cy.get('[data-testid="search-button"]').click();
-  cy.wait(500);
-
-  // Assert: Exact match
-  cy.get('[data-testid="user-row"]').should('have.length', 1);
-  cy.get('[data-testid="user-row"]').should('contain', 'test@example.com');
-});
-
-it('should filter users by status', () => {
-  // Act: Filter by Active
-  cy.get('[data-testid="status-filter"]').select('Active');
-  cy.wait(500);
-
-  // Assert: All users are active
-  cy.get('[data-testid="user-row"]').each(($row) => {
-    cy.wrap($row).find('[data-testid="status-badge"]')
-      .should('have.class', 'badge-success')
-      .should('contain', 'Active');
-  });
-
-  // Act: Filter by Banned
-  cy.get('[data-testid="status-filter"]').select('Banned');
-  cy.wait(500);
-
-  // Assert: All users are banned
-  cy.get('[data-testid="user-row"]').each(($row) => {
-    cy.wrap($row).find('[data-testid="status-badge"]')
-      .should('have.class', 'badge-danger')
-      .should('contain', 'Banned');
-  });
-});
-```
-
-#### Step 3: Ban and Unban User
-```javascript
-it('should ban and unban user account', () => {
-  // Arrange: Find active user
-  cy.get('[data-testid="user-row"]')
-    .filter(':contains("user1@example.com")')
-    .as('targetUser');
-
-  // Act: Ban user
-  cy.get('@targetUser').find('[data-testid="ban-button"]').click();
+test('[SYSTEM_ADMIN_AUTH_04] Deep link redirect', async ({ page }) => {
+  await page.goto('/admin/products');
+  await expect(page).toHaveURL(/.*admin\/login/);
   
-  // Confirm modal
-  cy.get('[data-testid="confirm-modal"]').should('be.visible');
-  cy.get('[data-testid="confirm-yes"]').click();
-  cy.wait(1000);
-
-  // Assert: Status changed to Banned
-  cy.get('@targetUser').find('[data-testid="status-badge"]')
-    .should('contain', 'Banned');
-
-  // Assert: Ban button changed to Unban
-  cy.get('@targetUser').find('[data-testid="unban-button"]')
-    .should('be.visible');
-
-  // Act: Unban user
-  cy.get('@targetUser').find('[data-testid="unban-button"]').click();
-  cy.get('[data-testid="confirm-yes"]').click();
-  cy.wait(1000);
-
-  // Assert: Status back to Active
-  cy.get('@targetUser').find('[data-testid="status-badge"]')
-    .should('contain', 'Active');
-});
-```
-
-#### Step 4: Upgrade User Role
-```javascript
-it('should upgrade user role to admin', () => {
-  // Arrange
-  cy.get('[data-testid="user-row"]')
-    .filter(':contains("user1@example.com")')
-    .as('targetUser');
-
-  // Act: Open edit modal
-  cy.get('@targetUser').find('[data-testid="edit-button"]').click();
-  cy.get('[data-testid="edit-modal"]').should('be.visible');
-
-  // Act: Change role
-  cy.get('[data-testid="role-select"]').select('Admin');
-  cy.get('[data-testid="save-button"]').click();
-  cy.wait(1000);
-
-  // Assert: Role updated
-  cy.get('@targetUser').find('[data-testid="role-badge"]')
-    .should('contain', 'Admin');
-
-  // Assert: Success message
-  cy.get('[data-testid="toast-message"]')
-    .should('contain', 'Cập nhật quyền thành công');
+  await page.fill('[data-testid="email-input"]', 'admin@example.com');
+  await page.fill('[data-testid="password-input"]', 'admin123');
+  await page.click('[data-testid="login-button"]');
+  
+  await expect(page).toHaveURL(/.*admin\/products/);
 });
 ```
 
 ---
 
-## TEST CASE 4: Product Management with Image Upload
+## Test Execution Commands
 
-### Test ID: `SYSTEM_ADMIN_PRODUCTS_01`
-**Chức năng**: Create and manage products with validation  
-**Related Test Cases**: [FE_ADMIN-15] to [FE_ADMIN-23]
+```bash
+# Run all admin system tests (Cypress)
+npx cypress run --spec "cypress/e2e/admin.system.cy.js"
 
-### Test Steps
+# Run specific test (Playwright)
+npx playwright test --grep "SYSTEM_ADMIN_AUTH"
 
-#### Step 1: Create Product Successfully
-```javascript
-describe('Product Management', () => {
-  beforeEach(() => {
-    cy.login('admin@example.com', 'admin123');
-    cy.visit('/admin/products');
-  });
+# Generate HTML report
+npx playwright show-report
 
-  it('should create new product with valid data', () => {
-    // Act: Click Add Product
-    cy.get('[data-testid="add-product-btn"]').click();
-    cy.get('[data-testid="product-modal"]').should('be.visible');
-
-    // Fill form
-    cy.get('[data-testid="name-input"]').type('New Product');
-    cy.get('[data-testid="price-input"]').type('300000');
-    cy.get('[data-testid="description-input"]').type('Product description');
-    cy.get('[data-testid="category-select"]').select('1');
-
-    // Upload image
-    cy.get('[data-testid="image-input"]').attachFile('product.jpg');
-
-    // Submit
-    cy.get('[data-testid="submit-button"]').click();
-    cy.wait(1000);
-
-    // Assert: Product appears in list
-    cy.get('[data-testid="products-table"]')
-      .should('contain', 'New Product');
-
-    // Assert: Success message
-    cy.get('[data-testid="toast-message"]')
-      .should('contain', 'Tạo sản phẩm thành công');
-  });
-});
-```
-
-#### Step 2: Validation Errors
-```javascript
-it('should show validation errors for invalid input', () => {
-  // Act: Open form
-  cy.get('[data-testid="add-product-btn"]').click();
-
-  // Act: Submit without filling (empty name)
-  cy.get('[data-testid="submit-button"]').click();
-
-  // Assert: Validation error
-  cy.get('[data-testid="name-error"]')
-    .should('be.visible')
-    .should('contain', 'Tên sản phẩm là bắt buộc');
-
-  // Act: Enter negative price
-  cy.get('[data-testid="name-input"]').type('Product');
-  cy.get('[data-testid="price-input"]').type('-1000');
-  cy.get('[data-testid="submit-button"]').click();
-
-  // Assert: Price error
-  cy.get('[data-testid="price-error"]')
-    .should('contain', 'Giá phải lớn hơn 0');
-});
-
-it('should reject invalid image format', () => {
-  // Act: Open form
-  cy.get('[data-testid="add-product-btn"]').click();
-
-  // Act: Upload .exe file
-  cy.get('[data-testid="image-input"]').attachFile('virus.exe');
-
-  // Assert: File type error
-  cy.get('[data-testid="image-error"]')
-    .should('be.visible')
-    .should('contain', 'Chỉ chấp nhận file ảnh');
-});
-```
-
-#### Step 3: Delete Product with Order Check
-```javascript
-it('should prevent deleting product in pending orders', () => {
-  // Arrange: Product C is in order 1 (pending)
-  cy.get('[data-testid="product-row"]')
-    .filter(':contains("Product C")')
-    .as('productInOrder');
-
-  // Act: Try to delete
-  cy.get('@productInOrder').find('[data-testid="delete-button"]').click();
-  cy.get('[data-testid="confirm-yes"]').click();
-  cy.wait(1000);
-
-  // Assert: Error message
-  cy.get('[data-testid="error-message"]')
-    .should('contain', 'Không thể xóa sản phẩm đang được xử lý');
-
-  // Assert: Product still in list
-  cy.get('[data-testid="products-table"]')
-    .should('contain', 'Product C');
-});
-
-it('should soft delete product not in orders', () => {
-  // Arrange: Product B not in any order
-  cy.get('[data-testid="product-row"]')
-    .filter(':contains("Product B")')
-    .as('productSafe');
-
-  // Act: Delete
-  cy.get('@productSafe').find('[data-testid="delete-button"]').click();
-  cy.get('[data-testid="confirm-yes"]').click();
-  cy.wait(1000);
-
-  // Assert: Product removed from list
-  cy.get('[data-testid="products-table"]')
-    .should('not.contain', 'Product B');
-
-  // Assert: Success message
-  cy.get('[data-testid="toast-message"]')
-    .should('contain', 'Đã xóa sản phẩm');
-});
+# Cross-browser testing
+npx playwright test --project=chromium --project=firefox --project=webkit
 ```
 
 ---
 
-## TEST CASE 5: Order Status Flow
-
-### Test ID: `SYSTEM_ADMIN_ORDERS_01`
-**Chức năng**: Complete order status lifecycle  
-**Related Test Cases**: [FE_ADMIN-24] to [FE_ADMIN-27]
-
-### Test Steps
-
-#### Automation Example
-```javascript
-describe('Order Status Flow', () => {
-  beforeEach(() => {
-    cy.login('admin@example.com', 'admin123');
-    cy.visit('/admin/orders');
-  });
-
-  it('should update order status through valid lifecycle', () => {
-    // Arrange: Find pending order
-    cy.get('[data-testid="order-row"]')
-      .filter(':contains("Pending")')
-      .first()
-      .as('targetOrder');
-
-    // Step 1: Pending -> Shipping
-    cy.get('@targetOrder').find('[data-testid="status-select"]').select('Shipping');
-    cy.get('[data-testid="confirm-yes"]').click();
-    cy.wait(1000);
-
-    // Assert: Status updated
-    cy.get('@targetOrder').find('[data-testid="status-badge"]')
-      .should('contain', 'Shipping');
-
-    // Step 2: Shipping -> Delivered
-    cy.get('@targetOrder').find('[data-testid="status-select"]').select('Delivered');
-    cy.get('[data-testid="confirm-yes"]').click();
-    cy.wait(1000);
-
-    // Assert: Status updated
-    cy.get('@targetOrder').find('[data-testid="status-badge"]')
-      .should('contain', 'Delivered');
-
-    // Screenshot final state
-    cy.screenshot('order-status-delivered');
-  });
-
-  it('should prevent invalid status reversal', () => {
-    // Arrange: Find delivered order
-    cy.get('[data-testid="order-row"]')
-      .filter(':contains("Delivered")')
-      .first()
-      .as('deliveredOrder');
-
-    // Act: Try to change to Pending
-    cy.get('@deliveredOrder').find('[data-testid="status-select"]').select('Pending');
-    cy.get('[data-testid="confirm-yes"]').click();
-    cy.wait(1000);
-
-    // Assert: Error message
-    cy.get('[data-testid="error-message"]')
-      .should('contain', 'Không thể chuyển ngược trạng thái');
-
-    // Assert: Status unchanged
-    cy.get('@deliveredOrder').find('[data-testid="status-badge"]')
-      .should('contain', 'Delivered');
-  });
-
-  it('should view order details', () => {
-    // Act: Click on order ID
-    cy.get('[data-testid="order-row"]').first()
-      .find('[data-testid="order-id"]')
-      .click();
-
-    // Assert: Detail page loaded
-    cy.url().should('include', '/admin/orders/');
-
-    // Assert: Order information displayed
-    cy.get('[data-testid="customer-name"]').should('be.visible');
-    cy.get('[data-testid="total-price"]').should('be.visible');
-    cy.get('[data-testid="order-items"]').should('be.visible');
-
-    // Assert: Items table
-    cy.get('[data-testid="item-row"]').should('have.length.greaterThan', 0);
-  });
-});
-```
-
----
-
-## TEST CASE 6: Dashboard Statistics
-
-### Test ID: `SYSTEM_ADMIN_STATS_01`
-**Chức năng**: View and filter dashboard analytics  
-**Related Test Cases**: [FE_ADMIN-28] to [FE_ADMIN-30]
-
-### Test Steps
-
-```javascript
-describe('Dashboard Statistics', () => {
-  beforeEach(() => {
-    cy.login('admin@example.com', 'admin123');
-    cy.visit('/admin/dashboard');
-  });
-
-  it('should display revenue statistics', () => {
-    // Assert: Revenue widget visible
-    cy.get('[data-testid="revenue-widget"]').should('be.visible');
-    
-    // Assert: Revenue number displayed
-    cy.get('[data-testid="revenue-amount"]')
-      .invoke('text')
-      .then((text) => {
-        const revenue = parseInt(text.replace(/[^0-9]/g, ''));
-        expect(revenue).to.be.greaterThan(0);
-      });
-
-    // Assert: Chart displayed
-    cy.get('[data-testid="revenue-chart"]').should('be.visible');
-  });
-
-  it('should display user count statistics', () => {
-    // Assert: User count widget
-    cy.get('[data-testid="users-widget"]').should('be.visible');
-    cy.get('[data-testid="users-count"]').should('contain', '50');
-  });
-
-  it('should filter stats by date range', () => {
-    // Act: Select date range
-    cy.get('[data-testid="start-date"]').type('2023-12-01');
-    cy.get('[data-testid="end-date"]').type('2023-12-15');
-    cy.get('[data-testid="apply-filter"]').click();
-    cy.wait(1000);
-
-    // Assert: Chart updated
-    cy.get('[data-testid="revenue-chart"]').should('be.visible');
-    
-    // Assert: Date range displayed
-    cy.get('[data-testid="date-range-label"]')
-      .should('contain', '2023-12-01')
-      .should('contain', '2023-12-15');
-  });
-});
-```
-
----
-
-## TEST CASE 7: Export/Import Workflow
-
-### Test ID: `SYSTEM_ADMIN_IMPORT_01`
-**Chức năng**: CSV export and import functionality  
-**Related Test Cases**: [FE_ADMIN-31] to [FE_ADMIN-33]
-
-### Test Steps
-
-```javascript
-describe('Export/Import Workflow', () => {
-  beforeEach(() => {
-    cy.login('admin@example.com', 'admin123');
-  });
-
-  it('should export users to CSV', () => {
-    // Arrange
-    cy.visit('/admin/users');
-
-    // Act: Click export button
-    cy.get('[data-testid="export-button"]').click();
-    cy.wait(2000);
-
-    // Assert: File downloaded
-    const downloadsFolder = Cypress.config('downloadsFolder');
-    cy.readFile(`${downloadsFolder}/users.csv`).should('exist');
-    
-    // Assert: CSV contains data
-    cy.readFile(`${downloadsFolder}/users.csv`).then((content) => {
-      expect(content).to.include('id,username,email');
-      expect(content).to.include('admin@example.com');
-    });
-  });
-
-  it('should import products from valid CSV', () => {
-    // Arrange
-    cy.visit('/admin/products');
-
-    // Act: Upload CSV file
-    cy.get('[data-testid="import-button"]').click();
-    cy.get('[data-testid="file-input"]').attachFile('products.csv');
-    cy.get('[data-testid="upload-button"]').click();
-    cy.wait(2000);
-
-    // Assert: Success message
-    cy.get('[data-testid="toast-message"]')
-      .should('contain', 'Import thành công');
-
-    // Assert: New products in table
-    cy.get('[data-testid="products-table"]')
-      .should('contain', 'Product X')
-      .should('contain', 'Product Y');
-  });
-
-  it('should show errors for invalid CSV format', () => {
-    // Arrange
-    cy.visit('/admin/products');
-
-    // Act: Upload invalid CSV
-    cy.get('[data-testid="import-button"]').click();
-    cy.get('[data-testid="file-input"]').attachFile('invalid.csv');
-    cy.get('[data-testid="upload-button"]').click();
-    cy.wait(2000);
-
-    // Assert: Error message
-    cy.get('[data-testid="error-message"]')
-      .should('be.visible')
-      .should('contain', 'Lỗi định dạng');
-
-    // Assert: Error details
-    cy.get('[data-testid="error-details"]')
-      .should('contain', 'dòng 1');
-  });
-});
-```
-
----
-
-## TEST CASE 8: Audit Log Verification
-
-### Test ID: `SYSTEM_ADMIN_AUDIT_01`
-**Chức năng**: Audit logging for sensitive actions  
-**Related Test Cases**: [FE_ADMIN-34], [FE_ADMIN-35]
-
-### Test Steps
-
-```javascript
-describe('Audit Log System', () => {
-  beforeEach(() => {
-    cy.login('admin@example.com', 'admin123');
-  });
-
-  it('should log admin login action', () => {
-    // Act: Navigate to audit logs
-    cy.visit('/admin/audit-logs');
-
-    // Assert: Login log exists
-    cy.get('[data-testid="log-row"]')
-      .filter(':contains("logged in")')
-      .should('have.length.greaterThan', 0);
-
-    // Assert: Log details
-    cy.get('[data-testid="log-row"]').first().within(() => {
-      cy.get('[data-testid="admin-name"]').should('contain', 'admin');
-      cy.get('[data-testid="action"]').should('contain', 'logged in');
-      cy.get('[data-testid="timestamp"]').should('be.visible');
-    });
-  });
-
-  it('should log user deletion action', () => {
-    // Arrange: Delete a user
-    cy.visit('/admin/users');
-    cy.get('[data-testid="user-row"]').last()
-      .find('[data-testid="delete-button"]').click();
-    cy.get('[data-testid="confirm-yes"]').click();
-    cy.wait(1000);
-
-    // Act: Check audit logs
-    cy.visit('/admin/audit-logs');
-
-    // Assert: Delete log exists
-    cy.get('[data-testid="log-row"]')
-      .filter(':contains("deleted User")')
-      .should('have.length.greaterThan', 0);
-
-    // Assert: Log contains user ID
-    cy.get('[data-testid="log-row"]').first().within(() => {
-      cy.get('[data-testid="target-type"]').should('contain', 'user');
-      cy.get('[data-testid="target-id"]').should('be.visible');
-    });
-  });
-});
-```
-
----
-
-## Cross-Browser Testing
-
-### Test Matrix
+## Cross-Browser Testing Matrix
 
 | Feature | Chrome | Firefox | Safari | Edge |
 |---------|--------|---------|--------|------|
 | Admin Login | ✅ | ✅ | ✅ | ✅ |
 | User Management | ✅ | ✅ | ✅ | ✅ |
-| Product CRUD | ✅ | ✅ | ⚠️ Image upload | ✅ |
-| Order Status Flow | ✅ | ✅ | ✅ | ✅ |
-| CSV Export/Import | ✅ | ✅ | ✅ | ✅ |
-| Dashboard Charts | ✅ | ✅ | ⚠️ Chart.js | ✅ |
-
-### Playwright Configuration
-```javascript
-// playwright.config.ts
-export default {
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-    { name: 'edge', use: { ...devices['Desktop Edge'] } }
-  ]
-};
-```
+| Product CRUD | ✅ | ✅ | ✅ | ✅ |
+| CSV Import/Export | ✅ | ✅ | ⚠️ Download UX | ✅ |
+| Dashboard Charts | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
 ## Performance Requirements
 
-### Page Load Times
-- Admin Dashboard: < 2 seconds
-- User List (50 items): < 1.5 seconds
-- Product List: < 2 seconds
-- Order Detail: < 1 second
-
-### API Response Times
-- Login API: < 500ms
-- Get Users API: < 1000ms
-- Update User API: < 500ms
-- Export CSV: < 3 seconds
-
-### Lighthouse Metrics
-```javascript
-test('should meet performance benchmarks', async ({ page }) => {
-  const { lhr } = await lighthouse(page.url());
-  
-  expect(lhr.categories.performance.score).toBeGreaterThan(0.85);
-  expect(lhr.audits['first-contentful-paint'].numericValue).toBeLessThan(2000);
-  expect(lhr.audits['interactive'].numericValue).toBeLessThan(3000);
-});
-```
+- Admin login: < 2s
+- User list load (10 items): < 1s
+- Dashboard stats: < 3s
+- CSV export (50 users): < 5s
+- Product image upload: < 3s per file
 
 ---
 
-## Execution Commands
+## Notes
 
-### Run All System Tests
-```bash
-# Cypress
-npm run cypress:open
-
-# Playwright
-npx playwright test admin.system.spec.ts
-
-# Cross-browser
-npx playwright test --project=chromium --project=firefox
-```
-
-### Generate Reports
-```bash
-# HTML report
-npx playwright show-report
-
-# Allure report
-allure generate allure-results --clean
-allure open
-```
+- Execute in **staging environment only**, never production
+- Use isolated test database that can be reset
+- Document browser-specific issues with screenshots
+- All sensitive actions should be logged in audit trail
+- Test data should be seeded before test execution
 
 ---
 
-## Test Data Requirements
-
-### Database Seed
-```sql
--- Admin users
-INSERT INTO users (email, password, role, is_active)
-VALUES ('admin@example.com', '$2b$10$hash', 'admin', true);
-
--- Regular users (50 total)
-INSERT INTO users (email, password, role, is_active)
-SELECT 
-  'user' || i || '@example.com',
-  '$2b$10$hash',
-  'user',
-  CASE WHEN i % 10 = 0 THEN false ELSE true END
-FROM generate_series(1, 50) AS i;
-
--- Products
-INSERT INTO products (name, price, category_id, is_deleted)
-VALUES 
-  ('Product A', 100000, 1, false),
-  ('Product B', 200000, 2, false),
-  ('Product C', 150000, 1, false);
-
--- Orders
-INSERT INTO orders (user_id, total_price, status)
-VALUES (2, 250000, 'pending'), (4, 500000, 'delivered');
-```
-
----
-
-## Expected Results Summary
-
-| Test Case | Expected Outcome |
-|-----------|------------------|
-| **Admin Login** | 200 response, token stored, redirect to dashboard |
-| **User Access Denied** | 403 error, no token, error message displayed |
-| **Deep Link Redirect** | Return to intended URL after login |
-| **User Pagination** | 10 users per page, no duplicates |
-| **Ban/Unban User** | Status toggle, button changes |
-| **Product CRUD** | Validation errors, soft delete, order check |
-| **Order Status Flow** | Valid transitions only, prevent reversal |
-| **Export CSV** | File download, correct data |
-| **Import CSV** | Parse validation, error reporting |
-| **Audit Logs** | Record login, deletions, timestamp |
-
----
-
-**Document Version**: 1.0  
-**Last Updated**: December 2025  
-**Test Framework**: Cypress 13.x / Playwright 1.40.x  
-**Recommended Execution**: Nightly regression suite
+**Document Version**: 2.0 (Table Format)  
+**Last Updated**: December 18, 2025  
+**Test Framework**: Cypress 13.x / Playwright 1.40.x
