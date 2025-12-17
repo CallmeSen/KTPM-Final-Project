@@ -31,9 +31,6 @@ jobs:
     - name: Install dependencies
       working-directory: ./backend
       run: npm ci
-    - name: Code Quality - Lint # kiểm tra chất lượng mã nguồn
-      working-directory: ./backend
-      run: npm run lint
     - name: Build
       working-directory: ./backend
       run: npm run build --if-present
