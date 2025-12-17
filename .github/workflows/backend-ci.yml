@@ -2,18 +2,12 @@ name: Backend CI
 
 on:
   push:
-    branches:
-      - main
-      - 'QUY-TRÌNH-*'
-      - SOURCE
+    branches: [ "main", "QUY-TRINH-1", "QUY-TRINH-2", "QUY-TRINH-3", "QUY-TRINH-4", "SOURCE" ]
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
-    branches:
-      - main
-      - 'QUY-TRÌNH-*'
-      - SOURCE
+    branches: [ "main", "QUY-TRINH-1", "QUY-TRINH-2", "QUY-TRINH-3", "QUY-TRINH-4", "SOURCE" ]
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
