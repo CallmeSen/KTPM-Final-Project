@@ -393,7 +393,6 @@ describe('Cart Module - Integration Tests', () => {
 
       // Assert: items must be array, not object
       expect(Array.isArray(response.data!.items)).toBe(true);
-      expect(typeof response.data!.items).not.toBe('object'); // Array is technically object, but we want true array
       expect(response.data!.items.length).toBeDefined(); // Arrays have length property
 
       mockGet.mockRestore();

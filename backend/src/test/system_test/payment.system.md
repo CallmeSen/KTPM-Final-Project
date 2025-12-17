@@ -1,627 +1,399 @@
-# Payment Module - System Test Cases
+# Payment Module - System Test Documentation
 
-> **Framework**: Manual Testing / E2E Testing (Cypress/Playwright)  
-> **Purpose**: End-to-end validation of payment flows across multiple systems (Backend + Stripe + Database + UI)  
-> **Environment**: Test Mode (Stripe Test Environment)
+## Overview
+This document contains End-to-End (E2E) test scenarios for the Payment Module in standardized table format, focusing on Stripe Connect Integration, Batch Processing, Data Synchronization, and Webhook Security.
 
----
-
-## Table of Contents
-
-1. [Stripe Connect Account Creation (ST_PAYMENT_8-11)](#stripe-connect-account-creation)
-2. [Batch Import Processing (ST_PAYMENT_15-19)](#batch-import-processing)
-3. [Stripe ID Synchronization (ST_PAYMENT_20-23)](#stripe-id-synchronization)
-4. [Webhook Event Handling (ST_PAYMENT_28-31)](#webhook-event-handling)
+**Module:** Payment (Stripe Integration & Transaction Processing)  
+**Test Type:** System Test / E2E  
+**Framework:** Manual Testing / Cypress / Playwright  
+**Environment:** Stripe Test Mode  
+**Last Updated:** December 18, 2025
 
 ---
 
-## Stripe Connect Account Creation
+## Test Environment Setup
 
-### [BE_Payment-8] ST_PAY_CreateAccount_Success
+### Configuration
+```javascript
+// Stripe Test Mode Configuration
+STRIPE_TEST_SECRET_KEY: process.env.STRIPE_TEST_SECRET_KEY
+STRIPE_TEST_PUBLIC_KEY: process.env.STRIPE_TEST_PUBLIC_KEY
+STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET
+STRIPE_CONNECT_CLIENT_ID: process.env.STRIPE_CONNECT_CLIENT_ID
 
-**Test Case ID**: `ST_PAY_CreateAccount_Success`  
-**Objective**: Kiểm thử luồng onboard trọn vẹn - tạo tài khoản kết nối thành công  
-**Type**: System Test (Happy Path)  
-**Technique**: Stripe Connect Flow
-
-#### Preconditions
-- Tài khoản User chưa kết nối Stripe
-- User: `Vendor_01`
-- Environment: Stripe Test Mode
-
-#### Test Data
-```json
-{
-  "userId": "Vendor_01",
-  "accountType": "express",
-  "country": "VN"
-}
+// Backend API
+BACKEND_URL: 'http://localhost:4000'
+WEBHOOK_ENDPOINT: 'http://localhost:4000/api/payment/webhook'
 ```
 
-#### Test Procedure
-1. **Step 1**: User click button "Kết nối thanh toán"
-2. **Step 2**: Hệ thống gọi API `createConnectedAccount` và lấy Link Onboarding
-3. **Step 3**: Hệ thống redirect user sang Stripe Hosted Onboarding
-4. **Step 4**: Tại Stripe: User điền thông tin test (Business name, Bank account, etc.)
-5. **Step 5**: User click "Submit" hoàn tất form
-6. **Step 6**: Stripe redirect về URL callback của hệ thống (e.g., `/payment/callback`)
-7. **Step 7**: Hệ thống nhận `account_id` và `auth_code` từ Stripe
-8. **Step 8**: Kiểm tra Database
-
-#### Expected Results
-✅ **Step 2**: API trả về `onboarding_url` hợp lệ (bắt đầu với `https://connect.stripe.com/`)  
-✅ **Step 3**: Browser redirect đúng trang Stripe Hosted  
-✅ **Step 6**: Stripe redirect về đúng callback URL  
-✅ **Step 7**: Hệ thống nhận được `auth_code` và log thành công  
-✅ **Step 8**: Database:
-  - Trường `stripe_account_id` được lưu (e.g., `acct_1234567890`)
-  - Trạng thái User: `status = 'Connected'`
-
-#### Pass/Fail Criteria
-- **Pass**: Tất cả expected results đều thỏa mãn
-- **Fail**: Bất kỳ step nào thất bại hoặc dữ liệu không khớp
+### Test Prerequisites
+- Stripe Test Account (https://dashboard.stripe.com/test/)
+- Stripe CLI installed (`stripe listen --forward-to localhost:4000/webhook`)
+- PostgreSQL/MySQL database for order/user data
+- Test CSV files for batch import scenarios
 
 ---
 
-### [BE_Payment-9] ST_PAY_CreateAccount_Cancel
+## System Test Cases
 
-**Test Case ID**: `ST_PAY_CreateAccount_Cancel`  
-**Objective**: Kiểm tra xử lý khi user từ chối/hủy liên kết giữa chừng  
-**Type**: System Test (Negative Path)  
-**Technique**: Error Handling
+### Section 1: Stripe Connect Account Creation
 
-#### Preconditions
-- User: `Vendor_02`
-- User chưa kết nối Stripe
+| Test ID | Test Case Name | Test Case Description | Test Case Procedure | Expected Output | Inter-test case Dependence | Test Data | Result | Test Date | Note |
+|---------|---------------|----------------------|---------------------|-----------------|---------------------------|-----------|--------|-----------|------|
+| SYSTEM_PAY_CONNECT_01 | Stripe Connect Onboarding Success | Kiểm thử luồng kết nối tài khoản Stripe thành công (Happy Path) | 1. **User Action**: User login as `Vendor_01`, click "Kết nối thanh toán"<br>2. **API Call**: Backend gọi API `createConnectedAccount` với `accountType = 'express'`, `country = 'VN'`<br>3. **Redirect**: System redirect user sang Stripe Hosted Onboarding URL<br>4. **Fill Form**: Tại Stripe, user điền:<br>   - Business name: "Test Vendor 01"<br>   - Bank account: Test account (routing: 110000000, account: 000123456789)<br>   - Email: vendor01@test.com<br>5. **Submit**: Click "Submit" hoàn tất onboarding<br>6. **Callback**: Stripe redirect về `/payment/callback?auth_code=ac_xyz&account_id=acct_123`<br>7. **Check DB**: Query `SELECT stripe_account_id, status FROM users WHERE id = 'Vendor_01'` | 1. **API Response**: `{ "onboarding_url": "https://connect.stripe.com/setup/..." }` (200 OK)<br>2. **Redirect**: Browser navigate đúng sang Stripe Hosted page<br>3. **Callback**: Backend nhận `auth_code` và `account_id` từ Stripe<br>4. **Database**:<br>   - `stripe_account_id = 'acct_123'`<br>   - `status = 'Connected'`<br>5. **UI**: Display "Kết nối thành công" notification | None | User: `Vendor_01`<br>Account Type: express<br>Country: VN<br>Stripe Test Bank:<br>  - Routing: 110000000<br>  - Account: 000123456789 | | | Related: [BE_Payment-8]<br>Priority: P0 |
+| SYSTEM_PAY_CONNECT_02 | User Cancels Onboarding | Kiểm tra xử lý khi user hủy/từ chối kết nối Stripe | 1. **Setup**: User `Vendor_02` chưa kết nối Stripe<br>2. **Start**: Click "Kết nối thanh toán" → Redirect to Stripe<br>3. **Cancel**: Tại Stripe Onboarding page, user click "Return to [Platform]" hoặc close tab<br>4. **Return**: Stripe redirect về `/payment/cancel`<br>5. **Check DB**: Query `SELECT stripe_account_id, status FROM users WHERE id = 'Vendor_02'` | 1. **Redirect**: System navigate đúng sang `/payment/cancel` URL<br>2. **UI**: Hiển thị message "Kết nối chưa hoàn tất. Bạn có thể thử lại bất cứ lúc nào."<br>3. **Database**:<br>   - `stripe_account_id = NULL` (không lưu)<br>   - `status = 'Not Connected'` (unchanged)<br>4. **No Errors**: Application không crash hoặc báo lỗi hệ thống | None | User: `Vendor_02`<br>Expected: Graceful cancellation | | | Related: [BE_Payment-9]<br>Negative Path |
+| SYSTEM_PAY_CONNECT_03 | Reconnect Existing Account | Xử lý khi user đã kết nối trước đó (Idempotency) | 1. **Precondition**: Vendor_01 đã có `stripe_account_id = 'acct_123'` (từ SYSTEM_PAY_CONNECT_01)<br>2. **User Action**: Login as Vendor_01, click lại "Kết nối thanh toán"<br>3. **Check Response**: Observe API behavior<br>4. **Expected Redirect**: System should provide login link instead of new onboarding | 1. **API Response**: `{ "dashboard_url": "https://connect.stripe.com/express_login/..." }` (NOT new onboarding URL)<br>2. **Redirect**: User navigate to Stripe Express Dashboard (not onboarding form)<br>3. **Database**: `stripe_account_id` remains unchanged (`acct_123`)<br>4. **No Duplicate**: Stripe account NOT duplicated | SYSTEM_PAY_CONNECT_01 (must run first) | User: `Vendor_01`<br>Existing Account: acct_123<br>Expected: Login link | | | Related: [BE_Payment-10]<br>Idempotency critical |
+| SYSTEM_PAY_CONNECT_04 | Stripe API Connection Error | Giả lập lỗi kết nối Stripe API (Fault Injection) | 1. **Setup**: Mock/Stub Stripe API to return `500 Internal Server Error` or timeout<br>   - Method 1: Disconnect network<br>   - Method 2: Use Stripe CLI with error simulation<br>   - Method 3: Mock API response in test environment<br>2. **User Action**: Click "Kết nối thanh toán"<br>3. **Observe**: Check error handling<br>4. **Check Logs**: Verify error logging | 1. **UI**: Hiển thị thông báo thân thiện: "Lỗi kết nối đối tác thanh toán, vui lòng thử lại sau"<br>2. **No Crash**: Application continues working (not HTTP 500 to user)<br>3. **Logs**: Error logged with details:<br>   `[ERROR] Stripe API connection failed: Timeout after 5000ms`<br>4. **Database**: No corrupted data (no partial writes)<br>5. **Retry**: User can click again without issues | None | Simulated Error: 500 or Timeout<br>Expected: Graceful error handling | | | Related: [BE_Payment-11]<br>Fault Injection |
 
-#### Test Procedure
-1. User được redirect sang Stripe Onboarding
-2. Tại Stripe: User click link **"Return to [Platform]"** hoặc **"Cancel"** thay vì điền form
-3. Quan sát phản hồi của hệ thống
+### Section 2: Batch Import Processing
 
-#### Expected Results
-✅ Stripe redirect về URL failure/return (e.g., `/payment/cancel`)  
-✅ Hệ thống hiển thị thông báo: **"Kết nối chưa hoàn tất"**  
-✅ Database: **KHÔNG** lưu `stripe_account_id`  
-✅ Trạng thái User: Không thay đổi (vẫn là `Pending` hoặc `Not Connected`)
+| Test ID | Test Case Name | Test Case Description | Test Case Procedure | Expected Output | Inter-test case Dependence | Test Data | Result | Test Date | Note |
+|---------|---------------|----------------------|---------------------|-----------------|---------------------------|-----------|--------|-----------|------|
+| SYSTEM_PAY_IMPORT_01 | Import Valid CSV File | Kiểm thử import lô dữ liệu hợp lệ (Happy Path - Small Batch) | 1. **Prepare File**: Create CSV file with 50 valid products:<br>   ```csv<br>   Name,Price,Currency,Description<br>   Product 1,100000,VND,Test product 1<br>   Product 2,200000,VND,Test product 2<br>   ...(50 rows total)<br>   ```<br>2. **Upload**: Navigate to Admin Panel → Import → Select file → Click "Upload"<br>3. **Wait**: Observe progress bar/spinner (1-2 seconds)<br>4. **Check DB**: Query `SELECT COUNT(*) FROM products WHERE created_at > NOW() - INTERVAL '1 minute'` | 1. **UI Notification**: "Import thành công 50/50 bản ghi"<br>2. **Database**: Exactly **50 new records** inserted with correct data<br>3. **Logs**:<br>   ```<br>   [INFO] Import started: file=valid_products_50.csv, rows=50<br>   [INFO] Import completed: success=50, failed=0, duration=1.2s<br>   ```<br>4. **Performance**: Import completes in < 5 seconds | None | File: `valid_products_50.csv`<br>Rows: 50 valid<br>Expected: 100% success | | | Related: [BE_Payment-15]<br>Baseline test |
+| SYSTEM_PAY_IMPORT_02 | Import Large Volume | Kiểm thử chịu tải dữ liệu lớn (Load Test - 10K rows) | 1. **Prepare File**: CSV with **10,000 rows** of valid products<br>2. **Monitor Resources**: Open server monitoring tools (htop, Task Manager, etc.)<br>3. **Upload**: Upload file via UI/API<br>4. **Track Progress**: Monitor:<br>   - Import duration<br>   - RAM usage<br>   - CPU usage<br>5. **Check DB**: `SELECT COUNT(*) FROM products WHERE batch_id = :batchId` | 1. **No Timeout**: Request completes successfully (not 504 Gateway Timeout)<br>2. **Duration**: Import completes in < 30 seconds<br>3. **Database**: All **10,000 records** inserted correctly (no data loss)<br>4. **Resource Usage**:<br>   - RAM < 80% of server capacity<br>   - CPU < 90% during import<br>5. **No Memory Leak**: RAM returns to normal after completion | None | File: `max_load_10k.csv`<br>Rows: 10,000<br>Server: ≥4GB RAM, ≥2 cores | | | Related: [BE_Payment-16]<br>Performance critical |
+| SYSTEM_PAY_IMPORT_03 | Import Partial Invalid Data | Xử lý lỗi một phần dữ liệu (Partial Failure) | 1. **Prepare Mixed File**: CSV with 100 rows:<br>   - 90 rows: Valid data<br>   - 10 rows: Invalid (missing price, wrong currency format, etc.)<br>   Example invalid rows:<br>   ```csv<br>   Product X,,VND,Desc    # Missing price<br>   Product Y,100,XYZ,Desc # Invalid currency<br>   ```<br>2. **Upload**: Import via UI<br>3. **Wait**: Let system process<br>4. **Download Error Report**: Check exported error file | 1. **UI Message**: "Thành công 90, Thất bại 10"<br>2. **Database**: Only **90 valid records** inserted<br>3. **Error Report**: System exports CSV/Excel with failed rows:<br>   ```csv<br>   Row,Error,Field,Value<br>   15,Missing required field,price,NULL<br>   27,Invalid data type,currency,XYZ<br>   ```<br>4. **User Action**: User can fix 10 rows and re-upload | None | File: `mixed_data_100.csv`<br>Valid: 90<br>Invalid: 10<br>Expected: Partial success | | | Related: [BE_Payment-17]<br>Validation logic |
+| SYSTEM_PAY_IMPORT_04 | Transaction Rollback on Crash | Kiểm thử tính toàn vẹn dữ liệu (Database Crash Handling) | 1. **Prepare**: CSV with 1,000 valid rows<br>2. **Start Import**: Upload file<br>3. **Simulate Crash**: At row ~500, simulate database error:<br>   - Docker: `docker stop bookstore_db`<br>   - Network: Disconnect DB connection<br>   - Manual: Kill DB process<br>4. **Restart**: Bring DB back online<br>5. **Check DB**: Query products table and import logs | 1. **Transaction Behavior** (depends on business logic):<br>   - **Option A (Full Rollback)**: All 500 inserted rows removed automatically<br>   - **Option B (Partial Commit)**: Batch marked `status = 'failed'`, but data kept for audit<br>2. **No Corrupted Data**: Database remains consistent (no half-records)<br>3. **Logs**:<br>   ```<br>   [ERROR] Import interrupted at row 500: Connection lost<br>   [INFO] Rollback completed: 500 records removed<br>   ```<br>4. **Recovery**: User can retry import without manual cleanup | None | File: `transaction_test.csv`<br>Rows: 1,000<br>Crash at: row 500 | | | Related: [BE_Payment-18]<br>Critical for data integrity |
+| SYSTEM_PAY_IMPORT_05 | Duplicate Data Handling | Kiểm thử idempotency (Re-upload same file) | 1. **Precondition**: Run SYSTEM_PAY_IMPORT_01 first (50 products already imported)<br>2. **Re-upload**: Upload same file `valid_products_50.csv` again<br>3. **Observe**: Check system behavior<br>4. **Check DB**: `SELECT COUNT(*) FROM products WHERE name LIKE 'Product%'` | 1. **Duplicate Detection**: System detects duplicate SKU/Product Code<br>2. **Behavior** (based on business logic):<br>   - **Update Mode**: Updates 50 existing records (latest data wins)<br>   - **Skip Mode**: Skips all 50 duplicates<br>3. **No Duplicate Records**: Database does NOT have duplicate entries<br>4. **UI Message**: "50 sản phẩm đã tồn tại: 50 cập nhật / 0 tạo mới" | SYSTEM_PAY_IMPORT_01 (must run first) | File: `valid_products_50.csv` (same as test 01)<br>Expected: Idempotent behavior | | | Related: [BE_Payment-19]<br>Idempotency critical |
 
----
+### Section 3: Stripe ID Synchronization
 
-### [BE_Payment-10] ST_PAY_CreateAccount_Exists
+| Test ID | Test Case Name | Test Case Description | Test Case Procedure | Expected Output | Inter-test case Dependence | Test Data | Result | Test Date | Note |
+|---------|---------------|----------------------|---------------------|-----------------|---------------------------|-----------|--------|-----------|------|
+| SYSTEM_PAY_SYNC_01 | Forward Sync - Local to Stripe | Đồng bộ xuôi: Cập nhật Stripe Customer ID từ Local DB lên Server | 1. **Setup**: Create new user in DB without `stripe_customer_id`:<br>   ```sql<br>   INSERT INTO users (id, email, name) VALUES (101, 'user101@test.com', 'Test User 101');<br>   ```<br>2. **Trigger Payment**: User thêm thẻ thanh toán hoặc thực hiện checkout<br>3. **Backend Action**: Stripe creates `cus_123`, backend calls `updateStripeIds(userId=101, stripeCustomerId='cus_123')`<br>4. **Check DB**: `SELECT stripe_customer_id FROM users WHERE id = 101`<br>5. **Check Stripe**: Query Stripe API for customer metadata | 1. **API Response**: `{ "success": true }` (HTTP 200)<br>2. **Database**: `stripe_customer_id = 'cus_123'` (updated correctly)<br>3. **Stripe Dashboard**: Customer `cus_123` has metadata:<br>   ```json<br>   {<br>     "metadata": {<br>       "local_user_id": "101"<br>     }<br>   }<br>   ```<br>4. **Bidirectional Link**: Both systems reference each other | None | User ID: 101<br>Stripe Customer ID: cus_123<br>Expected: Two-way link | | | Related: [BE_Payment-20]<br>Data consistency |
+| SYSTEM_PAY_SYNC_02 | Backward Sync - Stripe to Local | Đồng bộ ngược: Xử lý Webhook từ Stripe (Customer Update Event) | 1. **Setup**: Configure webhook endpoint `/api/payment/webhook` with secret<br>2. **Stripe Event**: Simulate `customer.updated` event from Stripe:<br>   ```json<br>   {<br>     "event": "customer.updated",<br>     "data": {<br>       "object": {<br>         "id": "cus_123",<br>         "email": "updated@example.com",<br>         "metadata": { "local_user_id": "101" }<br>       }<br>     }<br>   }<br>   ```<br>3. **Trigger**: Send POST request to webhook endpoint (or use Stripe CLI: `stripe trigger customer.updated`)<br>4. **Check Logs & DB** | 1. **Webhook Response**: Server returns **200 OK** (so Stripe doesn't retry)<br>2. **Logs**:<br>   ```<br>   [INFO] Webhook received: event=customer.updated, customer=cus_123<br>   [INFO] Sync data success: User ID 101 updated<br>   ```<br>3. **Database**: User 101 email updated to `updated@example.com`<br>4. **No Data Loss**: All fields synchronized correctly | None | Event: customer.updated<br>Customer ID: cus_123<br>User ID: 101 | | | Related: [BE_Payment-21]<br>Event-driven sync |
+| SYSTEM_PAY_SYNC_03 | Conflict Handling | Xử lý xung đột khi Stripe ID bất thường (Data Validation) | 1. **Setup**: User A có `stripe_customer_id = 'cus_A'`<br>2. **Attempt Update**: Gọi API để update User A với `stripe_customer_id = 'cus_B'` (ID của User khác hoặc invalid ID)<br>3. **Trigger**: `updateStripeIds(userId='UserA', stripeCustomerId='cus_B')`<br>4. **Check Validation**: Observe error handling | 1. **Validation Error**: API returns error:<br>   ```json<br>   {<br>     "error": "Stripe ID conflict",<br>     "message": "cus_B already belongs to UserB"<br>   }<br>   ```<br>2. **Database**: User A's data **unchanged** (rollback on conflict)<br>3. **Logs**:<br>   ```<br>   [WARNING] Stripe ID conflict: cus_B already belongs to UserB<br>   ```<br>4. **No Corruption**: Database integrity maintained | None | User A: cus_A<br>Attempted: cus_B (belongs to User B)<br>Expected: Reject | | | Related: [BE_Payment-22]<br>Data integrity critical |
+| SYSTEM_PAY_SYNC_04 | Unlink Stripe Account | Kiểm thử xóa/ngắt kết nối Stripe (Null Value Handling) | 1. **Setup**: User 101 đang có `stripe_customer_id = 'cus_123'`<br>2. **User Action**: User hủy liên kết thanh toán trong settings<br>3. **API Call**: `updateStripeIds(userId=101, stripeCustomerId=null)`<br>4. **Check DB**: Query user data<br>5. **Check Stripe**: Query Stripe API | 1. **API Response**: `{ "success": true }` (HTTP 200)<br>2. **Database**: `stripe_customer_id = NULL` (unlinked)<br>3. **Stripe Dashboard**: Customer metadata cleared or deleted<br>4. **User Status**: Payment status = 'Not Connected' or similar | None | User ID: 101<br>Action: Set stripe_customer_id to NULL<br>Expected: Clean unlink | | | Related: [BE_Payment-23]<br>Null handling |
 
-**Test Case ID**: `ST_PAY_CreateAccount_Exists`  
-**Objective**: Xử lý khi tài khoản đã kết nối trước đó (Idempotency)  
-**Type**: System Test (State Transition)  
-**Technique**: Idempotency Check
+### Section 4: Webhook Event Handling
 
-#### Preconditions
-- **Dependency**: Phải chạy sau test case `[BE_Payment-8]`
-- User: `Vendor_01` (đã có `stripe_account_id` từ test trước)
-
-#### Test Procedure
-1. Login bằng User `Vendor_01` (đã có `stripe_account_id`)
-2. Click lại nút **"Kết nối thanh toán"**
-3. Quan sát hành động của hệ thống
-
-#### Expected Results
-✅ Hệ thống **KHÔNG** tạo tài khoản mới trên Stripe  
-✅ Trả về Link đăng nhập Dashboard (Stripe Express Login Link) thay vì Link Onboarding mới  
-✅ User được redirect tới Stripe Dashboard để quản lý tài khoản  
-✅ Database: `stripe_account_id` không thay đổi
+| Test ID | Test Case Name | Test Case Description | Test Case Procedure | Expected Output | Inter-test case Dependence | Test Data | Result | Test Date | Note |
+|---------|---------------|----------------------|---------------------|-----------------|---------------------------|-----------|--------|-----------|------|
+| SYSTEM_PAY_WEBHOOK_01 | Payment Success Webhook | Xử lý webhook thanh toán thành công (Happy Path) | 1. **Setup**: Create order `ORD_123` with `status = 'PENDING'`<br>2. **Simulate Webhook**: Send POST to `/api/payment/webhook` with payload:<br>   ```json<br>   {<br>     "status": "SUCCESS",<br>     "order_id": "ORD_123",<br>     "signature": "valid_hmac_sha256_signature"<br>   }<br>   ```<br>   Signature calculated using webhook secret<br>3. **Wait**: Allow async processing (2-5 seconds)<br>4. **Check DB**: `SELECT status FROM orders WHERE id = 'ORD_123'`<br>5. **Check Email**: Verify email sent to user | 1. **API Response**: **200 OK** (immediately, so gateway doesn't retry)<br>2. **Database**: Order status updated from `PENDING` → `PAID`<br>3. **Email Sent**: User receives confirmation email:<br>   Subject: "Đơn hàng ORD_123 đã thanh toán thành công"<br>4. **Logs**:<br>   ```<br>   [INFO] Webhook success: order_id=ORD_123, status=PAID<br>   [INFO] Email sent to user@example.com<br>   ``` | None | Order ID: ORD_123<br>Status: SUCCESS<br>Signature: Valid HMAC | | | Related: [BE_Payment-28]<br>Priority: P0 |
+| SYSTEM_PAY_WEBHOOK_02 | Invalid Signature - Security | Kiểm thử bảo mật: Từ chối webhook giả mạo (Security Test) | 1. **Setup**: Order `ORD_123` đang `PENDING`<br>2. **Fake Request**: Send POST with WRONG signature:<br>   ```json<br>   {<br>     "status": "SUCCESS",<br>     "order_id": "ORD_123",<br>     "signature": "FAKE_SIGNATURE_12345"<br>   }<br>   ```<br>3. **Check API Response**: Immediately check HTTP status<br>4. **Check DB**: Verify order status unchanged<br>5. **Check Logs**: Look for security alert | 1. **API Response**: **401 Unauthorized** or **403 Forbidden**<br>2. **Database**: Order status remains `PENDING` (no change)<br>3. **No Processing**: Webhook logic NOT executed (ignored completely)<br>4. **Security Log**:<br>   ```<br>   [SECURITY] Invalid webhook signature: order_id=ORD_123, ip=192.168.1.100<br>   [SECURITY] Potential attack detected: timestamp=2025-12-18T10:30:45Z<br>   ```<br>5. **Alert**: Optionally trigger security monitoring alert | None | Order ID: ORD_123<br>Signature: FAKE (invalid)<br>Expected: Reject completely | | | Related: [BE_Payment-29]<br>Security critical |
+| SYSTEM_PAY_WEBHOOK_03 | Duplicate Webhook - Idempotency | Kiểm thử xử lý webhook trùng lặp (Gateway Retry Scenario) | 1. **First Request**: Send valid webhook for `ORD_456`:<br>   ```json<br>   {<br>     "status": "SUCCESS",<br>     "order_id": "ORD_456",<br>     "idempotency_key": "webhook_12345",<br>     "signature": "valid_sig"<br>   }<br>   ```<br>2. **Wait**: Processing completes<br>3. **Second Request**: Send EXACT same webhook (simulate gateway retry)<br>4. **Check DB**: Count payment records for ORD_456 | 1. **First Request**: Processed normally, returns **200 OK**, DB updated<br>2. **Second Request**: Returns **200 OK** (to acknowledge receipt), but **NO duplicate processing**<br>3. **Database**: Only **1 payment record** exists (not duplicated)<br>4. **Logs**:<br>   ```<br>   [INFO] Webhook duplicate detected: idempotency_key=webhook_12345, skipped<br>   ```<br>5. **Idempotent**: Safe to retry without side effects | None | Order ID: ORD_456<br>Idempotency Key: webhook_12345<br>Expected: Single processing | | | Related: [BE_Payment-30]<br>Idempotency critical |
+| SYSTEM_PAY_WEBHOOK_04 | Payment Failed Webhook | Xử lý webhook thanh toán thất bại (Negative Flow) | 1. **Setup**: Order `ORD_789` with `status = 'PENDING'`<br>2. **Send Webhook**: POST with failure payload:<br>   ```json<br>   {<br>     "status": "FAILED",<br>     "reason": "Insufficient funds",<br>     "order_id": "ORD_789",<br>     "signature": "valid_sig"<br>   }<br>   ```<br>3. **Check DB**: Order status<br>4. **Check Notification**: User notification sent | 1. **API Response**: **200 OK** (acknowledged)<br>2. **Database**: Order status changed to `CANCELED` or `FAILED`<br>3. **User Notification**: Email/push notification sent:<br>   Message: "Thanh toán thất bại: Số dư không đủ. Vui lòng thử lại."<br>4. **Logs**:<br>   ```<br>   [INFO] Webhook payment failed: order_id=ORD_789, reason=Insufficient funds<br>   [INFO] Notification sent to user<br>   ```<br>5. **Recovery**: User can retry payment from order history | None | Order ID: ORD_789<br>Status: FAILED<br>Reason: Insufficient funds | | | Related: [BE_Payment-31]<br>Error handling |
 
 ---
 
-### [BE_Payment-11] ST_PAY_CreateAccount_APIError
+## Automation Script Examples
 
-**Test Case ID**: `ST_PAY_CreateAccount_APIError`  
-**Objective**: Giả lập lỗi kết nối Stripe (External Error)  
-**Type**: System Test (Fault Injection)  
-**Technique**: Fault Injection
+### Playwright Example: Stripe Connect Onboarding
+```javascript
+// Test: SYSTEM_PAY_CONNECT_01
+import { test, expect } from '@playwright/test';
 
-#### Preconditions
-- Môi trường Dev/Test
-- Có quyền điều chỉnh network hoặc mock Stripe API
-
-#### Test Data
-```json
-{
-  "network": "Offline/Simulated",
-  "stripeResponse": "500 Internal Server Error / Timeout"
-}
-```
-
-#### Test Procedure
-1. **Setup**: Ngắt mạng hoặc giả lập Stripe API trả về `500`/`Timeout`
-2. User click **"Kết nối thanh toán"**
-3. Quan sát phản hồi của hệ thống
-
-#### Expected Results
-✅ Hệ thống **KHÔNG** bị Crash  
-✅ Hiển thị thông báo thân thiện:  
-   > **"Lỗi kết nối đối tác thanh toán, vui lòng thử lại sau"**  
-✅ Log hệ thống ghi nhận lỗi chi tiết:
-   ```
-   [ERROR] Stripe API connection failed: Timeout after 5000ms
-   ```
-✅ Database: Không có thay đổi (không lưu dữ liệu rác)
-
----
-
-## Batch Import Processing
-
-### [BE_Payment-15] ST_PAYMENT_Import_Success
-
-**Test Case ID**: `ST_PAYMENT_Import_Success`  
-**Objective**: Kiểm thử Import lô dữ liệu chuẩn (Happy Path)  
-**Type**: System Test (Batch Processing - Small batch)
-
-#### Test Data
-```
-File: valid_products_50.csv
-Content: 50 sản phẩm hợp lệ (Name, Price, Currency, Description)
-```
-
-#### Test Procedure
-1. Chuẩn bị file CSV chứa 50 sản phẩm hợp lệ
-2. Upload file vào hệ thống qua UI/API
-3. Đợi hệ thống xử lý (progress bar/notification)
-4. Check Database: Truy vấn bảng `Products` đếm số lượng
-
-#### Expected Results
-✅ Thông báo: **"Import thành công 50/50 bản ghi"**  
-✅ Database: Xuất hiện đúng **50 bản ghi mới** với dữ liệu chính xác  
-✅ Log hệ thống:
-   ```
-   [INFO] Import started: file=valid_products_50.csv, rows=50
-   [INFO] Import completed: success=50, failed=0, duration=1.2s
-   ```
-
----
-
-### [BE_Payment-16] ST_PAYMENT_Import_MaxLoad
-
-**Test Case ID**: `ST_PAYMENT_Import_MaxLoad`  
-**Objective**: Kiểm thử chịu tải dữ liệu lớn (Volume Test)  
-**Type**: System Test (Load Testing)  
-**Technique**: Batch Processing (Large batch)
-
-#### Preconditions
-- Server cấu hình đủ tài nguyên (RAM ≥ 4GB, CPU ≥ 2 cores)
-
-#### Test Data
-```
-File: max_load_10k.csv
-Content: 10,000 dòng sản phẩm hợp lệ
-```
-
-#### Test Procedure
-1. Chuẩn bị file chứa **10,000 dòng**
-2. Upload file
-3. **Theo dõi tài nguyên server** (RAM/CPU) trong quá trình xử lý
-4. Check Database sau khi hoàn tất
-
-#### Expected Results
-✅ Hệ thống **KHÔNG** bị Timeout (504 Gateway Time-out)  
-✅ Thời gian xử lý nằm trong ngưỡng cho phép: **< 30 giây**  
-✅ Database: Lưu đủ **10,000 bản ghi**, không bị mất mát dữ liệu  
-✅ RAM Usage: < 80% capacity  
-✅ CPU Usage: < 90% trong quá trình import
-
----
-
-### [BE_Payment-17] ST_PAYMENT_Import_PartialFail
-
-**Test Case ID**: `ST_PAYMENT_Import_PartialFail`  
-**Objective**: Kiểm thử xử lý lỗi một phần (Partial Success)  
-**Type**: System Test (Validation)  
-**Technique**: Batch Processing with Error Handling
-
-#### Test Data
-```
-File: mixed_data_100.csv
-Content:
-  - 90 dòng đúng format
-  - 10 dòng sai format (thiếu giá trị, sai kiểu dữ liệu)
-```
-
-#### Test Procedure
-1. Upload file chứa 100 dòng (90 đúng, 10 sai)
-2. Đợi hệ thống xử lý
-3. Check Database
-4. Tải về File báo lỗi (Error Report)
-
-#### Expected Results
-✅ Thông báo: **"Thành công 90, Thất bại 10"**  
-✅ Database: Chỉ lưu **90 bản ghi đúng**  
-✅ Hệ thống xuất **file log/excel chi tiết 10 dòng lỗi** để user sửa:
-   ```csv
-   Row,Error,Field,Value
-   15,Missing required field,price,NULL
-   27,Invalid data type,currency,XYZ123
-   ...
-   ```
-
----
-
-### [BE_Payment-18] ST_PAYMENT_Import_Rollback
-
-**Test Case ID**: `ST_PAYMENT_Import_Rollback`  
-**Objective**: Kiểm thử tính toàn vẹn (Transaction Rollback)  
-**Type**: System Test (Gray-box Testing)  
-**Technique**: Simulate Crash/DB Error
-
-#### Preconditions
-- Cần quyền truy cập Server/DB để giả lập lỗi
-
-#### Test Data
-```
-File: transaction_test.csv
-Content: 1000 dòng hợp lệ
-```
-
-#### Test Procedure
-1. Upload file 1000 dòng
-2. **Giả lập ngắt kết nối DB hoặc Stop Service ở dòng thứ 500**
-3. Khởi động lại và Check DB
-
-#### Expected Results
-✅ Hệ thống thực hiện **Rollback** (tùy nghiệp vụ):
-   - **Option 1**: Xóa 500 dòng đã lưu (Full Rollback)
-   - **Option 2**: Đánh dấu batch `status = 'failed'` (Partial Commit với flag)  
-✅ Đảm bảo **KHÔNG** có dữ liệu "rác" (corrupted data) trong DB  
-✅ Log ghi nhận:
-   ```
-   [ERROR] Import interrupted at row 500: Connection lost
-   [INFO] Rollback completed: 500 records removed
-   ```
-
----
-
-### [BE_Payment-19] ST_PAYMENT_Import_Duplicate
-
-**Test Case ID**: `ST_PAYMENT_Import_Duplicate`  
-**Objective**: Kiểm thử trùng lặp dữ liệu (Idempotency)  
-**Type**: System Test (Batch Processing Logic)
-
-#### Preconditions
-- **Dependency**: Test case `[BE_Payment-15]` đã chạy xong
-
-#### Test Data
-```
-File: valid_products_50.csv (same file used in BE_Payment-15)
-```
-
-#### Test Procedure
-1. Upload lại file `valid_products_50.csv` (đã import ở test trước)
-2. Thực hiện Upload lần 2
-3. Check DB: Đếm số lượng sản phẩm
-
-#### Expected Results
-✅ Hệ thống phát hiện trùng mã (SKU/Product Code)  
-✅ Hành động (tùy logic nghiệp vụ):
-   - **Update Mode**: Cập nhật thông tin mới (Update existing records)
-   - **Skip Mode**: Bỏ qua (Skip duplicates)  
-✅ **KHÔNG** tạo ra bản ghi nhân bản (Duplicate records)  
-✅ Thông báo: **"50 sản phẩm đã tồn tại: 50 cập nhật / 0 tạo mới"**
-
----
-
-## Stripe ID Synchronization
-
-### [BE_Payment-20] ST_PAYMENT_UpdateStripeIds_Forward
-
-**Test Case ID**: `ST_PAYMENT_UpdateStripeIds_Forward`  
-**Objective**: Đồng bộ xuôi - Cập nhật Stripe ID từ Local lên Server  
-**Type**: System Test (Data Sync)  
-**Technique**: Local trigger
-
-#### Preconditions
-- User phải tồn tại và Active
-- User chưa có Stripe Customer ID
-
-#### Test Data
-```json
-{
-  "userId": 101,
-  "stripeCustomerId": "cus_123"
-}
-```
-
-#### Test Procedure
-1. Tạo User mới trong DB (chưa có `stripe_customer_id`)
-2. Thực hiện hành động thanh toán/add card để sinh `cus_ID` từ Stripe
-3. Gọi hàm `updateStripeIds` để lưu `cus_ID` vào DB
-4. Query DB bảng `Users`
-
-#### Expected Results
-✅ Hàm trả về thành công (HTTP 200)  
-✅ Database: Cột `stripe_customer_id` được cập nhật đúng giá trị `cus_123`  
-✅ Stripe Dashboard: User được ghi nhận metadata khớp với Local User ID:
-   ```json
-   {
-     "metadata": {
-       "local_user_id": "101"
-     }
-   }
-   ```
-
----
-
-### [BE_Payment-21] ST_PAYMENT_UpdateStripeIds_Backward
-
-**Test Case ID**: `ST_PAYMENT_UpdateStripeIds_Backward`  
-**Objective**: Đồng bộ ngược - Xử lý Webhook/Callback từ Stripe  
-**Type**: System Test (Event Driven)  
-**Technique**: Webhook Testing
-
-#### Preconditions
-- Cấu hình Webhook endpoint: `/api/payment/webhook`
-- Stripe Webhook Secret đã được thiết lập
-
-#### Test Data
-```json
-{
-  "event": "customer.updated",
-  "data": {
-    "object": {
-      "id": "cus_123",
-      "email": "updated@example.com",
-      "metadata": {
-        "local_user_id": "101"
-      }
-    }
+test('Stripe Connect Onboarding Success', async ({ page, context }) => {
+  // Login as vendor
+  await page.goto('http://localhost:3000/login');
+  await page.fill('[name="email"]', 'vendor01@test.com');
+  await page.fill('[name="password"]', 'Test1234!');
+  await page.click('button[type="submit"]');
+  
+  // Navigate to payment settings
+  await page.goto('http://localhost:3000/vendor/payment-settings');
+  
+  // Click "Connect Payment"
+  await page.click('button:has-text("Kết nối thanh toán")');
+  
+  // Wait for redirect to Stripe
+  await page.waitForURL(/connect\.stripe\.com/);
+  expect(page.url()).toContain('connect.stripe.com/setup');
+  
+  // Fill Stripe onboarding form (in test mode, Stripe may auto-fill)
+  // Note: Stripe test mode might skip form in some cases
+  await page.fill('[name="business_name"]', 'Test Vendor 01');
+  
+  // Submit form (if visible)
+  const submitButton = await page.locator('button:has-text("Submit")');
+  if (await submitButton.isVisible()) {
+    await submitButton.click();
   }
-}
+  
+  // Wait for redirect back to our app
+  await page.waitForURL(/localhost:3000\/payment\/callback/);
+  
+  // Check success notification
+  await expect(page.locator('.notification')).toContainText('Kết nối thành công');
+  
+  // Verify database (requires API call or direct DB query)
+  const response = await page.request.get('http://localhost:4000/api/users/vendor01/payment-status');
+  const data = await response.json();
+  expect(data.stripe_account_id).toMatch(/^acct_/);
+  expect(data.status).toBe('Connected');
+});
 ```
 
-#### Test Procedure
-1. Giả lập sự kiện từ Stripe (User update info trên cổng thanh toán)
-2. Server nhận Webhook chứa `stripe_id` mới hoặc thay đổi trạng thái
-3. Hệ thống tự động gọi `updateStripeIds`
-4. Kiểm tra Log và DB
-
-#### Expected Results
-✅ Server nhận Webhook: Trả về **200 OK** (Để Stripe không retry)  
-✅ Log ghi nhận:
-   ```
-   [INFO] Webhook received: event=customer.updated, customer=cus_123
-   [INFO] Sync data success: User ID 101 updated
-   ```
-✅ Database: Thông tin thanh toán của User được đồng bộ theo Stripe (email cập nhật)
-
----
-
-### [BE_Payment-22] ST_PAYMENT_UpdateStripeIds_Conflict
-
-**Test Case ID**: `ST_PAYMENT_UpdateStripeIds_Conflict`  
-**Objective**: Xử lý xung đột dữ liệu (Data Consistency)  
-**Type**: System Test (Validation)
-
-#### Preconditions
-- User A đang có `stripe_id = cus_A`
-
-#### Test Data
-```json
-{
-  "userId": "UserA",
-  "newStripeId": "cus_B"  // ID của User khác
-}
+### Cypress Example: Webhook Testing
+```javascript
+// Test: SYSTEM_PAY_WEBHOOK_01
+describe('Payment Webhook Handling', () => {
+  it('should process success webhook correctly', () => {
+    // Create order first
+    cy.request('POST', 'http://localhost:4000/api/orders', {
+      userId: 1,
+      items: [{ productId: 'book_01', quantity: 1 }],
+      total: 100000
+    }).then((response) => {
+      const orderId = response.body.id;
+      
+      // Simulate webhook from payment gateway
+      const payload = {
+        status: 'SUCCESS',
+        order_id: orderId,
+        signature: 'valid_signature_here'
+      };
+      
+      // Send webhook
+      cy.request('POST', 'http://localhost:4000/api/payment/webhook', payload)
+        .then((webhookResponse) => {
+          expect(webhookResponse.status).to.eq(200);
+          
+          // Check order status updated
+          cy.request(`http://localhost:4000/api/orders/${orderId}`)
+            .then((orderResponse) => {
+              expect(orderResponse.body.status).to.eq('PAID');
+            });
+        });
+    });
+  });
+  
+  it('should reject webhook with invalid signature', () => {
+    const payload = {
+      status: 'SUCCESS',
+      order_id: 'ORD_123',
+      signature: 'FAKE_SIGNATURE'
+    };
+    
+    cy.request({
+      method: 'POST',
+      url: 'http://localhost:4000/api/payment/webhook',
+      body: payload,
+      failOnStatusCode: false
+    }).then((response) => {
+      expect(response.status).to.be.oneOf([401, 403]);
+    });
+  });
+});
 ```
 
-#### Test Procedure
-1. User A đang có `stripe_id = cus_A`
-2. Gọi hàm update với `stripe_id = cus_B` (của User khác hoặc không tồn tại)
-3. Kiểm tra cơ chế validate
+### Node.js Script: Batch Import Test
+```javascript
+// Test: SYSTEM_PAY_IMPORT_01
+const fs = require('fs');
+const FormData = require('form-data');
+const axios = require('axios');
 
-#### Expected Results
-✅ Hệ thống phát hiện bất thường:
-   - **Nếu logic cho phép thay thế**: Update và log warning
-   - **Nếu ID thuộc user khác**: Báo lỗi **"Duplicate/Conflict"**  
-✅ Dữ liệu cũ không bị hỏng (Rollback nếu lỗi)  
-✅ Log:
-   ```
-   [WARNING] Stripe ID conflict: cus_B already belongs to UserB
-   ```
-
----
-
-### [BE_Payment-23] ST_PAYMENT_UpdateStripeIds_Null
-
-**Test Case ID**: `ST_PAYMENT_UpdateStripeIds_Null`  
-**Objective**: Kiểm thử trường hợp ngắt kết nối (Unlink)  
-**Type**: System Test (Null Checking)
-
-#### Preconditions
-- User đang có Stripe ID
-
-#### Test Data
-```json
-{
-  "userId": 101,
-  "stripeCustomerId": null
+async function testBatchImport() {
+  // Create CSV file
+  const csvContent = `Name,Price,Currency,Description
+Product 1,100000,VND,Test product 1
+Product 2,200000,VND,Test product 2
+Product 3,150000,VND,Test product 3
+...
+Product 50,500000,VND,Test product 50`;
+  
+  fs.writeFileSync('test_products.csv', csvContent);
+  
+  // Upload file
+  const form = new FormData();
+  form.append('file', fs.createReadStream('test_products.csv'));
+  
+  const response = await axios.post('http://localhost:4000/api/products/import', form, {
+    headers: form.getHeaders(),
+    auth: { username: 'admin', password: 'admin123' }
+  });
+  
+  console.log('Import response:', response.data);
+  // Expected: { success: 50, failed: 0, message: "Import thành công 50/50 bản ghi" }
+  
+  // Verify database
+  const dbResponse = await axios.get('http://localhost:4000/api/products?limit=50');
+  console.log('Total products:', dbResponse.data.length); // Should be 50
+  
+  // Cleanup
+  fs.unlinkSync('test_products.csv');
 }
+
+testBatchImport();
 ```
 
-#### Test Procedure
-1. User hủy liên kết thanh toán
-2. Gọi hàm `updateStripeIds` với giá trị `null` hoặc rỗng
-3. Kiểm tra DB
+---
 
-#### Expected Results
-✅ API trả về thành công (HTTP 200)  
-✅ Database: Cột `stripe_customer_id` trở về **NULL**  
-✅ Stripe Dashboard: Không còn liên kết metadata với User (hoặc metadata bị xóa)
+## Manual Testing Guide
+
+### Test SYSTEM_PAY_CONNECT_01: Stripe Connect Onboarding
+
+**Step-by-Step:**
+
+1. **Prepare Stripe Test Account**
+   - Create account at https://dashboard.stripe.com/test/
+   - Copy API keys to `.env` file
+
+2. **Login as Vendor**
+   - Navigate to http://localhost:3000/login
+   - Email: `vendor01@test.com`, Password: `Test1234!`
+
+3. **Initiate Connection**
+   - Go to Settings → Payment Settings
+   - Click "Kết nối thanh toán" button
+
+4. **Complete Stripe Onboarding**
+   - Browser redirects to Stripe Hosted Onboarding
+   - Fill test data:
+     - Business name: "Test Vendor 01"
+     - Bank routing: `110000000` (Stripe test routing number)
+     - Account number: `000123456789`
+   - Submit form
+
+5. **Verify Callback**
+   - Stripe redirects back to `/payment/callback`
+   - Check URL parameters: `?auth_code=ac_xxx&account_id=acct_xxx`
+
+6. **Check Database**
+   ```sql
+   SELECT id, email, stripe_account_id, status 
+   FROM users 
+   WHERE email = 'vendor01@test.com';
+   ```
+   Expected: `stripe_account_id` is populated, `status = 'Connected'`
+
+7. **Verify Stripe Dashboard**
+   - Login to Stripe Dashboard → Connect → Accounts
+   - Find account `acct_xxx`, check metadata contains `local_user_id`
 
 ---
 
-## Webhook Event Handling
+### Test SYSTEM_PAY_WEBHOOK_01: Payment Success Webhook
 
-### [BE_Payment-28] ST_PAYMENT_Webhook_Success
+**Step-by-Step:**
 
-**Test Case ID**: `ST_PAYMENT_Webhook_Success`  
-**Objective**: Xử lý sự kiện thanh toán thành công  
-**Type**: System Test (Gray-box)  
-**Technique**: Event-driven Testing
-
-#### Preconditions
-- Order `ORD_123` phải đang ở trạng thái `PENDING`
-
-#### Test Data
-```json
-{
-  "status": "SUCCESS",
-  "order_id": "ORD_123",
-  "signature": "valid_signature_hash"
-}
-```
-
-#### Test Procedure
-1. **Trigger**: Giả lập Request POST từ Gateway với payload hợp lệ + Signature đúng
-2. **Check API**: Kiểm tra phản hồi HTTP ngay lập tức
-3. **Check DB (Async)**: Chờ 2-5s, query DB xem trạng thái đơn `ORD_123`
-
-#### Expected Results
-✅ API: Trả về **200 OK** (Để Gateway không gửi lại)  
-✅ Database: Trạng thái Order chuyển từ `PENDING` → `PAID`  
-✅ System: Trigger gửi email xác nhận thanh toán tới user  
-✅ Log:
-   ```
-   [INFO] Webhook success: order_id=ORD_123, status=PAID
-   [INFO] Email sent to user@example.com
-   ```
-
----
-
-### [BE_Payment-29] ST_PAYMENT_Webhook_InvalidSignature
-
-**Test Case ID**: `ST_PAYMENT_Webhook_InvalidSignature`  
-**Objective**: Kiểm thử bảo mật (Fake Request)  
-**Type**: System Test (Security)  
-**Technique**: Validate Signature (Chữ ký số)
-
-#### Preconditions
-- Order tồn tại và đang `PENDING`
-
-#### Test Data
-```json
-{
-  "status": "SUCCESS",
-  "order_id": "ORD_123",
-  "signature": "Fake_Sig_123"  // Sai signature
-}
-```
-
-#### Test Procedure
-1. Gửi Request giống hệt `[BE_Payment-28]` nhưng sửa đổi 1 ký tự trong signature
-2. Check API: Quan sát phản hồi
-3. Check DB: Kiểm tra trạng thái đơn hàng
-
-#### Expected Results
-✅ API: Trả về **401 Unauthorized** hoặc **403 Forbidden**  
-✅ Database: Trạng thái đơn hàng **KHÔNG** đổi (Vẫn là `PENDING`)  
-✅ Log: Hệ thống ghi log cảnh báo tấn công giả mạo:
-   ```
-   [SECURITY] Invalid webhook signature: order_id=ORD_123, ip=192.168.1.100
+1. **Create Test Order**
+   ```sql
+   INSERT INTO orders (id, user_id, total, status) 
+   VALUES ('ORD_TEST_001', 1, 100000, 'PENDING');
    ```
 
----
-
-### [BE_Payment-30] ST_PAYMENT_Webhook_Duplicate
-
-**Test Case ID**: `ST_PAYMENT_Webhook_Duplicate`  
-**Objective**: Kiểm thử xử lý trùng lặp (Idempotency)  
-**Type**: System Test (Event Replay)
-
-#### Test Data
-```json
-{
-  "status": "SUCCESS",
-  "order_id": "ORD_456",
-  "signature": "valid_signature",
-  "idempotency_key": "webhook_12345"
-}
-```
-
-#### Test Procedure
-1. **Lần 1**: Gửi Webhook thành công cho `ORD_456`
-2. **Lần 2**: Gửi lại y chang Request đó (Simulate Gateway retry)
-3. Check DB: Kiểm tra lịch sử giao dịch
-
-#### Expected Results
-✅ **Lần 1**: Xử lý thành công, DB update, trả về **200 OK**  
-✅ **Lần 2**: API vẫn trả về **200 OK** (để báo Gateway đã nhận rồi),  
-   nhưng **KHÔNG** thực hiện logic update lần nữa  
-✅ Database: Chỉ có **1 record giao dịch** (không bị trùng lặp)  
-✅ Log:
-   ```
-   [INFO] Webhook duplicate detected: idempotency_key=webhook_12345, skipped
+2. **Calculate Signature**
+   ```javascript
+   const crypto = require('crypto');
+   const secret = process.env.STRIPE_WEBHOOK_SECRET;
+   const payload = JSON.stringify({
+     status: 'SUCCESS',
+     order_id: 'ORD_TEST_001'
+   });
+   const signature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+   console.log('Signature:', signature);
    ```
 
----
+3. **Send Webhook (Postman/CURL)**
+   ```bash
+   curl -X POST http://localhost:4000/api/payment/webhook \
+     -H "Content-Type: application/json" \
+     -H "X-Webhook-Signature: <calculated_signature>" \
+     -d '{
+       "status": "SUCCESS",
+       "order_id": "ORD_TEST_001"
+     }'
+   ```
 
-### [BE_Payment-31] ST_PAYMENT_Webhook_Failed
+4. **Check Response**
+   - Expect: HTTP 200 OK
 
-**Test Case ID**: `ST_PAYMENT_Webhook_Failed`  
-**Objective**: Xử lý sự kiện thanh toán thất bại  
-**Type**: System Test
+5. **Verify Database**
+   ```sql
+   SELECT status FROM orders WHERE id = 'ORD_TEST_001';
+   ```
+   Expected: `status = 'PAID'`
 
-#### Preconditions
-- Order đang `PENDING`
-
-#### Test Data
-```json
-{
-  "status": "FAILED",
-  "reason": "Insufficient funds",
-  "order_id": "ORD_789"
-}
-```
-
-#### Test Procedure
-1. Trigger: Giả lập Request từ Gateway với payload `status = FAILED`
-2. Check API: Kiểm tra phản hồi
-3. Check DB: Kiểm tra trạng thái đơn hàng
-
-#### Expected Results
-✅ API: Trả về **200 OK** (Đã nhận tin)  
-✅ Database: Trạng thái Order chuyển thành `CANCELED` hoặc `FAILED`  
-✅ UI/Notif: Gửi thông báo nhắc nhở user thanh toán lại:
-   > **"Thanh toán thất bại: Số dư không đủ. Vui lòng thử lại."**
+6. **Check Logs**
+   ```bash
+   tail -f logs/app.log | grep "ORD_TEST_001"
+   ```
+   Look for: `[INFO] Webhook success: order_id=ORD_TEST_001, status=PAID`
 
 ---
 
-## Test Execution Notes
+## Cross-Browser Testing Matrix
 
-### Environment Setup
-- **Stripe**: Use Stripe Test Mode with test API keys
-- **Database**: Use separate test database (auto-reset before each test suite)
-- **Network**: Use tools like `Postman`, `ngrok` for webhook testing
+| Test Case | Chrome 120+ | Firefox 120+ | Safari 17+ | Edge 120+ |
+|-----------|-------------|--------------|------------|-----------|
+| SYSTEM_PAY_CONNECT_01 | ✅ | ✅ | ✅ | ✅ |
+| SYSTEM_PAY_CONNECT_02 | ✅ | ✅ | ⚠️ (Safari may block popup) | ✅ |
+| SYSTEM_PAY_IMPORT_01 | ✅ | ✅ | ✅ | ✅ |
+| SYSTEM_PAY_WEBHOOK_01 | N/A (API only) | N/A | N/A | N/A |
 
-### Tools Recommended
-- **E2E Testing**: Cypress / Playwright
-- **API Testing**: Postman / Newman / REST Client
-- **Webhook Testing**: Stripe CLI (`stripe listen --forward-to localhost:3000/webhook`)
-- **Database**: pgAdmin / MySQL Workbench
-
-### Execution Order
-1. Run Integration Tests first (`payment.it.spec.ts`)
-2. Then run System Tests manually or via E2E framework
-3. Verify logs and database state after each test
+**Note**: Stripe Connect Onboarding uses popup windows - test popup blockers disabled.
 
 ---
 
-## Summary
+## Performance Requirements
 
-| Category | Total Tests |
-|----------|-------------|
-| Stripe Connect Account | 4 |
-| Batch Import Processing | 5 |
-| Stripe ID Synchronization | 4 |
-| Webhook Event Handling | 4 |
-| **TOTAL** | **17** |
+| Metric | Target | Test Case |
+|--------|--------|-----------|
+| Batch Import (50 rows) | < 5 seconds | SYSTEM_PAY_IMPORT_01 |
+| Batch Import (10K rows) | < 30 seconds | SYSTEM_PAY_IMPORT_02 |
+| Webhook Response Time | < 500ms | SYSTEM_PAY_WEBHOOK_01 |
+| Stripe Connect API Call | < 2 seconds | SYSTEM_PAY_CONNECT_01 |
+| Database Query (Sync) | < 200ms | SYSTEM_PAY_SYNC_01 |
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-01-15  
-**Author**: QA Automation Engineer
+## Environment Requirements
+
+| Requirement | Specification |
+|------------|---------------|
+| **Stripe Account** | Test Mode enabled |
+| **Stripe CLI** | v1.19.0+ (for webhook testing) |
+| **Node.js** | v18.0.0+ |
+| **Database** | PostgreSQL 15+ or MySQL 8+ |
+| **Backend** | NestJS on port 4000 |
+| **Frontend** | React/Next.js on port 3000 |
+
+---
+
+## Test Prioritization
+
+### P0 (Critical) - Must Pass Before Release
+- SYSTEM_PAY_CONNECT_01 (happy path)
+- SYSTEM_PAY_IMPORT_01 (baseline import)
+- SYSTEM_PAY_WEBHOOK_01 (payment success)
+- SYSTEM_PAY_WEBHOOK_02 (security validation)
+
+### P1 (High) - Important for Stability
+- SYSTEM_PAY_IMPORT_02 (load testing)
+- SYSTEM_PAY_SYNC_01 (data consistency)
+- SYSTEM_PAY_WEBHOOK_03 (idempotency)
+
+### P2 (Medium) - Edge Cases
+- SYSTEM_PAY_CONNECT_04 (error handling)
+- SYSTEM_PAY_IMPORT_03 (partial failure)
+- SYSTEM_PAY_SYNC_03 (conflict resolution)
+
+---
+
+## Notes
+
+- **SYSTEM_PAY_CONNECT_01**: Use Stripe test credentials only
+- **SYSTEM_PAY_IMPORT_02**: Monitor server resources during 10K row import
+- **SYSTEM_PAY_WEBHOOK_02**: Critical for preventing payment fraud
+- **SYSTEM_PAY_WEBHOOK_03**: Prevents duplicate charges when gateway retries
+- **Stripe CLI Tool**: Essential for local webhook testing (`stripe listen --forward-to localhost:4000/webhook`)
+- **Idempotency Keys**: Use UUID v4 or timestamp-based keys for webhook deduplication
+- **Security**: Always validate webhook signatures using HMAC SHA-256
+- **Test Database**: Use separate test database, reset before each test suite
+
+---
+
+## Related Documents
+
+- [Payment Unit Tests](../unit_test/payment.unit.spec.ts)
+- [Payment Integration Tests](../integration_test/payment.it.spec.ts)
+- [Stripe Connect Documentation](https://stripe.com/docs/connect)
+- [Stripe Webhook Best Practices](https://stripe.com/docs/webhooks/best-practices)
+
+---
+
+**Document Version**: 2.0 (Table Format)  
+**Last Updated**: December 18, 2025  
+**Test Framework**: Manual / Cypress / Playwright  
+**Maintained By**: Backend QA Team & Payment Integration Team
