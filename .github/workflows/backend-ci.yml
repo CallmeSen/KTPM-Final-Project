@@ -4,12 +4,12 @@ on:
   push:
     branches: [ "main", "QUY-TRÌNH-1", "QUY-TRÌNH-2", "QUY-TRÌNH-3", "QUY-TRÌNH-4", "SOURCE" ]
     paths:
-      - 'Backend/**'
+      - 'backend/**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
     branches: [ "main", "QUY-TRÌNH-1", "QUY-TRÌNH-2", "QUY-TRÌNH-3", "QUY-TRÌNH-4", "SOURCE" ]
     paths:
-      - 'Backend/**'
+      - 'backend/**'
       - '.github/workflows/backend-ci.yml'
 
 jobs:
@@ -27,16 +27,16 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: 'Backend/package-lock.json'
+        cache-dependency-path: 'backend/package-lock.json'
     - name: Install dependencies
-      working-directory: ./Backend
+      working-directory: ./backend
       run: npm ci
     - name: Code Quality - Lint # kiểm tra chất lượng mã nguồn
-      working-directory: ./Backend
+      working-directory: ./backend
       run: npm run lint
     - name: Build
-      working-directory: ./Backend
+      working-directory: ./backend
       run: npm run build --if-present
     - name: Run tests
-      working-directory: ./Backend
+      working-directory: ./backend
       run: npm test
