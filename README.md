@@ -493,12 +493,6 @@ Sau khi chạy seeder hoặc import dữ liệu mẫu:
   <img width="48%" alt="Screenshot 6" src="https://github.com/user-attachments/assets/58961658-93d2-4ff1-bab3-02eefd79743d" />
 </div>
 
-
-
-
-
-
-
 ## License 📄
 
 This project is licensed under the MIT License.
