@@ -5,7 +5,7 @@ import { CartItem } from 'src/modules/cart/entities/cart.items';
 
 @Resolver(() => Cart)
 export class CartResolver {
-  constructor(private readonly cartService: CartService) { }
+  constructor(private readonly cartService: CartService) {}
 
   @Mutation(() => Cart)
   async createCart(
@@ -28,25 +28,28 @@ export class CartResolver {
     @Args('bookId', { type: () => ID }) bookId: string,
     @Args('quantity', { type: () => Int, defaultValue: 1 }) quantity: number,
   ) {
-    return await this.cartService.createCartItem(cartId, userId, bookId, quantity);
+    return await this.cartService.createCartItem(
+      cartId,
+      userId,
+      bookId,
+      quantity,
+    );
   }
 
   // ...existing code...
 
-@Mutation(() => Boolean, { name: 'removeCartItem' })
-async removeCartItem(
-  @Args('cartItemId', { type: () => ID }) cartItemId: number,
-  @Args('userId', { type: () => ID }) userId: string,
-): Promise<boolean> {
-  return await this.cartService.removeCartItem(cartItemId, userId);
-}
+  @Mutation(() => Boolean, { name: 'removeCartItem' })
+  async removeCartItem(
+    @Args('cartItemId', { type: () => ID }) cartItemId: number,
+    @Args('userId', { type: () => ID }) userId: string,
+  ): Promise<boolean> {
+    return await this.cartService.removeCartItem(cartItemId, userId);
+  }
 
-// ...existing code... (không thay đổi gì khác)
+  // ...existing code... (không thay đổi gì khác)
 
   @Query(() => Int)
-  async countCartItems(
-    @Args('userId') userId: string,
-  ): Promise<number> {
+  async countCartItems(@Args('userId') userId: string): Promise<number> {
     return await this.cartService.countCartItems(userId);
   }
 
@@ -57,6 +60,4 @@ async removeCartItem(
     await this.cartService.clearCart(userId);
     return true;
   }
-
-  
 }

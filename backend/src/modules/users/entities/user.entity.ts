@@ -1,9 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { Cart } from 'src/modules/cart/entities/cart.entity';
-import { Payment } from 'src/modules/Payment/entity/payment.entity';
-import { Comment } from 'src/modules/comment/entities/comment.entity';
-
+// import { Payment } from 'src/modules/Payment/entity/payment.entity';
+// import { Comment } from 'src/modules/comment/entities/comment.entity';
 
 export enum UserStatus {
   ACTIVE = 'Active',
@@ -18,7 +24,6 @@ registerEnumType(UserStatus, {
 @ObjectType()
 @Entity()
 export class User {
-
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -33,7 +38,6 @@ export class User {
   @Field({ nullable: true })
   @Column({ default: 'Unknown' })
   address: string;
-
 
   @Field()
   @Column({ unique: true })
@@ -62,11 +66,11 @@ export class User {
   @OneToOne(() => Cart, (cart) => cart.user, { cascade: true })
   cart: Cart;
 
-  @OneToMany(() => Payment, payment => payment.user)
-  payments: Payment[];
+  // @OneToMany(() => Payment, (payment) => payment.user)
+  // payments: Payment[];
 
-  @OneToMany(() => Comment, (comment) => comment.user)
-  comments?: Comment[];
+  // @OneToMany(() => Comment, (comment) => comment.user)
+  // comments?: Comment[];
 
   @Field({ nullable: true })
   @Column({ nullable: true })
@@ -83,5 +87,4 @@ export class User {
   @Field({ nullable: true })
   @Column({ nullable: true })
   gender?: string;
-
 }

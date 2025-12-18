@@ -36,5 +36,4 @@ export class CreateBookInput {
 
   @Field(() => Float, { nullable: true })
   price?: number;
-
 }

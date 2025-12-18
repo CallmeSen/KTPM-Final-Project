@@ -10,16 +10,16 @@ import { databaseConfig } from 'src/config/db.config';
 import { UserModule } from 'src/modules/users/users.module';
 import { MailModule } from 'src/mails/mail.module';
 import { ConfigModule } from '@nestjs/config';
-import { PaymentModule } from 'src/modules/Payment/payment.module';
-import { NotificationModule } from 'src/modules/notification/notification.module';
+// import { PaymentModule } from 'src/modules/Payment/payment.module';
+// import { NotificationModule } from 'src/modules/notification/notification.module';
 import { LoggerMiddleware } from 'src/middleware/Logging-middleware';
 import { CacheModule } from '@nestjs/cache-manager';
-import { CommentModule } from 'src/modules/comment/comment.module';
+// import { CommentModule } from 'src/modules/comment/comment.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ChatModule } from 'src/chats/chat.module';
-import { OrdersModule } from './modules/orders/orders.module';
-import { CategoriesModule } from './modules/categories/categories.module';
-import { AuthorsModule } from 'src/modules/authors/authors.module';
+// import { OrdersModule } from './modules/orders/orders.module';
+// import { CategoriesModule } from './modules/categories/categories.module';
+// import { AuthorsModule } from 'src/modules/authors/authors.module';
 
 @Module({
   imports: [
@@ -34,9 +34,9 @@ import { AuthorsModule } from 'src/modules/authors/authors.module';
 
     CacheModule.register({
       isGlobal: true,
-      ttl: 300, 
+      ttl: 300,
     }),
-  
+
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -51,12 +51,12 @@ import { AuthorsModule } from 'src/modules/authors/authors.module';
     BooksModule,
     MailModule,
     ChatModule,
-    PaymentModule,
-    NotificationModule,
-    CommentModule,
-    OrdersModule,
-    AuthorsModule,
-    CategoriesModule,
+    // PaymentModule,
+    // NotificationModule,
+    // CommentModule,
+    // OrdersModule,
+    // AuthorsModule,
+    // CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

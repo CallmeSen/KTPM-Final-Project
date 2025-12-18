@@ -10,18 +10,17 @@ export class BooksService {
   constructor(
     @InjectRepository(Book)
     private readonly bookRepository: Repository<Book>,
-  ) { }
+  ) {}
 
   async create(createBookInput: CreateBookInput): Promise<Book> {
     const book = this.bookRepository.create(createBookInput);
     return await this.bookRepository.save(book);
   }
 
-
   async findOne(id: string): Promise<Book | null> {
     let book = await this.bookRepository.findOneBy({ id });
-    console.log(book)
-    return book
+    console.log(book);
+    return book;
   }
 
   async update(id: string, updateBookInput: UpdateBookInput): Promise<Book> {
@@ -42,7 +41,6 @@ export class BooksService {
   }
 
   async findAll(pagination) {
-
     const { page, limit } = pagination;
 
     const [items, total] = await this.bookRepository.findAndCount({
@@ -51,14 +49,22 @@ export class BooksService {
     });
 
     return {
-      data :items,
+      data: items,
       total,
       page,
       limit,
     };
   }
 
-  async Partition({ category, skip, take }: { category: string; skip: number; take: number }) {
+  async Partition({
+    category,
+    skip,
+    take,
+  }: {
+    category: string;
+    skip: number;
+    take: number;
+  }) {
     return this.bookRepository.find({
       where: { categories: category },
       skip,
@@ -93,32 +99,27 @@ export class BooksService {
   }
 
   async searchByTitle({ searchTerm }: { searchTerm: string }): Promise<Book[]> {
-
     const query = this.bookRepository.createQueryBuilder('book');
 
-    query.where('LOWER(book.title) LIKE :searchTerm', { searchTerm: `%${searchTerm.toLowerCase()}%` });
+    query.where('LOWER(book.title) LIKE :searchTerm', {
+      searchTerm: `%${searchTerm.toLowerCase()}%`,
+    });
 
     return query.getMany();
-
   }
 
   async getTopRatedBooks({ limit }: { limit: number }): Promise<Book[]> {
-
     const query = this.bookRepository.createQueryBuilder('book');
 
-    query.where('book.average_rating IS NOT NULL')
+    query
+      .where('book.average_rating IS NOT NULL')
       .orderBy('book.average_rating', 'DESC')
       .take(limit);
 
     return query.getMany();
-
   }
 
   randomPrice(min = 10, max = 500) {
     return parseFloat((Math.random() * (max - min) + min).toFixed(2));
   }
-
-  
-
 }
-

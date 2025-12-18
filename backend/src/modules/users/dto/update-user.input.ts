@@ -8,7 +8,6 @@ export class UpdateUserDto {
   @Field({ nullable: true })
   firstName?: string;
 
-
   @Field({ nullable: true })
   lastName?: string;
 
@@ -23,6 +22,4 @@ export class UpdateUserDto {
 
   @Field({ nullable: true })
   email?: string;
-
-
 }
