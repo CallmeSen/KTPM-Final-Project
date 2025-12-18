@@ -1,0 +1,36 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ "main", "QUY-TRINH-1", "QUY-TRINH-2", "QUY-TRINH-3", "QUY-TRINH-4", "SOURCE" ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ "main", "QUY-TRINH-1", "QUY-TRINH-2", "QUY-TRINH-3", "QUY-TRINH-4", "SOURCE" ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.19.0]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Code Quality - Lint
+      run: npm run lint
+    - name: Build
+      run: npm run build --if-present
+    - name: Run tests
+      run: npm test
