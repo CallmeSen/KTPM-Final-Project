@@ -96,15 +96,27 @@ describe('Notification Module - Integration Tests (Get Operations)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         { provide: 'NotificationService', useClass: MockNotificationService },
-        { provide: getRepositoryToken(NotificationEntity), useClass: MockNotificationRepository },
-        { provide: getRepositoryToken(UserEntity), useClass: MockUserRepository },
+        {
+          provide: getRepositoryToken(NotificationEntity),
+          useClass: MockNotificationRepository,
+        },
+        {
+          provide: getRepositoryToken(UserEntity),
+          useClass: MockUserRepository,
+        },
         { provide: 'AuthGuard', useClass: MockAuthGuard },
       ],
     }).compile();
 
-    notificationService = module.get<MockNotificationService>('NotificationService');
-    notificationRepository = module.get<MockNotificationRepository>(getRepositoryToken(NotificationEntity));
-    userRepository = module.get<MockUserRepository>(getRepositoryToken(UserEntity));
+    notificationService = module.get<MockNotificationService>(
+      'NotificationService',
+    );
+    notificationRepository = module.get<MockNotificationRepository>(
+      getRepositoryToken(NotificationEntity),
+    );
+    userRepository = module.get<MockUserRepository>(
+      getRepositoryToken(UserEntity),
+    );
     authGuard = module.get<MockAuthGuard>('AuthGuard');
 
     jest.clearAllMocks();
@@ -177,15 +189,18 @@ describe('Notification Module - Integration Tests (Get Operations)', () => {
       expect(result.data[0].id).toBe('noti3');
       expect(result.data[1].id).toBe('noti2');
       expect(result.data[2].id).toBe('noti1');
-      
+
       // Verify descending order
       expect(result.data[0].createdAt > result.data[1].createdAt).toBe(true);
       expect(result.data[1].createdAt > result.data[2].createdAt).toBe(true);
-      
-      expect(notificationService.getNotifications).toHaveBeenCalledWith(userId, {
-        sortBy: 'createdAt',
-        order: 'DESC',
-      });
+
+      expect(notificationService.getNotifications).toHaveBeenCalledWith(
+        userId,
+        {
+          sortBy: 'createdAt',
+          order: 'DESC',
+        },
+      );
     });
   });
 
@@ -200,28 +215,34 @@ describe('Notification Module - Integration Tests (Get Operations)', () => {
       const totalNotifications = 20;
 
       // Mock Page 1 (Notifications 20 -> 11)
-      const page1Notifications: Notification[] = Array.from({ length: 10 }, (_, i) => ({
-        id: `noti${20 - i}`,
-        userId: 'userB',
-        title: `Notification ${20 - i}`,
-        message: `Created on day ${20 - i}`,
-        type: NotificationType.SYSTEM,
-        isRead: false,
-        createdAt: new Date(`2024-01-${20 - i}T10:00:00`),
-        updatedAt: new Date(`2024-01-${20 - i}T10:00:00`),
-      }));
+      const page1Notifications: Notification[] = Array.from(
+        { length: 10 },
+        (_, i) => ({
+          id: `noti${20 - i}`,
+          userId: 'userB',
+          title: `Notification ${20 - i}`,
+          message: `Created on day ${20 - i}`,
+          type: NotificationType.SYSTEM,
+          isRead: false,
+          createdAt: new Date(`2024-01-${20 - i}T10:00:00`),
+          updatedAt: new Date(`2024-01-${20 - i}T10:00:00`),
+        }),
+      );
 
       // Mock Page 2 (Notifications 10 -> 1)
-      const page2Notifications: Notification[] = Array.from({ length: 10 }, (_, i) => ({
-        id: `noti${10 - i}`,
-        userId: 'userB',
-        title: `Notification ${10 - i}`,
-        message: `Created on day ${10 - i}`,
-        type: NotificationType.SYSTEM,
-        isRead: false,
-        createdAt: new Date(`2024-01-${10 - i}T10:00:00`),
-        updatedAt: new Date(`2024-01-${10 - i}T10:00:00`),
-      }));
+      const page2Notifications: Notification[] = Array.from(
+        { length: 10 },
+        (_, i) => ({
+          id: `noti${10 - i}`,
+          userId: 'userB',
+          title: `Notification ${10 - i}`,
+          message: `Created on day ${10 - i}`,
+          type: NotificationType.SYSTEM,
+          isRead: false,
+          createdAt: new Date(`2024-01-${10 - i}T10:00:00`),
+          updatedAt: new Date(`2024-01-${10 - i}T10:00:00`),
+        }),
+      );
 
       authGuard.canActivate.mockResolvedValue(true);
 
@@ -276,9 +297,9 @@ describe('Notification Module - Integration Tests (Get Operations)', () => {
       expect(resultPage2.page).toBe(2);
 
       // Verify no duplication between pages
-      const page1Ids = resultPage1.data.map(n => n.id);
-      const page2Ids = resultPage2.data.map(n => n.id);
-      const intersection = page1Ids.filter(id => page2Ids.includes(id));
+      const page1Ids = resultPage1.data.map((n) => n.id);
+      const page2Ids = resultPage2.data.map((n) => n.id);
+      const intersection = page1Ids.filter((id) => page2Ids.includes(id));
       expect(intersection).toHaveLength(0);
     });
   });
@@ -321,10 +342,13 @@ describe('Notification Module - Integration Tests (Get Operations)', () => {
       expect(result.total).toBe(0);
       expect(result.page).toBe(1);
       expect(result.limit).toBe(10);
-      expect(notificationService.getNotifications).toHaveBeenCalledWith(userId, {
-        page: 1,
-        limit: 10,
-      });
+      expect(notificationService.getNotifications).toHaveBeenCalledWith(
+        userId,
+        {
+          page: 1,
+          limit: 10,
+        },
+      );
     });
   });
 });

@@ -1,20 +1,25 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
-@ObjectType() 
+@ObjectType()
 @Entity('notifications')
 export class Notification {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Field({ nullable: true })      
-  @Column({ nullable: true ,default: null})      
+  @Field({ nullable: true })
+  @Column({ nullable: true, default: null })
   userId?: string;
 
   @Field()
   @Column()
-  title: string; 
+  title: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })

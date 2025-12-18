@@ -1,9 +1,14 @@
-import { IsUUID, IsArray, ValidateNested, IsNotEmpty, IsDateString } from 'class-validator';
+import {
+  IsUUID,
+  IsArray,
+  ValidateNested,
+  IsNotEmpty,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ItemDto } from 'src/modules/Payment/dto/Item.dto';
 
 export class OrderDto {
-
   @IsUUID()
   @IsNotEmpty()
   userId: string;
@@ -16,5 +21,4 @@ export class OrderDto {
   @ValidateNested({ each: true })
   @Type(() => ItemDto)
   items: ItemDto[];
-  
 }

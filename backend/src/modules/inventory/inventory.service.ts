@@ -5,7 +5,6 @@ import { Inventory } from './entities/inventory.entity';
 import { CreateInventoryInput } from './dto/create-inventory.input';
 import type { UpdateInventoryInput } from 'src/modules/inventory/dto/update-inventory.input';
 
-
 @Injectable()
 export class InventoryService {
   constructor(
@@ -30,7 +29,7 @@ export class InventoryService {
     return inventory;
   }
 
-  async update(id: string, invetory:number) {
+  async update(id: string, invetory: number) {
     const inventory = await this.findOne(id);
     Object.assign(inventory, invetory);
     return this.inventoryRepository.save(inventory);

@@ -12,6 +12,4 @@ export class Inventory {
   @Field(() => Int)
   @Column({ type: 'int', default: 1 })
   quantity: number;
-
-
 }

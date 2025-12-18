@@ -5,13 +5,12 @@ import { CreateNotificationInput } from 'src/modules/notification/dto/create-not
 
 @Resolver(() => Notification)
 export class NotificationResolver {
-  
   constructor(private readonly notificationService: NotificationService) {}
 
- @Mutation(() => Notification)
- 
+  @Mutation(() => Notification)
   sendNotification(
-    @Args('createNotificationInput') createNotificationInput: CreateNotificationInput,
+    @Args('createNotificationInput')
+    createNotificationInput: CreateNotificationInput,
   ) {
     return this.notificationService.sendNotification(createNotificationInput);
   }
@@ -25,5 +24,4 @@ export class NotificationResolver {
   async countNotifications(@Args('userId') userId: string) {
     return await this.notificationService.countNotificationsByUser(userId);
   }
-
 }

@@ -2,7 +2,6 @@ import { InputType, Int, Field } from '@nestjs/graphql';
 
 @InputType()
 export class CreateCommentInput {
-  
   @Field()
   userId?: string;
 
@@ -12,6 +11,6 @@ export class CreateCommentInput {
   @Field()
   content: string;
 
-   @Field({ nullable: true })
-  parentId?: string; 
+  @Field({ nullable: true })
+  parentId?: string;
 }

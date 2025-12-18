@@ -9,7 +9,9 @@ export class InventoryResolver {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Mutation(() => Inventory)
-  createInventory(@Args('createInventoryInput') createInventoryInput: CreateInventoryInput) {
+  createInventory(
+    @Args('createInventoryInput') createInventoryInput: CreateInventoryInput,
+  ) {
     return this.inventoryService.create(createInventoryInput);
   }
 
@@ -24,8 +26,10 @@ export class InventoryResolver {
   }
 
   @Mutation(() => Inventory)
-  updateInventory(@Args('updateInventoryInput') updateInventoryInput: UpdateInventoryInput) {
-    return this.inventoryService.update("211", updateInventoryInput.quantity);
+  updateInventory(
+    @Args('updateInventoryInput') updateInventoryInput: UpdateInventoryInput,
+  ) {
+    return this.inventoryService.update('211', updateInventoryInput.quantity);
   }
 
   @Mutation(() => Inventory)

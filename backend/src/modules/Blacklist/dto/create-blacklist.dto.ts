@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateBlacklistDto {
-    @IsNotEmpty()
-    @IsString()
-    accesstoken: string;
+  @IsNotEmpty()
+  @IsString()
+  accesstoken: string;
 }

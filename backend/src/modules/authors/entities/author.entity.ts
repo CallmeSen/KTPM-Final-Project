@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-
 @Entity('authors')
 export class Author {
   @PrimaryGeneratedColumn('uuid')
@@ -21,7 +20,7 @@ export class Author {
 
   @Column({ length: 150 })
   address: string;
-   
+
   @CreateDateColumn()
   createdAt: Date;
 

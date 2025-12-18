@@ -13,7 +13,9 @@ export class BlacklistService {
   ) {}
 
   async create(createBlacklistDto: CreateBlacklistDto) {
-    const token = this.blacklistRepo.create(createBlacklistDto as Partial<Blacklist>);
+    const token = this.blacklistRepo.create(
+      createBlacklistDto as Partial<Blacklist>,
+    );
     return await this.blacklistRepo.save(token);
   }
 

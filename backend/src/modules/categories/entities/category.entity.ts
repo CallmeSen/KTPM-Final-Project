@@ -12,10 +12,10 @@ export class Category {
   id: number;
 
   @Column({ length: 150 })
-  name: string; 
+  name: string;
 
   @Column({ unique: true, length: 100 })
-  slug: string; 
+  slug: string;
 
   @Column({ type: 'text', nullable: true })
   description?: string;

@@ -143,20 +143,40 @@ describe('Comment Module - Integration Tests', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         { provide: 'CommentService', useClass: MockCommentService },
-        { provide: getRepositoryToken(CommentEntity), useClass: MockCommentRepository },
-        { provide: getRepositoryToken(BookEntity), useClass: MockBookRepository },
-        { provide: getRepositoryToken(UserEntity), useClass: MockUserRepository },
-        { provide: getRepositoryToken(CommentLikeEntity), useClass: MockCommentLikeRepository },
+        {
+          provide: getRepositoryToken(CommentEntity),
+          useClass: MockCommentRepository,
+        },
+        {
+          provide: getRepositoryToken(BookEntity),
+          useClass: MockBookRepository,
+        },
+        {
+          provide: getRepositoryToken(UserEntity),
+          useClass: MockUserRepository,
+        },
+        {
+          provide: getRepositoryToken(CommentLikeEntity),
+          useClass: MockCommentLikeRepository,
+        },
         { provide: 'AuthGuard', useClass: MockAuthGuard },
         { provide: 'RolesGuard', useClass: MockRolesGuard },
       ],
     }).compile();
 
     commentService = module.get<MockCommentService>('CommentService');
-    commentRepository = module.get<MockCommentRepository>(getRepositoryToken(CommentEntity));
-    bookRepository = module.get<MockBookRepository>(getRepositoryToken(BookEntity));
-    userRepository = module.get<MockUserRepository>(getRepositoryToken(UserEntity));
-    commentLikeRepository = module.get<MockCommentLikeRepository>(getRepositoryToken(CommentLikeEntity));
+    commentRepository = module.get<MockCommentRepository>(
+      getRepositoryToken(CommentEntity),
+    );
+    bookRepository = module.get<MockBookRepository>(
+      getRepositoryToken(BookEntity),
+    );
+    userRepository = module.get<MockUserRepository>(
+      getRepositoryToken(UserEntity),
+    );
+    commentLikeRepository = module.get<MockCommentLikeRepository>(
+      getRepositoryToken(CommentLikeEntity),
+    );
     authGuard = module.get<MockAuthGuard>('AuthGuard');
     rolesGuard = module.get<MockRolesGuard>('RolesGuard');
 
@@ -332,7 +352,7 @@ describe('Comment Module - Integration Tests', () => {
       // Assert
       expect(result.data[0].id).toBe('A');
       expect(result.data[0].children).toHaveLength(2);
-      expect(result.data[0].children.map(c => c.id)).toEqual(['B1', 'B2']);
+      expect(result.data[0].children.map((c) => c.id)).toEqual(['B1', 'B2']);
       expect(result.data[0].children[0].parentId).toBe('A');
       expect(result.data[0].children[1].parentId).toBe('A');
     });
@@ -662,11 +682,19 @@ describe('Comment Module - Integration Tests', () => {
       });
 
       // Act
-      const result = await commentService.updateComment(commentId, updateDto, userId);
+      const result = await commentService.updateComment(
+        commentId,
+        updateDto,
+        userId,
+      );
 
       // Assert
       expect(result.content).toBe('Mới');
-      expect(commentService.updateComment).toHaveBeenCalledWith(commentId, updateDto, userId);
+      expect(commentService.updateComment).toHaveBeenCalledWith(
+        commentId,
+        updateDto,
+        userId,
+      );
     });
   });
 
@@ -694,12 +722,12 @@ describe('Comment Module - Integration Tests', () => {
       });
 
       // Act & Assert
-      await expect(commentService.updateComment(commentId, updateDto, userId))
-        .rejects
-        .toMatchObject({
-          statusCode: 403,
-          message: 'Bạn không có quyền chỉnh sửa comment này',
-        });
+      await expect(
+        commentService.updateComment(commentId, updateDto, userId),
+      ).rejects.toMatchObject({
+        statusCode: 403,
+        message: 'Bạn không có quyền chỉnh sửa comment này',
+      });
     });
   });
 
@@ -720,12 +748,12 @@ describe('Comment Module - Integration Tests', () => {
       });
 
       // Act & Assert
-      await expect(commentService.updateComment(commentId, updateDto, userId))
-        .rejects
-        .toMatchObject({
-          statusCode: 404,
-          message: 'Không tìm thấy bình luận',
-        });
+      await expect(
+        commentService.updateComment(commentId, updateDto, userId),
+      ).rejects.toMatchObject({
+        statusCode: 404,
+        message: 'Không tìm thấy bình luận',
+      });
     });
   });
 
@@ -757,11 +785,19 @@ describe('Comment Module - Integration Tests', () => {
       commentRepository.softDelete.mockResolvedValue({ affected: 1 });
 
       // Act
-      const result = await commentService.removeComment(commentId, userId, UserRole.USER);
+      const result = await commentService.removeComment(
+        commentId,
+        userId,
+        UserRole.USER,
+      );
 
       // Assert
       expect(result.message).toBe('Xóa thành công');
-      expect(commentService.removeComment).toHaveBeenCalledWith(commentId, userId, UserRole.USER);
+      expect(commentService.removeComment).toHaveBeenCalledWith(
+        commentId,
+        userId,
+        UserRole.USER,
+      );
     });
   });
 
@@ -790,11 +826,19 @@ describe('Comment Module - Integration Tests', () => {
       commentRepository.softDelete.mockResolvedValue({ affected: 1 });
 
       // Act
-      const result = await commentService.removeComment(commentId, adminId, UserRole.ADMIN);
+      const result = await commentService.removeComment(
+        commentId,
+        adminId,
+        UserRole.ADMIN,
+      );
 
       // Assert
       expect(result.message).toBe('Đã xóa bình luận');
-      expect(commentService.removeComment).toHaveBeenCalledWith(commentId, adminId, UserRole.ADMIN);
+      expect(commentService.removeComment).toHaveBeenCalledWith(
+        commentId,
+        adminId,
+        UserRole.ADMIN,
+      );
     });
   });
 
@@ -821,12 +865,12 @@ describe('Comment Module - Integration Tests', () => {
       });
 
       // Act & Assert
-      await expect(commentService.removeComment(commentId, userId, UserRole.USER))
-        .rejects
-        .toMatchObject({
-          statusCode: 403,
-          message: 'Bạn không có quyền thực hiện hành động này',
-        });
+      await expect(
+        commentService.removeComment(commentId, userId, UserRole.USER),
+      ).rejects.toMatchObject({
+        statusCode: 403,
+        message: 'Bạn không có quyền thực hiện hành động này',
+      });
     });
   });
 
@@ -846,12 +890,12 @@ describe('Comment Module - Integration Tests', () => {
       });
 
       // Act & Assert
-      await expect(commentService.removeComment(commentId, userId, UserRole.USER))
-        .rejects
-        .toMatchObject({
-          statusCode: 404,
-          message: 'Bình luận không tồn tại',
-        });
+      await expect(
+        commentService.removeComment(commentId, userId, UserRole.USER),
+      ).rejects.toMatchObject({
+        statusCode: 404,
+        message: 'Bình luận không tồn tại',
+      });
     });
   });
 
@@ -902,7 +946,10 @@ describe('Comment Module - Integration Tests', () => {
       // Assert
       expect(result.liked).toBe(true);
       expect(result.count).toBe(1);
-      expect(commentService.likeComment).toHaveBeenCalledWith(commentId, userId);
+      expect(commentService.likeComment).toHaveBeenCalledWith(
+        commentId,
+        userId,
+      );
     });
   });
 
@@ -947,7 +994,10 @@ describe('Comment Module - Integration Tests', () => {
       // Assert
       expect(result.liked).toBe(false);
       expect(result.count).toBe(0);
-      expect(commentService.likeComment).toHaveBeenCalledWith(commentId, userId);
+      expect(commentService.likeComment).toHaveBeenCalledWith(
+        commentId,
+        userId,
+      );
     });
   });
 
@@ -967,12 +1017,12 @@ describe('Comment Module - Integration Tests', () => {
       });
 
       // Act & Assert
-      await expect(commentService.likeComment(commentId, userId))
-        .rejects
-        .toMatchObject({
-          statusCode: 404,
-          message: 'Comment không tồn tại',
-        });
+      await expect(
+        commentService.likeComment(commentId, userId),
+      ).rejects.toMatchObject({
+        statusCode: 404,
+        message: 'Comment không tồn tại',
+      });
     });
   });
 });

@@ -26,15 +26,10 @@ export class CreateBookInput {
   published_year?: number;
 
   @Field(() => Float, { nullable: true })
-
-
   @Field(() => Int, { nullable: true })
   num_pages?: number;
 
   @Field(() => Int, { nullable: true })
-
-
   @Field(() => Float, { nullable: true })
   price?: number;
-
 }

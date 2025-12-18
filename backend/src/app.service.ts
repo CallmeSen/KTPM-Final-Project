@@ -4,9 +4,5 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class AppService {
-  constructor(
-
-  ) {}
-
-
+  constructor() {}
 }

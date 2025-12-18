@@ -11,41 +11,35 @@ import * as csv from 'csv-parser';
 @Injectable()
 export class PaymentService {
   constructor(
-
     @Inject('STRIPE_CLIENT') private readonly stripe: Stripe,
     @InjectRepository(Payment)
-
     private readonly paymentRes: Repository<Payment>,
 
     @InjectRepository(User)
     private readonly userRes: Repository<Payment>,
 
-
     @InjectRepository(User) readonly UserRes: Repository<User>,
-
 
     private readonly ordersService: OrdersService,
 
     private readonly notificationService: NotificationService,
-
-  ) { }
-
+  ) {}
 
   async getProductByTitle(title: string) {
     const cleanTitle = title.trim();
 
     const products = await this.stripe.products.search({
-      query: `name:"${cleanTitle}"`
+      query: `name:"${cleanTitle}"`,
     });
 
-    console.log(" Stripe returned:", products.data);
+    console.log(' Stripe returned:', products.data);
 
     if (products.data.length === 0) {
       return { message: 'No product found' };
     }
 
     return {
-      id: products.data[0].id
+      id: products.data[0].id,
     };
   }
 
@@ -54,15 +48,12 @@ export class PaymentService {
     cardId: string,
     items: { id_stripe: string; quantity: number }[],
   ) {
-
-
     const lineItems: Stripe.PaymentLinkCreateParams.LineItem[] = [];
 
     for (const item of items) {
-
       const product = await this.stripe.products.retrieve(item.id_stripe);
 
-      console.log(product)
+      console.log(product);
 
       if (!product.default_price) {
         throw new Error(`Product ${item.id_stripe} has no default price`);
@@ -77,18 +68,16 @@ export class PaymentService {
       });
     }
 
-
     const paymentLink = await this.stripe.paymentLinks.create({
       line_items: lineItems,
       metadata: {
         cart_id: cardId,
-        date: date
+        date: date,
       },
     });
 
     return { url: paymentLink.url };
   }
-
 
   async createPayment(
     cartId: string,
@@ -117,69 +106,71 @@ export class PaymentService {
     return await this.paymentRes.save(payment);
   }
 
- 
- async refundPayment(
-  paymentIntentId: string,
-  reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer',
-  email?: string
-)
-{
-  try {
-    // Tìm user theo email
-    const user = await this.UserRes.findOne({ where: { email } });
+  async refundPayment(
+    paymentIntentId: string,
+    reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer',
+    email?: string,
+  ) {
+    try {
+      // Tìm user theo email
+      const user = await this.UserRes.findOne({ where: { email } });
 
-    if (!user) {
-      throw new Error(`Không tìm thấy người dùng với email: ${email}`);
+      if (!user) {
+        throw new Error(`Không tìm thấy người dùng với email: ${email}`);
+      }
+
+      // Lấy thông tin PaymentIntent từ Stripe
+      const paymentIntent =
+        await this.stripe.paymentIntents.retrieve(paymentIntentId);
+      if (!paymentIntent || !paymentIntent.latest_charge) {
+        throw new Error('Payment Intent không hợp lệ hoặc chưa có charge');
+      }
+
+      const chargeId = paymentIntent.latest_charge as string;
+
+      // Gửi yêu cầu refund toàn bộ
+      const refund = await this.stripe.refunds.create({
+        charge: chargeId,
+        reason,
+      });
+
+      // Cập nhật trạng thái đơn hàng
+      await this.ordersService.updateStatusByPaymentIntent(
+        paymentIntentId,
+        'refunded',
+      );
+
+      await this.notificationService.sendNotification({
+        userId: user.id,
+        title: `Đơn hàng của bạn đã được hoàn tiền thành công`,
+        message: `Đơn hàng của bạn là đã được hoàn tiền`,
+      });
+
+      //  Ghi log hoặc gửi mail cho user
+      console.log(
+        `Refund thành công cho user ${user.email}, order ${paymentIntentId}`,
+      );
+
+      // Trả kết quả
+      return {
+        success: true,
+        message: 'Refund created and order status updated successfully',
+        data: refund,
+        user,
+      };
+    } catch (error: any) {
+      console.error('Refund error:', error);
+      return {
+        success: false,
+        message: error.message || 'Refund failed',
+      };
     }
-
-    // Lấy thông tin PaymentIntent từ Stripe
-    const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
-    if (!paymentIntent || !paymentIntent.latest_charge) {
-      throw new Error('Payment Intent không hợp lệ hoặc chưa có charge');
-    }
-
-    const chargeId = paymentIntent.latest_charge as string;
-
-    // Gửi yêu cầu refund toàn bộ
-    const refund = await this.stripe.refunds.create({
-      charge: chargeId,
-      reason,
-    });
-
-    // Cập nhật trạng thái đơn hàng
-    await this.ordersService.updateStatusByPaymentIntent(paymentIntentId, "refunded");
-
-    await this.notificationService.sendNotification({
-            userId: user.id,
-            title: `Đơn hàng của bạn đã được hoàn tiền thành công`,
-            message: `Đơn hàng của bạn là đã được hoàn tiền`,
-    });
-
-    //  Ghi log hoặc gửi mail cho user
-    console.log(`Refund thành công cho user ${user.email}, order ${paymentIntentId}`);
-
-    // Trả kết quả
-    return {
-      success: true,
-      message: 'Refund created and order status updated successfully',
-      data: refund,
-      user,
-    };
-
-  } catch (error: any) {
-    console.error('Refund error:', error);
-    return {
-      success: false,
-      message: error.message || 'Refund failed',
-    };
   }
-}
 
-async importProductsFromFile(filePath: string) {
+  async importProductsFromFile(filePath: string) {
     const results: any[] = [];
 
     return new Promise((resolve, reject) => {
-
       fs.createReadStream(filePath)
         .pipe(csv({ mapHeaders: ({ header }) => header.toLowerCase().trim() }))
         .on('data', (row) => results.push(row))
@@ -187,7 +178,7 @@ async importProductsFromFile(filePath: string) {
           const createdProducts: Stripe.Response<Stripe.Product>[] = [];
 
           for (const row of results) {
-            console.log("Row from CSV:", row);
+            console.log('Row from CSV:', row);
             const product = await this.stripe.products.create({
               name: row.title,
               active: true,
@@ -210,7 +201,4 @@ async importProductsFromFile(filePath: string) {
         .on('error', (err) => reject(err));
     });
   }
-
-
 }
-

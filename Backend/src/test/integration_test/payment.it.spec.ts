@@ -403,11 +403,9 @@ describe('Payment Module - Integration Tests (Excel-based)', () => {
       });
 
       // Act
-      const result = await service.createPaymentLink(
-        '2025-01-01',
-        'cart123',
-        [{ id_stripe: 'prod_123', quantity: 1 }],
-      );
+      const result = await service.createPaymentLink('2025-01-01', 'cart123', [
+        { id_stripe: 'prod_123', quantity: 1 },
+      ]);
 
       // Assert
       expect(result.url).toMatch(/^https:\/\/checkout\.stripe\.com/);
@@ -501,9 +499,7 @@ describe('Payment Module - Integration Tests (Excel-based)', () => {
   describe('[BE_Payment-27] IT_PAYMENT_GetProductStripe_AuthFail', () => {
     it('should log authentication error with invalid Stripe API key', async () => {
       // Arrange
-      const consoleErrorSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation();
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       stripe.products.retrieve.mockRejectedValue({
         type: 'StripeAuthenticationError',
@@ -635,11 +631,9 @@ describe('Payment Module - Integration Tests (Excel-based)', () => {
         url: 'https://checkout.stripe.com/pay',
       });
 
-      const result = await service.createPaymentLink(
-        '2025-01-01',
-        'cart123',
-        [{ id_stripe: 'prod_123', quantity: 1 }],
-      );
+      const result = await service.createPaymentLink('2025-01-01', 'cart123', [
+        { id_stripe: 'prod_123', quantity: 1 },
+      ]);
 
       expect(result.url).toContain('stripe.com');
     });

@@ -1,9 +1,8 @@
 import { IsString, IsUUID, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class ItemDto {
-
   @IsString()
-  title: string
+  title: string;
 
   @IsNotEmpty()
   @IsNumber()

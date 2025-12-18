@@ -4,22 +4,19 @@ import { AuthService } from 'src/modules/auth/auth.service';
 import { User } from 'src/modules/users/entities/user.entity';
 
 function generateOtp(): string {
-  return (Math.floor(100000 + Math.random() * 900000)).toString();
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 @Injectable()
 export class MailService {
-
   constructor(
     private readonly mailerService: MailerService,
 
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
-
-  ) { }
+  ) {}
 
   async sendUserConfirmation(user: User): Promise<void> {
-
     try {
       await this.mailerService.sendMail({
         to: user.email,
@@ -31,7 +28,6 @@ export class MailService {
         },
       });
 
-
       console.log('Confirmation email sent to:', user.email);
     } catch (error) {
       console.error('Failed to send confirmation email:', error);
@@ -39,11 +35,9 @@ export class MailService {
   }
 
   async sendPasswordResetOtp(email: string): Promise<void> {
-
     const otp = generateOtp();
 
     try {
-
       await this.mailerService.sendMail({
         to: email,
         from: 'Bookstore',
@@ -57,11 +51,8 @@ export class MailService {
       });
 
       await this.authService.savePostcode(email, otp);
-
-
     } catch (error) {
       console.error('Failed to send reset OTP:', error);
     }
-
   }
 }

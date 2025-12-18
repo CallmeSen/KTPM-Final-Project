@@ -55,12 +55,19 @@ describe('Notification Module - Unit Tests (Count Logic)', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         { provide: 'NotificationService', useClass: MockNotificationService },
-        { provide: getRepositoryToken(NotificationEntity), useClass: MockNotificationRepository },
+        {
+          provide: getRepositoryToken(NotificationEntity),
+          useClass: MockNotificationRepository,
+        },
       ],
     }).compile();
 
-    notificationService = module.get<MockNotificationService>('NotificationService');
-    notificationRepository = module.get<MockNotificationRepository>(getRepositoryToken(NotificationEntity));
+    notificationService = module.get<MockNotificationService>(
+      'NotificationService',
+    );
+    notificationRepository = module.get<MockNotificationRepository>(
+      getRepositoryToken(NotificationEntity),
+    );
 
     jest.clearAllMocks();
   });
@@ -77,17 +84,23 @@ describe('Notification Module - Unit Tests (Count Logic)', () => {
       notificationRepository.find.mockResolvedValue([]);
       notificationRepository.count.mockResolvedValue(0);
 
-      notificationService.countNotifications.mockImplementation(async (userId: string) => {
-        const notifications = await notificationRepository.find({ where: { userId } });
-        return notifications.length;
-      });
+      notificationService.countNotifications.mockImplementation(
+        async (userId: string) => {
+          const notifications = await notificationRepository.find({
+            where: { userId },
+          });
+          return notifications.length;
+        },
+      );
 
       // Act
       const result = await notificationService.countNotifications(userId);
 
       // Assert
       expect(result).toBe(0);
-      expect(notificationService.countNotifications).toHaveBeenCalledWith(userId);
+      expect(notificationService.countNotifications).toHaveBeenCalledWith(
+        userId,
+      );
       expect(typeof result).toBe('number');
     });
 
@@ -100,7 +113,9 @@ describe('Notification Module - Unit Tests (Count Logic)', () => {
       notificationService.countNotifications.mockResolvedValue(0);
 
       // Act & Assert
-      await expect(notificationService.countNotifications(userId)).resolves.toBe(0);
+      await expect(
+        notificationService.countNotifications(userId),
+      ).resolves.toBe(0);
     });
   });
 
@@ -170,15 +185,17 @@ describe('Notification Module - Unit Tests (Count Logic)', () => {
       // Mock count with WHERE status = UNREAD condition
       notificationRepository.count.mockResolvedValue(0);
 
-      notificationService.countNotifications.mockImplementation(async (userId: string) => {
-        const count = await notificationRepository.count({
-          where: {
-            userId,
-            status: NotificationStatus.UNREAD,
-          },
-        });
-        return count;
-      });
+      notificationService.countNotifications.mockImplementation(
+        async (userId: string) => {
+          const count = await notificationRepository.count({
+            where: {
+              userId,
+              status: NotificationStatus.UNREAD,
+            },
+          });
+          return count;
+        },
+      );
 
       // Act
       const result = await notificationService.countNotifications(userId);
@@ -260,22 +277,34 @@ describe('Notification Module - Unit Tests (Count Logic)', () => {
       // Mock count with filter for UNREAD only
       notificationRepository.count.mockResolvedValue(3);
 
-      notificationService.countNotifications.mockImplementation(async (userId: string) => {
-        const allNotifications = await notificationRepository.find({ where: { userId } });
-        const unreadCount = allNotifications.filter(n => n.status === NotificationStatus.UNREAD).length;
-        return unreadCount;
-      });
+      notificationService.countNotifications.mockImplementation(
+        async (userId: string) => {
+          const allNotifications = await notificationRepository.find({
+            where: { userId },
+          });
+          const unreadCount = allNotifications.filter(
+            (n) => n.status === NotificationStatus.UNREAD,
+          ).length;
+          return unreadCount;
+        },
+      );
 
       // Act
       const result = await notificationService.countNotifications(userId);
 
       // Assert
       expect(result).toBe(3);
-      expect(notificationService.countNotifications).toHaveBeenCalledWith(userId);
-      
+      expect(notificationService.countNotifications).toHaveBeenCalledWith(
+        userId,
+      );
+
       // Verify filtering logic
-      const allNotifications = await notificationRepository.find({ where: { userId } });
-      const unreadNotifications = allNotifications.filter(n => n.status === NotificationStatus.UNREAD);
+      const allNotifications = await notificationRepository.find({
+        where: { userId },
+      });
+      const unreadNotifications = allNotifications.filter(
+        (n) => n.status === NotificationStatus.UNREAD,
+      );
       expect(allNotifications.length).toBe(5);
       expect(unreadNotifications.length).toBe(3);
     });
@@ -290,30 +319,36 @@ describe('Notification Module - Unit Tests (Count Logic)', () => {
       // Arrange
       const userId = null as any;
 
-      notificationService.countNotifications.mockImplementation(async (userId: string) => {
-        if (!userId || userId === null) {
-          throw new Error('IllegalArgumentException: userId cannot be null');
-        }
-        return 0;
-      });
+      notificationService.countNotifications.mockImplementation(
+        async (userId: string) => {
+          if (!userId || userId === null) {
+            throw new Error('IllegalArgumentException: userId cannot be null');
+          }
+          return 0;
+        },
+      );
 
       // Act & Assert
-      await expect(notificationService.countNotifications(userId))
-        .rejects
-        .toThrow('IllegalArgumentException: userId cannot be null');
+      await expect(
+        notificationService.countNotifications(userId),
+      ).rejects.toThrow('IllegalArgumentException: userId cannot be null');
     });
 
     it('should return 0 when userId is null (alternative business logic)', async () => {
       // Arrange - Alternative approach: Return 0 instead of throwing exception
       const userId = null as any;
 
-      notificationService.countNotifications.mockImplementation(async (userId: string) => {
-        if (!userId || userId === null) {
-          return 0; // Business logic decision: return 0 for null users
-        }
-        const count = await notificationRepository.count({ where: { userId } });
-        return count;
-      });
+      notificationService.countNotifications.mockImplementation(
+        async (userId: string) => {
+          if (!userId || userId === null) {
+            return 0; // Business logic decision: return 0 for null users
+          }
+          const count = await notificationRepository.count({
+            where: { userId },
+          });
+          return count;
+        },
+      );
 
       // Act
       const result = await notificationService.countNotifications(userId);
@@ -326,17 +361,19 @@ describe('Notification Module - Unit Tests (Count Logic)', () => {
       // Arrange
       const userId = undefined as any;
 
-      notificationService.countNotifications.mockImplementation(async (userId: string) => {
-        if (!userId) {
-          throw new Error('IllegalArgumentException: userId is required');
-        }
-        return 0;
-      });
+      notificationService.countNotifications.mockImplementation(
+        async (userId: string) => {
+          if (!userId) {
+            throw new Error('IllegalArgumentException: userId is required');
+          }
+          return 0;
+        },
+      );
 
       // Act & Assert
-      await expect(notificationService.countNotifications(userId))
-        .rejects
-        .toThrow('IllegalArgumentException: userId is required');
+      await expect(
+        notificationService.countNotifications(userId),
+      ).rejects.toThrow('IllegalArgumentException: userId is required');
     });
   });
 });

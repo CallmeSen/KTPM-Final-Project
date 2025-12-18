@@ -34,9 +34,9 @@ import { AuthorsModule } from 'src/modules/authors/authors.module';
 
     CacheModule.register({
       isGlobal: true,
-      ttl: 300, 
+      ttl: 300,
     }),
-  
+
     ConfigModule.forRoot({
       isGlobal: true,
     }),

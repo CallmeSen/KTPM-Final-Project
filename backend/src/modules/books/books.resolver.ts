@@ -5,17 +5,20 @@ import { CreateBookInput } from './dto/create-book.input';
 import { UpdateBookInput } from './dto/update-book.input';
 import { FilterBooksArgs } from 'src/modules/books/dto/fiterbook';
 
-import { GetPaginatedBooks, PaginatedBooks, PaginationInput } from 'src/interfaces/pagnition.interface';
+import {
+  GetPaginatedBooks,
+  PaginatedBooks,
+  PaginationInput,
+} from 'src/interfaces/pagnition.interface';
 
 @Resolver(() => Book)
 export class BooksResolver {
-  constructor(private readonly booksService: BooksService) { }
+  constructor(private readonly booksService: BooksService) {}
 
   @Mutation(() => Book)
   async createBook(@Args('createBookInput') createBookInput: CreateBookInput) {
     return await this.booksService.create(createBookInput);
   }
-
 
   @Query(() => Book, { name: 'book', nullable: true })
   async findOne(@Args('id', { type: () => ID }) id: string) {
@@ -25,22 +28,29 @@ export class BooksResolver {
     return await this.booksService.findOne(id);
   }
 
-  @Query(()=>GetPaginatedBooks )
+  @Query(() => GetPaginatedBooks)
   async books(
     @Args('pagination', { type: () => PaginationInput, nullable: true })
-    pagination: { page: 1, limit: 10 },
+    pagination: {
+      page: 1;
+      limit: 10;
+    },
   ) {
     return await this.booksService.findAll(pagination);
   }
 
-
   @Mutation(() => Book)
   async updateBook(@Args('updateBookInput') updateBookInput: UpdateBookInput) {
-    return await this.booksService.update(updateBookInput.isbn10, updateBookInput);
+    return await this.booksService.update(
+      updateBookInput.isbn10,
+      updateBookInput,
+    );
   }
 
   @Query(() => [Book], { name: 'searchBooksByTitle' })
-  async searchBooksByTitle(@Args('searchTerm', { type: () => String }) searchTerm: string) {
+  async searchBooksByTitle(
+    @Args('searchTerm', { type: () => String }) searchTerm: string,
+  ) {
     return await this.booksService.searchByTitle({ searchTerm });
   }
 
@@ -64,7 +74,6 @@ export class BooksResolver {
     return await this.booksService.getTopRatedBooks({ limit });
   }
 
-
   @Query(() => [Book], { name: 'booksByCategory' })
   async Patrition(@Args() filter: FilterBooksArgs) {
     return await this.booksService.Partition({
@@ -82,6 +91,4 @@ export class BooksResolver {
   ) {
     return await this.booksService.GetByCategory({ categoryName, page, limit });
   }
-
-
 }
