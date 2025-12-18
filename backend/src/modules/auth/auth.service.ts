@@ -16,7 +16,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartService } from 'src/modules/cart/cart.service';
 import { MailService } from 'src/mails/mail.service';
-import { Blacklist } from 'src/modules/Blacklist/entities/blacklist.entity';
+// import { Blacklist } from 'src/modules/Blacklist/entities/blacklist.entity';
 
 
 
@@ -36,7 +36,7 @@ export class AuthService {
 
     @InjectRepository(User) private userRepo: Repository<User>,
 
-    @InjectRepository(Blacklist) private BlackListrepo: Repository<Blacklist>,
+    // @InjectRepository(Blacklist) private BlackListrepo: Repository<Blacklist>,
 
     @Inject(jwtConfig.KEY) private jwtConfigrulation: ConfigType<typeof jwtConfig>,
 
@@ -130,8 +130,9 @@ export class AuthService {
 
   }
   async LogOut(accessToken: string) {
-    const token = this.BlackListrepo.create({ accessToken: accessToken });
-    return await this.BlackListrepo.save(token);
+    // const token = this.BlackListrepo.create({ accessToken: accessToken });
+    // return await this.BlackListrepo.save(token);
+    return { message: 'Logged out successfully' };
   }
 
 

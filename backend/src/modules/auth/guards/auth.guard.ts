@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Request, Response } from 'express';
 import { AuthenticatedRequest } from 'src/interfaces/authentication.interface';
 import { RefreshToken } from 'src/modules/auth/entities/RefreshToken.entity';
-import { BlacklistService } from 'src/modules/Blacklist/blacklist.service';
+// import { BlacklistService } from 'src/modules/Blacklist/blacklist.service';
 import { Repository } from 'typeorm';
 
 export interface JwtPayload {
@@ -22,7 +22,7 @@ export interface JwtPayload {
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly blacklistService: BlacklistService,
+    // private readonly blacklistService: BlacklistService,
     @InjectRepository(RefreshToken) private RefreshTokenRespo: Repository<RefreshToken>,
   ) { }
 
@@ -37,9 +37,9 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new UnauthorizedException('Missing or invalid token');
 
 
-    const isBlacklisted = await this.blacklistService.findAccessToken(token);
+    // const isBlacklisted = await this.blacklistService.findAccessToken(token);
 
-    if (isBlacklisted) throw new UnauthorizedException('Token is in blacklist');
+    // if (isBlacklisted) throw new UnauthorizedException('Token is in blacklist');
 
     try {
 
