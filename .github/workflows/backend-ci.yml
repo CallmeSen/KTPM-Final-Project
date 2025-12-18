@@ -4,12 +4,12 @@ on:
   push:
     branches: [ "main", "QUY-TRINH-1", "QUY-TRINH-2", "QUY-TRINH-3", "QUY-TRINH-4", "SOURCE" ]
     paths:
-      - 'Backend/**'
+      - 'backend/**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
     branches: [ "main", "QUY-TRINH-1", "QUY-TRINH-2", "QUY-TRINH-3", "QUY-TRINH-4", "SOURCE" ]
     paths:
-      - 'Backend/**'
+      - 'backend/**'
       - '.github/workflows/backend-ci.yml'
 
 jobs:
@@ -26,14 +26,14 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
-      working-directory: ./Backend
+      working-directory: ./backend
       run: npm ci
     - name: Code Quality - Lint
-      working-directory: ./Backend
+      working-directory: ./backend
       run: npm run lint
     - name: Build
-      working-directory: ./Backend
+      working-directory: ./backend
       run: npm run build --if-present
     - name: Run tests
-      working-directory: ./Backend
+      working-directory: ./backend
       run: npm test
