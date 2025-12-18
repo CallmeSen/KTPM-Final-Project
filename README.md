@@ -495,7 +495,7 @@ Sau khi chạy seeder hoặc import dữ liệu mẫu:
 
 ## License 📄
 
-This project is licensed under the MIT License.
+This project is licensed under the GPL-3.0 License.
 
 ## Về Nhóm Dự Án 🤝
 
