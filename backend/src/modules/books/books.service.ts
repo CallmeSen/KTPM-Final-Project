@@ -106,8 +106,7 @@ export class BooksService {
 
     const query = this.bookRepository.createQueryBuilder('book');
 
-    query.where('book.average_rating IS NOT NULL')
-      .orderBy('book.average_rating', 'DESC')
+    query.orderBy('book.title', 'ASC')
       .take(limit);
 
     return query.getMany();

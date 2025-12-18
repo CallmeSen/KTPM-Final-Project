@@ -103,7 +103,7 @@ export class PaymentController {
 
   @Get('products/import')
   async importProducts() {
-    const filePath = "D:\\KTPM-Final-Project\\backend\\src\\modules\\books\\mockData\\books.csv";
+    const filePath = "src\\modules\\books\\mockData\\books.csv";
     return await this.paymentService.importProductsFromFile(filePath);
   }
 

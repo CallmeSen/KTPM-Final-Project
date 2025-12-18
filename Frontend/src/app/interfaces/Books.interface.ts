@@ -3,11 +3,11 @@ export interface Book {
   title: string;
   thumbnail: string;
   authors: string;
-  average_rating: number;
+
   published_year: number;
   description: string;
   num_pages: number;
-  ratings_count: number;
+
   price: number;
   id_stripe: string;
   quantity: number;

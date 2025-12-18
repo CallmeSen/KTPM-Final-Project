@@ -26,7 +26,7 @@ CREATE TABLE `blacklist` (
   `id` varchar(36) NOT NULL,
   `accessToken` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,14 +55,12 @@ CREATE TABLE `books` (
   `thumbnail` varchar(255) DEFAULT NULL,
   `description` longtext,
   `published_year` int DEFAULT NULL,
-  `average_rating` float DEFAULT NULL,
   `num_pages` int DEFAULT NULL,
-  `ratings_count` int DEFAULT NULL,
   `price` float DEFAULT NULL,
   `id_stripe` varchar(255) DEFAULT NULL,
   `quantity` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -71,7 +69,7 @@ CREATE TABLE `books` (
 
 LOCK TABLES `books` WRITE;
 /*!40000 ALTER TABLE `books` DISABLE KEYS */;
-INSERT INTO `books` VALUES ('00002077-14fc-4aa6-b67d-1cc8d11f5bc6','The Music of Chance',NULL,'Paul Auster','Fiction','http://books.google.com/books/content?id=gf_sRKKiwgwC&printsec=frontcover&img=1&zoom=1&source=gbs_api','An \"exceptional\" (Los Angeles Times) tale of fate, loyalty, responsibility, and the real meaning of freedom, from the author of the forthcoming 4 3 2 1: A Novel A finalist for the PEN/Faulkner Award This \"rich and dazzling\" (Wall Street Journal) novel follows Jim Nashe who, after squandering an unexpected inheritance, picks up a young gambler named Jack Pozzi hoping to con two millionaires. But when their plans backfire, Jim and Jack are indentured by their elusive marks and are forced to build a meaningless wall with bricks gathered from ruins of an Irish castle. Time passes, their debts mount, and anger builds as the two struggle to dig themselves out of their Kafkaesque serfdom. New York Times-bestselling author Paul Auster (The New York Trilogy) brings us back into his strange, shape-shifting world of fiendish bargains and punitive whims, where chance is a powerful yet unpredictable force.',1991,3.9,217,354,217,'prod_TPgfyAHkNvTRNE',1),('0012e929-c505-44fe-a378-05486f51652d','Geisha',NULL,'Liza Crihfield Dalby','Social Science','http://books.google.com/books/content?id=LGTVNSYrKucC&printsec=frontcover&img=1&zoom=1&source=gbs_api','00 In this classic best-seller, Liza Dalby, the only non-Japanese ever to have trained as a geisha, offers an insider\'s look at the exclusive world of female companions to the Japanese male elite. Her new preface considers the geisha today as a vestige of tradition as Japan heads into the 21st century. In this classic best-seller, Liza Dalby, the only non-Japanese ever to have trained as a geisha, offers an insider\'s look at the exclusive world of female companions to the Japanese male elite. Her new preface considers the geisha today as a vestige of tradition as Japan heads into the 21st century.',1998,4,367,3646,367,'prod_TPgf438qAEk50r',1),('0014ec61-eef2-4c58-9bfe-51046ffff113','A Second Chance at Eden',NULL,'Peter F. Hamilton','Science fiction','http://books.google.com/books/content?id=foyS8cdFJQkC&printsec=frontcover&img=1&zoom=1&source=gbs_api','This novella and six stories are set in the same universe and time-line as the Night\'s Dawn trilogy.',1999,4.02,496,3844,496,'prod_TPgfLRLuabRgfy',1),('003d25b8-af27-4c8d-84c5-d5285d145282','Redburn',NULL,'Herman Melville','Fiction','http://books.google.com/books/content?id=LH87V-JOBSEC&printsec=frontcover&img=1&zoom=1&source=gbs_api','The hardships of life at sea and the realities of distant cities provide young Redburn with a startling introduction to the world',1976,3.61,448,522,448,'prod_TPgfvEy8SYrqoq',1),('00436794-d4d9-40d4-ae3f-c8cface40280','Selected Speeches and Writings',NULL,'Abraham Lincoln','History','http://books.google.com/books/content?id=7PuBQgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api','Records Lincoln\'s campaigns for public office, the evolution of his stand against slavery, his debates with Stephen Douglas, and the great addresses of his presidency',1992,4.23,515,169,515,'prod_TPgfKY3D0a1LcI',1),('0049a3d4-02b8-44e3-96c7-cb00dde26210','Evolution and the Theory of Games',NULL,'John Maynard Smith','Science','http://books.google.com/books/content?id=Nag2IhmPS3gC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api','In this 1982 book, the theory of games, first developed to analyse economic behaviour, is modified so that it can be applied to evolving populations. John Maynard Smith\'s concept of an evolutionarily stable strategy is relevant whenever the best thing for an animal or plant to do depends on what others are doing. The theory leads to testable predictions about the evolution of behaviour, of sex and genetic systems, and of growth and life history patterns. This book contains a full account of the theory, and of the data relevant to it. The account is aimed at senior undergraduate and graduate students, teachers and research workers in animal behaviour, population genetics and evolutionary biology. The book will also be of interest to mathematicians and game theorists; the mathematics has been largely confined to appendixes so that the main text may be easily followed by biologists.',1982,4,234,80,234,'prod_TPgfu4m92SspSK',1),('0050eca2-d465-446c-8208-a2bff1e913cb','Anansi Boys',NULL,'Neil Gaiman','Fiction','http://books.google.com/books/content?id=VagoPwAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api','Fat Charlie Nancy\'s normal life ended the moment his father dropped dead on a Florida karaoke stage. Charlie didn\'t know his dad was a god. And he never knew he had a brother. Now brother Spider\'s on his doorstep—about to make Fat Charlie\'s life more interesting . . . and a lot more dangerous.',2006,4.02,387,153485,387,'prod_TPgfNHR55j59qE',1),('00522578-b62b-442d-92b8-84b7fd895ecb','The Last Days of Socrates',NULL,'Plato;Hugh Tredennick','Fiction','http://books.google.com/books/content?id=vwj_1haGR9wC&printsec=frontcover&img=1&zoom=1&source=gbs_api','Chronicling the life and death of the father of western philosophy, and charting his influence on the most influential ancient Greek philosophers, Plato\'s The Last Days of Socrates is translated from the Greek by Hugh Tredennick, revised with an introduction and notes by Harold Tarrant in Penguin Classics. The trial and condemnation of Socrates on charges of heresy and corrupting young minds is a defining moment in the history of Classical Athens. In tracing these events through four dialogues, Plato also developed his own philosophy, based on Socrates\' manifesto for a life guided by self-responsibility. Euthyphro finds Socrates outside the court-house, debating the nature of piety, while the Apology is his robust rebuttal of the charges of impiety and a defence of the philosopher\'s life. In the Crito, while awaiting execution in prison, Socrates counters the arguments of friends urging him to escape. Finally, in the Phaedo, he is shown calmly confident in the face of death, skilfully arguing the case for the immortality of the soul. Hugh Tredennick\'s landmark 1954 translation has been revised by Harold Tarrant, reflecting changes in Platonic studies, with an introduction and expanded introductions to each of the four dialogues. Plato (c.427-347 BC) stands with Socrates and Aristotle as one of the shapers of the whole intellectual tradition of the West. He founded the Academy in Athens, the first permanent institution devoted to philosophical research and teaching, and the prototype of all Western universities. If you enjoyed The Last Days of Socrates, you might like Plato\'s The Symposium, also available in Penguin Classics.',2003,4.07,256,1571,256,'prod_TPgfrKDUBldDtd',1),('0055ea7e-21a2-44d6-ac6d-f53a5b1e57f9','The Portable James Joyce',NULL,'James Joyce','Literary Collections','http://books.google.com/books/content?id=LSv3AKlD2OsC&printsec=frontcover&img=1&zoom=1&source=gbs_api','This compilation of the works of the Irish writer contains a variety of poems, stories and excerpts from novels',1985,4.16,762,624,762,'prod_TPgfS7XXHgVckd',1),('0059fd4f-4abf-485c-a818-2325520feaff','The Language Instinct','How the Mind Creates Language','Steven Pinker','Language Arts & Disciplines','http://books.google.com/books/content?id=NrXVUNbLaMUC&printsec=frontcover&img=1&zoom=1&source=gbs_api','In this classic study, the world\'s leading expert on language and the mind lucidly explains everything you always wanted to know about languages: how it works, how children learn it, how it changes, how the brain computes it, and how it envolved. With wit, erudition, and deft use it everyday examples of humor and wordplay, Steven Pinker weaves our vast knowledge of language into a compelling story: language is a human instinct, wired into our brains by evolution like web spinning in spiders or sonar bats. The Language Instinct received the William James Book Prize from the American Psychological Association and the Public Interest Award from the Linguistics Society of America.',2000,4.05,448,14293,448,'prod_TPgfOG9TmbuRdQ',1),('a4e7443b-117b-4ab9-9595-80eeacd02d5a','test',NULL,'test, test',NULL,'http://books.google.com/books/content?id=w2uMGXpNlzAC&printsec=frontcover&img=1&zoom=1&source=gbs_api','test',NULL,NULL,NULL,NULL,1234,NULL,1);
+INSERT INTO `books` VALUES ('00002077-14fc-4aa6-b67d-1cc8d11f5bc6','The Music of Chance',NULL,'Paul Auster','Fiction','http://books.google.com/books/content?id=gf_sRKKiwgwC&printsec=frontcover&img=1&zoom=1&source=gbs_api','An \"exceptional\" (Los Angeles Times) tale of fate, loyalty, responsibility, and the real meaning of freedom, from the author of the forthcoming 4 3 2 1: A Novel A finalist for the PEN/Faulkner Award This \"rich and dazzling\" (Wall Street Journal) novel follows Jim Nashe who, after squandering an unexpected inheritance, picks up a young gambler named Jack Pozzi hoping to con two millionaires. But when their plans backfire, Jim and Jack are indentured by their elusive marks and are forced to build a meaningless wall with bricks gathered from ruins of an Irish castle. Time passes, their debts mount, and anger builds as the two struggle to dig themselves out of their Kafkaesque serfdom. New York Times-bestselling author Paul Auster (The New York Trilogy) brings us back into his strange, shape-shifting world of fiendish bargains and punitive whims, where chance is a powerful yet unpredictable force.',1991,217,217,'prod_TPgfyAHkNvTRNE',1),('0012e929-c505-44fe-a378-05486f51652d','Geisha',NULL,'Liza Crihfield Dalby','Social Science','http://books.google.com/books/content?id=LGTVNSYrKucC&printsec=frontcover&img=1&zoom=1&source=gbs_api','00 In this classic best-seller, Liza Dalby, the only non-Japanese ever to have trained as a geisha, offers an insider\'s look at the exclusive world of female companions to the Japanese male elite. Her new preface considers the geisha today as a vestige of tradition as Japan heads into the 21st century. In this classic best-seller, Liza Dalby, the only non-Japanese ever to have trained as a geisha, offers an insider\'s look at the exclusive world of female companions to the Japanese male elite. Her new preface considers the geisha today as a vestige of tradition as Japan heads into the 21st century.',1998,367,367,'prod_TPgf438qAEk50r',1),('0014ec61-eef2-4c58-9bfe-51046ffff113','A Second Chance at Eden',NULL,'Peter F. Hamilton','Science fiction','http://books.google.com/books/content?id=foyS8cdFJQkC&printsec=frontcover&img=1&zoom=1&source=gbs_api','This novella and six stories are set in the same universe and time-line as the Night\'s Dawn trilogy.',1999,496,496,'prod_TPgfLRLuabRgfy',1),('003d25b8-af27-4c8d-84c5-d5285d145282','Redburn',NULL,'Herman Melville','Fiction','http://books.google.com/books/content?id=LH87V-JOBSEC&printsec=frontcover&img=1&zoom=1&source=gbs_api','The hardships of life at sea and the realities of distant cities provide young Redburn with a startling introduction to the world',1976,448,448,'prod_TPgfvEy8SYrqoq',1),('00436794-d4d9-40d4-ae3f-c8cface40280','Selected Speeches and Writings',NULL,'Abraham Lincoln','History','http://books.google.com/books/content?id=7PuBQgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api','Records Lincoln\'s campaigns for public office, the evolution of his stand against slavery, his debates with Stephen Douglas, and the great addresses of his presidency',1992,515,515,'prod_TPgfKY3D0a1LcI',1),('0049a3d4-02b8-44e3-96c7-cb00dde26210','Evolution and the Theory of Games',NULL,'John Maynard Smith','Science','http://books.google.com/books/content?id=Nag2IhmPS3gC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api','In this 1982 book, the theory of games, first developed to analyse economic behaviour, is modified so that it can be applied to evolving populations. John Maynard Smith\'s concept of an evolutionarily stable strategy is relevant whenever the best thing for an animal or plant to do depends on what others are doing. The theory leads to testable predictions about the evolution of behaviour, of sex and genetic systems, and of growth and life history patterns. This book contains a full account of the theory, and of the data relevant to it. The account is aimed at senior undergraduate and graduate students, teachers and research workers in animal behaviour, population genetics and evolutionary biology. The book will also be of interest to mathematicians and game theorists; the mathematics has been largely confined to appendixes so that the main text may be easily followed by biologists.',1982,234,234,'prod_TPgfu4m92SspSK',1),('0050eca2-d465-446c-8208-a2bff1e913cb','Anansi Boys',NULL,'Neil Gaiman','Fiction','http://books.google.com/books/content?id=VagoPwAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api','Fat Charlie Nancy\'s normal life ended the moment his father dropped dead on a Florida karaoke stage. Charlie didn\'t know his dad was a god. And he never knew he had a brother. Now brother Spider\'s on his doorstep—about to make Fat Charlie\'s life more interesting . . . and a lot more dangerous.',2006,387,387,'prod_TPgfNHR55j59qE',1),('00522578-b62b-442d-92b8-84b7fd895ecb','The Last Days of Socrates',NULL,'Plato;Hugh Tredennick','Fiction','http://books.google.com/books/content?id=vwj_1haGR9wC&printsec=frontcover&img=1&zoom=1&source=gbs_api','Chronicling the life and death of the father of western philosophy, and charting his influence on the most influential ancient Greek philosophers, Plato\'s The Last Days of Socrates is translated from the Greek by Hugh Tredennick, revised with an introduction and notes by Harold Tarrant in Penguin Classics. The trial and condemnation of Socrates on charges of heresy and corrupting young minds is a defining moment in the history of Classical Athens. In tracing these events through four dialogues, Plato also developed his own philosophy, based on Socrates\' manifesto for a life guided by self-responsibility. Euthyphro finds Socrates outside the court-house, debating the nature of piety, while the Apology is his robust rebuttal of the charges of impiety and a defence of the philosopher\'s life. In the Crito, while awaiting execution in prison, Socrates counters the arguments of friends urging him to escape. Finally, in the Phaedo, he is shown calmly confident in the face of death, skilfully arguing the case for the immortality of the soul. Hugh Tredennick\'s landmark 1954 translation has been revised by Harold Tarrant, reflecting changes in Platonic studies, with an introduction and expanded introductions to each of the four dialogues. Plato (c.427-347 BC) stands with Socrates and Aristotle as one of the shapers of the whole intellectual tradition of the West. He founded the Academy in Athens, the first permanent institution devoted to philosophical research and teaching, and the prototype of all Western universities. If you enjoyed The Last Days of Socrates, you might like Plato\'s The Symposium, also available in Penguin Classics.',2003,256,256,'prod_TPgfrKDUBldDtd',1),('0055ea7e-21a2-44d6-ac6d-f53a5b1e57f9','The Portable James Joyce',NULL,'James Joyce','Literary Collections','http://books.google.com/books/content?id=LSv3AKlD2OsC&printsec=frontcover&img=1&zoom=1&source=gbs_api','This compilation of the works of the Irish writer contains a variety of poems, stories and excerpts from novels',1985,762,762,'prod_TPgfS7XXHgVckd',1),('0059fd4f-4abf-485c-a818-2325520feaff','The Language Instinct','How the Mind Creates Language','Steven Pinker','Language Arts & Disciplines','http://books.google.com/books/content?id=NrXVUNbLaMUC&printsec=frontcover&img=1&zoom=1&source=gbs_api','In this classic study, the world\'s leading expert on language and the mind lucidly explains everything you always wanted to know about languages: how it works, how children learn it, how it changes, how the brain computes it, and how it envolved. With wit, erudition, and deft use it everyday examples of humor and wordplay, Steven Pinker weaves our vast knowledge of language into a compelling story: language is a human instinct, wired into our brains by evolution like web spinning in spiders or sonar bats. The Language Instinct received the William James Book Prize from the American Psychological Association and the Public Interest Award from the Linguistics Society of America.',2000,448,448,'prod_TPgfOG9TmbuRdQ',1),('a4e7443b-117b-4ab9-9595-80eeacd02d5a','test',NULL,'test, test',NULL,'http://books.google.com/books/content?id=w2uMGXpNlzAC&printsec=frontcover&img=1&zoom=1&source=gbs_api','test',NULL,NULL,1234,NULL,1);
 /*!40000 ALTER TABLE `books` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -90,7 +88,7 @@ CREATE TABLE `cart` (
   UNIQUE KEY `REL_756f53ab9466eb52a52619ee01` (`userId`),
   KEY `IDX_756f53ab9466eb52a52619ee01` (`userId`),
   CONSTRAINT `FK_756f53ab9466eb52a52619ee019` FOREIGN KEY (`userId`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -120,7 +118,7 @@ CREATE TABLE `cart_items` (
   KEY `FK_1091797c1c12f2523b1990bd941` (`bookId`),
   CONSTRAINT `FK_1091797c1c12f2523b1990bd941` FOREIGN KEY (`bookId`) REFERENCES `books` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_edd714311619a5ad09525045838` FOREIGN KEY (`cartId`) REFERENCES `cart` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -157,7 +155,7 @@ CREATE TABLE `comments` (
   CONSTRAINT `FK_7e8d7c49f218ebb14314fdb3749` FOREIGN KEY (`userId`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_8770bd9030a3d13c5f79a7d2e81` FOREIGN KEY (`parentId`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `FK_fe496134857bf079aa6b55d68df` FOREIGN KEY (`bookId`) REFERENCES `books` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -181,7 +179,7 @@ CREATE TABLE `inventories` (
   `id` varchar(36) NOT NULL,
   `quantity` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,7 +207,7 @@ CREATE TABLE `notifications` (
   `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `image` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -241,7 +239,7 @@ CREATE TABLE `orders` (
   `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `updatedAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,7 +270,7 @@ CREATE TABLE `payments` (
   PRIMARY KEY (`id`),
   KEY `FK_d35cb3c13a18e1ea1705b2817b1` (`userId`),
   CONSTRAINT `FK_d35cb3c13a18e1ea1705b2817b1` FOREIGN KEY (`userId`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -297,7 +295,7 @@ CREATE TABLE `refresh_tokens` (
   `token` text NOT NULL,
   `expiryDate` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -322,7 +320,7 @@ CREATE TABLE `search_history` (
   `searchTerm` varchar(255) NOT NULL,
   `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -358,7 +356,7 @@ CREATE TABLE `user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `IDX_78a916df40e02a9deb1c4b75ed` (`username`),
   UNIQUE KEY `IDX_e12875dfb3b1d92d7d7c5377e2` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

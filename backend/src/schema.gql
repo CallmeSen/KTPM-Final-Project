@@ -194,9 +194,7 @@ input CreateBookInput {
   thumbnail: String
   description: String
   published_year: Int
-  average_rating: Float
   num_pages: Int
-  ratings_count: Int
   price: Float
 }
 
@@ -208,9 +206,7 @@ input UpdateBookInput {
   thumbnail: String
   description: String
   published_year: Int
-  average_rating: Float
   num_pages: Int
-  ratings_count: Int
   price: Float
   isbn10: Int!
 }
