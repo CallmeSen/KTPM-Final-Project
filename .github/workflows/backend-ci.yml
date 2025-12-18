@@ -4,16 +4,15 @@ on:
   push:
     branches: [ "main", "QUY-TRINH-1", "QUY-TRINH-2", "QUY-TRINH-3", "QUY-TRINH-4", "SOURCE" ]
     paths:
-      - 'backend/**'
+      - 'Backend/**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
     branches: [ "main", "QUY-TRINH-1", "QUY-TRINH-2", "QUY-TRINH-3", "QUY-TRINH-4", "SOURCE" ]
     paths:
-      - 'backend/**'
+      - 'Backend/**'
       - '.github/workflows/backend-ci.yml'
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -27,13 +26,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: 'backend/package-lock.json'
     - name: Install dependencies
-      working-directory: ./backend
       run: npm ci
+    - name: Code Quality - Lint
+      run: npm run lint
     - name: Build
-      working-directory: ./backend
       run: npm run build --if-present
     - name: Run tests
-      working-directory: ./backend
       run: npm test
