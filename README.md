@@ -478,6 +478,27 @@ Sau khi chạy seeder hoặc import dữ liệu mẫu:
 
 ## Ảnh Màn Hình 📸
 
+<div align="center">
+  <img width="48%" alt="Screenshot 1" src="https://github.com/user-attachments/assets/a63dc06b-7a48-4037-bf4a-ce2dbac2f4dd" />
+  <img width="48%" alt="Screenshot 2" src="https://github.com/user-attachments/assets/675edbd5-9f84-4f2d-82d9-406f4291e098" />
+</div>
+
+<div align="center">
+  <img width="48%" alt="Screenshot 3" src="https://github.com/user-attachments/assets/308ee6f0-28d9-4754-b3f9-ca7262b9fc41" />
+  <img width="48%" alt="Screenshot 4" src="https://github.com/user-attachments/assets/b0b9f86f-e9ff-4c4a-8041-d71798002d8a" />
+</div>
+
+<div align="center">
+  <img width="48%" alt="Screenshot 5" src="https://github.com/user-attachments/assets/8285ca89-9fd6-47fb-a0a2-ec4900e9eb40" />
+  <img width="48%" alt="Screenshot 6" src="https://github.com/user-attachments/assets/58961658-93d2-4ff1-bab3-02eefd79743d" />
+</div>
+
+
+
+
+
+
+
 ## License 📄
 
 This project is licensed under the MIT License.
