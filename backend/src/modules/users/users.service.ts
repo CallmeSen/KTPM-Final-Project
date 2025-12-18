@@ -8,7 +8,7 @@ import { CacheInterceptor } from "@nestjs/cache-manager";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "src/modules/users/entities/user.entity";
-import { CreateAuthDto } from "../auth/dto/create-auth.dto";
+// import { CreateAuthDto } from "../auth/dto/create-auth.dto";
 import { MailService } from "src/mails/mail.service";
 import { CreateUserDto } from "src/modules/users/dto/create-user.input";
 import { UpdateUserDto } from "src/modules/users/dto/update-user.input";
@@ -109,7 +109,7 @@ export class UserService {
 
   }
 
-  async register(registerDto: CreateAuthDto) {
+  async register(registerDto: any) {
 
     if (await this.checkEmailExist(registerDto.email)) {
 

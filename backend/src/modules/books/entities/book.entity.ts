@@ -1,7 +1,7 @@
 import { ObjectType, Field, Int, Float, ID } from '@nestjs/graphql';
 import { CartItem } from 'src/modules/cart/entities/cart.items';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, ManyToOne } from 'typeorm';
-import { Comment } from 'src/modules/comment/entities/comment.entity';
+// import { Comment } from 'src/modules/comment/entities/comment.entity';
 @ObjectType()
 @Entity('books')
 export class Book {
@@ -54,9 +54,9 @@ export class Book {
   @Column({ type: 'varchar', nullable: true })
   id_stripe?: string;
 
-  @Field(() => [Comment], { nullable: true })
-  @OneToMany(() => Comment, (comment) => comment.book, { cascade: true })
-  comments?: Comment[];
+  // @Field(() => [Comment], { nullable: true })
+  // @OneToMany(() => Comment, (comment) => comment.book, { cascade: true })
+  // comments?: Comment[];
 
    @Field(() => Int)
   @Column({ type: 'int', default: 1 })

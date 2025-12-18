@@ -1,6 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { AuthService } from 'src/modules/auth/auth.service';
+// import { AuthService } from 'src/modules/auth/auth.service';
 import { User } from 'src/modules/users/entities/user.entity';
 
 function generateOtp(): string {
@@ -13,8 +13,8 @@ export class MailService {
   constructor(
     private readonly mailerService: MailerService,
 
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
+    // @Inject(forwardRef(() => AuthService))
+    // private readonly authService: AuthService,
 
   ) { }
 
@@ -56,7 +56,7 @@ export class MailService {
       `,
       });
 
-      await this.authService.savePostcode(email, otp);
+      // await this.authService.savePostcode(email, otp);
 
 
     } catch (error) {

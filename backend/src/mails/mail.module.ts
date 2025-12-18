@@ -4,7 +4,7 @@ import {  forwardRef, Module } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { join } from 'path';
 import {   ConfigService } from '@nestjs/config';
-import { AuthModule } from 'src/modules/auth/auth.module';
+// import { AuthModule } from 'src/modules/auth/auth.module';
 import { UserModule } from 'src/modules/users/users.module';
 
 
@@ -35,7 +35,7 @@ import { UserModule } from 'src/modules/users/users.module';
             inject: [ConfigService],
         }),
         
-        forwardRef(() => AuthModule),
+        // forwardRef(() => AuthModule),
         forwardRef(() => UserModule),
        
     ],
