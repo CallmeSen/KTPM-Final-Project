@@ -11,24 +11,24 @@ export default function Footer() {
             <div>
               <h3 className="text-lg font-bold mb-4">Liên kết nhanh</h3>
               <ul className="space-y-2">
-                <li><a href="#courses" className="hover:underline">Khóa học</a></li>
-                <li><a href="#bestsellers" className="hover:underline">Tài liệu nổi bật</a></li>
-                <li><a href="#categories" className="hover:underline">Chuyên đề</a></li>
-                <li><a href="#teachers" className="hover:underline">Giáo viên</a></li>
-                <li><a href="#careers" className="hover:underline">Cơ hội việc làm</a></li>
+                <li><a href="/page/BookLibrary" className="hover:underline">Thư viện sách</a></li>
+                <li><a href="/page/BookLibrary" className="hover:underline">Sách bán chạy</a></li>
+                <li><a href="/page/BookLibrary" className="hover:underline">Danh mục sách</a></li>
+                <li><a href="/auth/Register" className="hover:underline">Đăng ký</a></li>
+                <li><a href="/auth/Login" className="hover:underline">Đăng nhập</a></li>
                 <li><a href="#contact" className="hover:underline">Liên hệ</a></li>
               </ul>
             </div>
           </div>
 
-          {/* Giới thiệu trung tâm */}
+          {/* Giới thiệu cửa hàng */}
           <div className="col-span-8 space-y-6">
             <div className="space-y-2">
-              <h3 className="text-lg font-bold">Về IELTS Center</h3>
+              <h3 className="text-lg font-bold">Về Book Store</h3>
               <p className="text-sm leading-relaxed">
-                IELTS Center là trung tâm luyện thi IELTS hàng đầu, cung cấp đa dạng khóa học và tài liệu
-                từ cơ bản đến nâng cao. Với sứ mệnh giúp học viên đạt điểm cao, chúng tôi kết nối bạn
-                với thế giới học thuật quốc tế.
+                Book Store là cửa hàng sách trực tuyến hàng đầu, cung cấp đa dạng các đầu sách
+                từ văn học, khoa học, giáo dục đến sách thiếu nhi. Với sứ mệnh lan tỏa tri thức,
+                chúng tôi mang đến trải nghiệm mua sắm sách tiện lợi và đáng tin cậy.
               </p>
             </div>
 
@@ -36,9 +36,9 @@ export default function Footer() {
             <div className="space-y-2">
               <h3 className="text-lg font-bold">Sứ mệnh của chúng tôi</h3>
               <p className="text-sm leading-relaxed">
-                Chúng tôi tin rằng IELTS là chìa khóa mở ra nhiều cơ hội học tập và nghề nghiệp.
-                IELTS Center cam kết mang đến trải nghiệm học tập tiện lợi, đội ngũ giáo viên chất lượng,
-                và nhiều ưu đãi hấp dẫn để mỗi học viên đều có thể đạt mục tiêu điểm số của mình.
+                Chúng tôi tin rằng sách là nguồn tri thức vô tận, mở ra cánh cửa kiến thức cho mọi người.
+                Book Store cam kết mang đến dịch vụ tốt nhất, sản phẩm chất lượng, giá cả hợp lý
+                và nhiều ưu đãi hấp dẫn để mỗi độc giả đều có thể tiếp cận với những cuốn sách yêu thích.
               </p>
             </div>
 
@@ -62,10 +62,10 @@ export default function Footer() {
 
             {/* Bản quyền */}
             <div className="text-sm leading-relaxed space-y-4 pt-4">
-              <p>© 2025 <span className="font-bold">IELTS Center</span>. Bảo lưu mọi quyền.</p>
+              <p>© 2025 <span className="font-bold">Book Store</span>. Bảo lưu mọi quyền.</p>
               <p>
-                Tất cả tài liệu học tập, hình ảnh và nội dung liên quan thuộc quyền sở hữu của trung tâm.
-                IELTS Center là đơn vị đào tạo độc lập, không liên kết trực tiếp với bất kỳ tổ chức quốc tế nào.
+                Tất cả hình ảnh sách, nội dung mô tả và thông tin liên quan thuộc quyền sở hữu của các tác giả và nhà xuất bản.
+                Book Store là nền tảng thương mại điện tử, cung cấp dịch vụ mua bán sách trực tuyến.
               </p>
             </div>
           </div>

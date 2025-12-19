@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 import { IS_PUBLIC_KEY } from 'src/decorator/custome';
 
-@Injectable() 
+@Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(private reflector: Reflector) {
     super();
@@ -15,14 +15,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
-  
+
     if (isPublic) return true;
-  
+
     const result = (await super.canActivate(context)) as boolean;
-  
+
     const request = context.switchToHttp().getRequest();
-  
+
     return result;
   }
-
 }

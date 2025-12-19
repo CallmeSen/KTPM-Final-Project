@@ -8,9 +8,7 @@ import { UserService } from 'src/modules/users/users.service';
 
 @Resolver(() => User)
 export class UsersResolver {
-
   constructor(private readonly usersService: UserService) {}
-
 
   @Mutation(() => User)
   createUser(@Args('input') input: CreateUserDto) {
@@ -34,5 +32,4 @@ export class UsersResolver {
   ) {
     return await this.usersService.findAll(page, limit);
   }
-  
 }

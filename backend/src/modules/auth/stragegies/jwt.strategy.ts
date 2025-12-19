@@ -6,7 +6,6 @@ import jwtConfig from 'src/modules/auth/config/jwt.config';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { AuthPayload } from 'src/modules/auth/types/auth-jwtPayload';
 
-
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
@@ -17,18 +16,15 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: jwtConf.secret,
-      ignoreExpiration: false, 
+      ignoreExpiration: false,
     });
   }
 
   async validate(payload: AuthPayload) {
-    
     const user = await this.authService.validateJwtUser(payload.sub);
-    
+
     if (!user) throw new UnauthorizedException();
-  
-    return user; 
 
+    return user;
   }
-
 }

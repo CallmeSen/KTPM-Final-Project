@@ -67,9 +67,7 @@ type Book {
   thumbnail: String
   description: String
   published_year: Int
-  average_rating: Float
   num_pages: Int
-  ratings_count: Int
   price: Float!
   id_stripe: String
   comments: [Comment!]
@@ -196,9 +194,7 @@ input CreateBookInput {
   thumbnail: String
   description: String
   published_year: Int
-  average_rating: Float
   num_pages: Int
-  ratings_count: Int
   price: Float
 }
 
@@ -210,9 +206,7 @@ input UpdateBookInput {
   thumbnail: String
   description: String
   published_year: Int
-  average_rating: Float
   num_pages: Int
-  ratings_count: Int
   price: Float
   isbn10: Int!
 }
@@ -247,11 +241,8 @@ input CreateOrderInput {
 }
 
 input UpdateOrderInput {
-  user_email: String
-  totalAmount: Float
-  stripePaymentId: String
   id: String!
-
-  """Trạng thái của đơn hàng"""
   status: String
+  orderStatus: String
+  refundReason: String
 }

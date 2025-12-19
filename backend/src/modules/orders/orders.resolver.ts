@@ -7,17 +7,19 @@ import { PaginatedOrders } from 'src/interfaces/pagnition.interface';
 
 @Resolver(() => Order)
 export class OrdersResolver {
-
-  constructor(private readonly ordersService: OrdersService) { }
+  constructor(private readonly ordersService: OrdersService) {}
 
   @Mutation(() => Order)
   async createOrder(
     @Args('createOrderInput') createOrderInput: CreateOrderInput,
   ) {
-    const { user_email,totalAmount, stripePaymentId } = createOrderInput;
-    return this.ordersService.createOrder(user_email,totalAmount, stripePaymentId);
+    const { user_email, totalAmount, stripePaymentId } = createOrderInput;
+    return this.ordersService.createOrder(
+      user_email,
+      totalAmount,
+      stripePaymentId,
+    );
   }
-
 
   @Query(() => [Order], { name: 'orders' })
   findAll() {
@@ -25,12 +27,12 @@ export class OrdersResolver {
   }
 
   @Query(() => PaginatedOrders)
-    async getAllOrders(
-      @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
-      @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
-    ) {
-      return await this.ordersService.findAll(page, limit);
-    }
+  async getAllOrders(
+    @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+  ) {
+    return await this.ordersService.findAll(page, limit);
+  }
 
   @Query(() => Order, { name: 'order' })
   findOne(@Args('id', { type: () => Int }) id: number) {
@@ -38,13 +40,17 @@ export class OrdersResolver {
   }
 
   @Mutation(() => Order)
-  async updateOrder(@Args('updateOrderInput') updateOrderInput: UpdateOrderInput) {
-    return await this.ordersService.update(updateOrderInput.id, updateOrderInput);
+  async updateOrder(
+    @Args('updateOrderInput') updateOrderInput: UpdateOrderInput,
+  ) {
+    return await this.ordersService.update(
+      updateOrderInput.id,
+      updateOrderInput,
+    );
   }
 
   @Mutation(() => Order)
   removeOrder(@Args('id', { type: () => Int }) id: number) {
     return this.ordersService.remove(id);
   }
-  
 }

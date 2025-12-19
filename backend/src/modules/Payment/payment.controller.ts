@@ -1,6 +1,15 @@
-import { Controller, Post, Body, Inject, Get, Req, Res, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Inject,
+  Get,
+  Req,
+  Res,
+  BadRequestException,
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import Stripe from 'stripe'
+import Stripe from 'stripe';
 import { Repository } from 'typeorm';
 import { Book } from 'src/modules/books/entities/book.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,8 +19,6 @@ import { NotificationService } from 'src/modules/notification/notification.servi
 import { OrdersService } from 'src/modules/orders/orders.service';
 @Controller('payment')
 export class PaymentController {
-
-
   constructor(
     private readonly paymentService: PaymentService,
     @Inject('STRIPE_CLIENT') private readonly stripe: Stripe,
@@ -20,11 +27,12 @@ export class PaymentController {
     @InjectRepository(User) readonly UserRes: Repository<User>,
     private readonly notificationService: NotificationService,
     private readonly ordersService: OrdersService,
-  ) { }
+  ) {}
 
   @Post('products')
   async createProduct(
-    @Body() body: {
+    @Body()
+    body: {
       name: string;
       description: string;
       price: number;
@@ -92,21 +100,25 @@ export class PaymentController {
 
   @Post('create-payment-link')
   async createPaymentLink(
-    @Body() body: {
+    @Body()
+    body: {
       date: string;
       cartId: string;
       items: { id_stripe: string; quantity: number }[];
-    }
+    },
   ) {
-    return await this.paymentService.createPaymentLink(body.date, body.cartId, body.items);
+    return await this.paymentService.createPaymentLink(
+      body.date,
+      body.cartId,
+      body.items,
+    );
   }
 
   @Get('products/import')
   async importProducts() {
-    const filePath = "D:\\KTPM-Final-Project\\backend\\src\\modules\\books\\mockData\\books.csv";
+    const filePath = 'src\\modules\\books\\mockData\\books.csv';
     return await this.paymentService.importProductsFromFile(filePath);
   }
-
 
   @Post('update')
   async updateStripeIdsForAllBooks() {
@@ -114,16 +126,19 @@ export class PaymentController {
 
     for (const book of books) {
       try {
-        const stripeProduct = await this.paymentService.getProductByTitle(book.title);
+        const stripeProduct = await this.paymentService.getProductByTitle(
+          book.title,
+        );
 
         if (stripeProduct?.id) {
           book.id_stripe = stripeProduct.id;
           await this.bookRepository.save(book);
-          console.log(` Updated book "${book.title}" with Stripe ID: ${stripeProduct.id}`);
+          console.log(
+            ` Updated book "${book.title}" with Stripe ID: ${stripeProduct.id}`,
+          );
         } else {
           console.log(` No Stripe product found for "${book.title}"`);
         }
-
       } catch (err) {
         console.error(`Error updating "${book.title}":`, err.message);
       }
@@ -134,23 +149,16 @@ export class PaymentController {
 
   @Get('get-product-stripe')
   async GetProdcutSpipe(@Body() body: { title: string }) {
-    return await this.paymentService.getProductByTitle(body.title)
+    return await this.paymentService.getProductByTitle(body.title);
   }
-
-
 
   @Post('webhook')
   async handleWebhook(@Req() req: Request, @Res() res: Response) {
-
-    console.log("Webhook received:");
+    console.log('Webhook received:');
 
     const sig = req.headers['stripe-signature'] as string;
 
     let event: Stripe.Event;
-
-
-
-
 
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     if (!webhookSecret) {
@@ -161,23 +169,21 @@ export class PaymentController {
       event = this.stripe.webhooks.constructEvent(
         req.body as unknown as Buffer,
         sig,
-        webhookSecret
+        webhookSecret,
       );
     } catch (err: any) {
       console.error('Webhook signature verification failed:', err.message);
       throw new BadRequestException(err.message);
     }
 
-
-
     switch (event.type) {
-
       case 'checkout.session.completed': {
-
         const session = event.data.object as Stripe.Checkout.Session;
 
         if (!session.metadata)
-          throw new BadRequestException('No session object found in event data');
+          throw new BadRequestException(
+            'No session object found in event data',
+          );
 
         const cartId = session.metadata.cart_id;
 
@@ -194,7 +200,9 @@ export class PaymentController {
         let user: User | null = null;
 
         if (customerEmail) {
-          user = await this.UserRes.findOne({ where: { email: customerEmail } });
+          user = await this.UserRes.findOne({
+            where: { email: customerEmail },
+          });
 
           if (user) {
             await this.paymentService.createPayment(
@@ -207,7 +215,6 @@ export class PaymentController {
             );
 
             console.log(`Payment saved for user ${user.email}`);
-
           } else {
             console.warn(`No user found for email ${customerEmail}`);
           }
@@ -219,7 +226,6 @@ export class PaymentController {
         }
 
         if (user) {
-
           await this.notificationService.sendNotification({
             userId: user.id,
             title: `Mã đơn hàng ${session.metadata.date}) đã thanh toán thành công.Đơn hàng sẽ được giao đến bạn trong thời gian sớm nhất`,
@@ -231,7 +237,6 @@ export class PaymentController {
             amount / 100,
             stripePaymentId,
           );
-
         }
         break;
       }
@@ -247,16 +252,16 @@ export class PaymentController {
     }
 
     return res.json();
-
   }
 
   @Post('refund')
-  async refund(@Body() body: { paymentIntentId: string, reason?: string, email: string }) {
+  async refund(
+    @Body() body: { paymentIntentId: string; reason?: string; email: string },
+  ) {
     return await this.paymentService.refundPayment(
       body.paymentIntentId,
       body.reason as any,
-      body.email
+      body.email,
     );
   }
-
 }

@@ -9,22 +9,18 @@ export class NotificationService {
   constructor(
     @InjectRepository(Notification)
     private notificationRepo: Repository<Notification>,
-  ) { }
+  ) {}
 
   async sendNotification(input: CreateNotificationInput) {
     const notification = await this.notificationRepo.create(input);
     return await this.notificationRepo.save(notification);
   }
 
-
   async getNotificationsByUser(userId: string) {
     return await this.notificationRepo.find({
-    where: [
-      { userId },        
-      { userId: IsNull() },  
-    ],
-    order: { createdAt: 'DESC' },
-  });
+      where: [{ userId }, { userId: IsNull() }],
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async markAsRead(notificationId: string) {
@@ -33,9 +29,8 @@ export class NotificationService {
   }
 
   async countNotificationsByUser(userId: string): Promise<number> {
-  return await this.notificationRepo.count({
-    where:[ { userId }, { userId: IsNull() }, ]
-  });
+    return await this.notificationRepo.count({
+      where: [{ userId }, { userId: IsNull() }],
+    });
   }
-  
 }

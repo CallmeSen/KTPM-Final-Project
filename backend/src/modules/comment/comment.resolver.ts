@@ -5,12 +5,9 @@ import { CreateCommentInput } from './dto/create-comment.input';
 import { UpdateCommentInput } from './dto/update-comment.input';
 import { Throttle } from '@nestjs/throttler';
 
-
-
 @Resolver(() => Comment)
 export class CommentResolver {
-  constructor(private readonly commentService: CommentService) { }
-
+  constructor(private readonly commentService: CommentService) {}
 
   @Query(() => [Comment])
   async getCommentsByBook(
@@ -36,12 +33,14 @@ export class CommentResolver {
     return await this.commentService.getRepliesByParent(commentId);
   }
 
-
   @Mutation(() => Boolean)
   async updateComment(
     @Args('updateCommentInput') updateCommentInput: UpdateCommentInput,
   ) {
-    return await this.commentService.update(updateCommentInput.id, updateCommentInput);
+    return await this.commentService.update(
+      updateCommentInput.id,
+      updateCommentInput,
+    );
   }
 
   @Mutation(() => Comment)
@@ -55,7 +54,5 @@ export class CommentResolver {
     @Args('userId', { type: () => String }) userId: string,
   ) {
     return await this.commentService.likeComment(commentId, userId);
-
   }
-
 }

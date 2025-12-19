@@ -17,7 +17,7 @@ export function NewReleaseBooks({ books }: PropsItemBooks) {
         <div className="w-full bg-[#FFFFFF] mt-12 ">
             <div className="flex justify-between items-center mb-4 mx-4">
                 <h2 className="text-3xl font-bold text-[#173F5F] flex">New Books</h2>
-                <Link href="/books" className="text-[#ED553B] hover:underline text-xl   ">
+                <Link href="/page/BookLibrary" className="text-[#ED553B] hover:underline text-xl   ">
                     Xem tất cả
                 </Link>
             </div>

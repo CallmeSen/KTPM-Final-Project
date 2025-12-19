@@ -1,11 +1,17 @@
-import { Field, Int, ObjectType } from "@nestjs/graphql";
-import { Book } from "src/modules/books/entities/book.entity";
-import { Cart } from "src/modules/cart/entities/cart.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Book } from 'src/modules/books/entities/book.entity';
+import { Cart } from 'src/modules/cart/entities/cart.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 
-@ObjectType() 
+@ObjectType()
 @Entity('cart_items')
-@Unique(['cart', 'book'])   
+@Unique(['cart', 'book'])
 export class CartItem {
   @Field(() => Int)
   @PrimaryGeneratedColumn()
@@ -16,7 +22,10 @@ export class CartItem {
   cart: Cart;
 
   @Field(() => Book)
-  @ManyToOne(() => Book, (book) => book.cartItems, { eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Book, (book) => book.cartItems, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   book: Book;
 
   @Field(() => Int)

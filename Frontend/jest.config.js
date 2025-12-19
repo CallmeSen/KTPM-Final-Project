@@ -26,7 +26,10 @@ module.exports = {
       testMatch: [
         "**/*.spec.ts",
         "**/*.spec.tsx",
+        "**/*.test.ts",
+        "**/*.test.tsx",
         "!**/*.it.spec.ts",
+        "!**/*.it.test.ts",
       ],
 
       clearMocks: true,
@@ -51,7 +54,11 @@ module.exports = {
 
       moduleFileExtensions: ["ts", "js", "json"],
 
-      testMatch: ["**/*.it.spec.ts"],
+      testMatch: [
+        "**/*.it.spec.ts",
+        "**/*.it.test.ts",
+        "**/*.it.test.tsx",
+      ],
 
       testTimeout: 30000,
       clearMocks: false,

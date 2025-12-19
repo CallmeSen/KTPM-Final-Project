@@ -6,6 +6,13 @@ export const GET_TOP_RATED_BOOKS = gql`
       id
       title
       thumbnail
+      authors
+      published_year
+      description
+      num_pages
+      price
+      id_stripe
+      quantity
     }
   }
 `;
@@ -16,12 +23,10 @@ export const GETBook = gql`
       id
       title
       authors
-      average_rating
       published_year
       description
       thumbnail
       num_pages
-      ratings_count
       price
       id_stripe
     }
@@ -81,7 +86,6 @@ export const GET_BOOKS_BY_CATEGORY = gql`
         title
         authors
         thumbnail
-        average_rating
         published_year
         description
       }
@@ -113,12 +117,11 @@ export const SEARCH_BOOKS_BY_TITLE = gql`
       id
       title
       authors
-      average_rating
       published_year
       description
       thumbnail
       num_pages
-      ratings_count
+
       price
       id_stripe
     }
@@ -227,7 +230,6 @@ export const GET_ALL_BOOKS = gql`
         title
         authors
         thumbnail
-        average_rating
         published_year
         price
         quantity

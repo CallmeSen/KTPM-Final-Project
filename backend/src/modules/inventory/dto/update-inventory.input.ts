@@ -1,7 +1,7 @@
 import { InputType, Int, Field } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateInventoryInput  {
+export class UpdateInventoryInput {
   @Field()
   productId: string;
 

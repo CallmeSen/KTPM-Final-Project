@@ -6,18 +6,16 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class OrdersService {
-
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
-  ) { }
+  ) {}
 
   async createOrder(
     user_email: string,
     totalAmount: number,
     stripePaymentId: string,
   ) {
-
     try {
       const order = this.orderRepository.create({
         user_email,
@@ -53,7 +51,6 @@ export class OrdersService {
   }
 
   async update(id: string, updateOrderInput: UpdateOrderInput) {
-
     const order = await this.orderRepository.findOne({ where: { id } });
 
     if (!order) {
@@ -62,12 +59,10 @@ export class OrdersService {
 
     Object.assign(order, updateOrderInput);
 
-
     return await this.orderRepository.save(order);
   }
 
   async updateStatusByPaymentIntent(paymentIntentId: string, status: string) {
-
     const order = await this.orderRepository.findOne({
       where: { stripePaymentId: paymentIntentId },
     });
@@ -77,15 +72,11 @@ export class OrdersService {
     }
 
     order.status = status;
-    
+
     return await this.orderRepository.save(order);
-
   }
-
-
 
   remove(id: number) {
     return `This action removes a #${id} order`;
   }
-
 }

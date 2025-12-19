@@ -48,13 +48,14 @@ export default function Homepage() {
                 title: b.title,
                 thumbnail: b.thumbnail,
                 authors: b.authors,
-                average_rating: b.average_rating,
+
                 published_year: b.published_year,
                 description: b.description,
                 num_pages: b.num_pages,
-                ratings_count: b.ratings_count,
+
                 price: b.price,
                 id_stripe: b.id_stripe,
+                quantity: b.quantity,
             })) || []
     };
 

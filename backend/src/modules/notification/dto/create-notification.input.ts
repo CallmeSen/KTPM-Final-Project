@@ -6,12 +6,11 @@ export class CreateNotificationInput {
   userId?: string;
 
   @Field()
-  title: string;  
+  title: string;
 
   @Field()
   message: string;
 
   @Field({ nullable: true })
-  image?: string;  
+  image?: string;
 }
-

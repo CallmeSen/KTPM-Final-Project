@@ -8,10 +8,8 @@ import { CartItem } from 'src/modules/cart/entities/cart.items';
 import { Book } from 'src/modules/books/entities/book.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Cart,User,CartItem,Book]),
-  ],
+  imports: [TypeOrmModule.forFeature([Cart, User, CartItem, Book])],
   providers: [CartResolver, CartService],
-  exports:[CartService]
+  exports: [CartService],
 })
 export class CartModule {}

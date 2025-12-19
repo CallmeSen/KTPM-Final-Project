@@ -10,7 +10,9 @@ import Stripe from 'stripe';
       useFactory: (configService: ConfigService) => {
         const stripeKey = configService.get<string>('sk_test');
         if (!stripeKey) {
-          throw new Error('Stripe secret key (sk_test) is not defined in environment variables');
+          throw new Error(
+            'Stripe secret key (sk_test) is not defined in environment variables',
+          );
         }
         return new Stripe(stripeKey, {});
       },
@@ -19,4 +21,4 @@ import Stripe from 'stripe';
   ],
   exports: ['STRIPE_CLIENT'],
 })
-export class StripeModule { }
+export class StripeModule {}

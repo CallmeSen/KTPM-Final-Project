@@ -12,8 +12,6 @@ export class PaginationInput {
   limit: number;
 }
 
-
-
 @ObjectType()
 export class PaginatedBooks {
   @Field(() => [Book])
@@ -58,7 +56,6 @@ export class PaginatedUsers {
   @Field(() => Int)
   limit: number;
 }
-
 
 @ObjectType()
 export class PaginatedOrders {

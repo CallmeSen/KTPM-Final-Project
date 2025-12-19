@@ -2,7 +2,6 @@ import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
 export class UpdateOrderInput {
-
   @Field(() => String)
   id: string;
 

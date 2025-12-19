@@ -14,11 +14,7 @@ import { CartModule } from 'src/modules/cart/cart.module';
     forwardRef(() => MailModule),
     forwardRef(() => CartModule),
   ],
-  providers: [
-    UsersResolver,
-    UserService,
-  ],
-  exports: [UserService], 
+  providers: [UsersResolver, UserService],
+  exports: [UserService],
 })
 export class UserModule {}
-

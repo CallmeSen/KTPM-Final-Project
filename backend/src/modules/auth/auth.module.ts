@@ -23,15 +23,21 @@ import { CartModule } from 'src/modules/cart/cart.module';
 import { Book } from 'src/modules/books/entities/book.entity';
 import { MailModule } from 'src/mails/mail.module';
 
-
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Blacklist, RefreshToken, Cart, CartItem, Book]),
+    TypeOrmModule.forFeature([
+      User,
+      Blacklist,
+      RefreshToken,
+      Cart,
+      CartItem,
+      Book,
+    ]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshjwtConfig),
     ConfigModule.forFeature(googleOuth),
-    forwardRef(() => MailModule), 
+    forwardRef(() => MailModule),
     forwardRef(() => UserModule),
     forwardRef(() => BlacklistModule),
     forwardRef(() => CartModule),
